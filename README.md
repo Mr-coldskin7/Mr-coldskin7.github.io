@@ -4,7 +4,10 @@
 [![GitHub license](https://img.shields.io/github/license/cotes2020/chirpy-starter.svg?color=blue)][mit]
 
 ##这是一个个人博客 使用的下述作者的克隆网页
+
+
 ##This is a personal blog. It's a clone of the project below.
+
 
 When installing the [**Chirpy**][chirpy] theme through [RubyGems.org][gem], Jekyll can only read files in the folders
 `_data`, `_layouts`, `_includes`, `_sass` and `assets`, as well as a small part of options of the `_config.yml` file
