@@ -24,4 +24,4 @@ order: 4
 
 
 Jordan Peterson观点的视频连接：
-{% include embed/{bilibili}.html id='{BV1jP411D7jo}' %}
+{% include embed/bilibili.html id='BV1jP411D7jo' %}
