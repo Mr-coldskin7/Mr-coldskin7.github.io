@@ -29,11 +29,11 @@ cols = shape(h) + shape(x)
 
 RNN可以通过下列数学方程描述：
 隐藏层状态：
-\[ h_t = \sigma(W_{hh} \cdot h_{t-1} + W_{ih} \cdot x_t + b_h) \]
+$$\[ h_t = \sigma(W_{hh} \cdot h_{t-1} + W_{ih} \cdot x_t + b_h) \]$$
 
 输出层状态：
-\[ y_t = W_{ho} \cdot h_t + b_o \]
-\( \sigma  是一个激活函数（如tanh或ReLU）， h_t  是当前隐藏状态，\)\( x_t  是当前输入， y_t  是当前输出。权重和偏置分别由 W_{hh}, W_{ih}, W_{ho}  和  b_h, b_o  表示。 \)
+$\[ y_t = W_{ho} \cdot h_t + b_o \]$
+$\( \sigma  是一个激活函数（如tanh或ReLU）， h_t  是当前隐藏状态，\)\( x_t  是当前输入， y_t  是当前输出。权重和偏置分别由 W_{hh}, W_{ih}, W_{ho}  和  b_h, b_o  表示。 \)$
 
 ## 相关代码
 ```
