@@ -49,26 +49,38 @@ async function runCode(source, block, btn) {
   try {
     const pyodide = await loadPyodideOnce();
 
-    pyodide.setStdout({ batch: false, write: (text) => {
-      outputEl.textContent += text;
-    }});
-    pyodide.setStderr({ batch: false, write: (text) => {
-      outputEl.innerHTML += `<span class="py-error">${text}</span>`;
-    }});
+    const setupCode = `
+import sys as _sys, io as _io
+__orig_stdout, _sys.stdout = _sys.stdout, _io.StringIO()
+__orig_stderr, _sys.stderr = _sys.stderr, _io.StringIO()
+`;
 
+    const teardownCode = `
+__captured_out = _sys.stdout.getvalue()
+__captured_err = _sys.stderr.getvalue()
+_sys.stdout = __orig_stdout
+_sys.stderr = __orig_stderr
+`;
+
+    await pyodide.runPythonAsync(setupCode);
     await pyodide.runPythonAsync(source);
+    await pyodide.runPythonAsync(teardownCode);
 
-    if (!outputEl.textContent && !outputEl.innerHTML) {
+    const stdout = pyodide.globals.get('__captured_out') || '';
+    const stderr = pyodide.globals.get('__captured_err') || '';
+
+    if (stderr) {
+      outputEl.innerHTML += `<span class="py-error">${stderr}</span>`;
+    }
+    if (stdout) {
+      outputEl.textContent = stdout;
+    }
+    if (!stdout && !stderr) {
       outputEl.innerHTML = '<span class="py-success">✓ 执行完成（无输出）</span>';
     }
   } catch (err) {
     const msg = err.message || String(err);
-    if (msg.includes('PythonError')) {
-      const traceback = msg.split('\n').filter(l => l.trim()).join('\n');
-      outputEl.innerHTML = `<span class="py-error">${traceback}</span>`;
-    } else {
-      outputEl.innerHTML = `<span class="py-error">Error: ${msg}</span>`;
-    }
+    outputEl.innerHTML = `<span class="py-error">${msg}</span>`;
   } finally {
     btn.textContent = 'Run';
     btn.disabled = false;
