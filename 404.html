@@ -1,0 +1,26 @@
+---
+layout: default
+title: 404 - 页面不存在
+permalink: /404.html
+---
+
+<div class="row">
+  <div id="not-found" class="col-12 text-center my-5">
+    <h1 class="display-1 text-muted">404</h1>
+    <p class="lead">你好像迷路了，这个页面不存在。</p>
+    <a href="{{ '/' | relative_url }}" class="btn btn-outline-primary mt-3">
+      <i class="fas fa-home"></i> 回到首页
+    </a>
+  </div>
+</div>
+
+<style>
+  #not-found {
+    padding: 80px 0;
+  }
+  #not-found .display-1 {
+    font-size: 8rem;
+    font-weight: 700;
+    opacity: 0.3;
+  }
+</style>

@@ -1,3 +1,4 @@
+/* ---- Run button ---- */
 .py-run-btn {
   display: inline-flex;
   align-items: center;
@@ -23,47 +24,89 @@
 .py-run-btn.running {
   opacity: 0.6;
   cursor: wait;
+  border-color: #f9c74f;
+  color: #f9c74f;
 }
 
+/* ---- Output panel ---- */
 .py-output {
   position: relative;
   margin: 0;
-  padding: 14px 16px;
   border: 1px solid var(--language-border-color);
-  border-top: none;
+  border-top: 2px solid #667eea;
   border-radius: 0 0 6px 6px;
   background: var(--highlight-bg-color);
-  font-family: monospace;
-  font-size: 13px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  word-break: break-all;
   max-height: 500px;
   overflow-y: auto;
-  color: var(--highlighter-rouge-color);
 }
 
 .py-output:empty {
   display: none;
 }
 
-.py-output::before {
-  content: 'Output';
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 2px 8px;
+/* header bar */
+.py-output-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 12px;
+  background: var(--card-header-bg, rgba(0,0,0,0.05));
+  border-bottom: 1px solid var(--language-border-color);
   font-size: 11px;
   color: var(--code-header-muted-color);
-  background: var(--language-border-color);
-  border-radius: 0 5px 0 4px;
   letter-spacing: 0.5px;
+  text-transform: uppercase;
+  user-select: none;
 }
 
-.py-output .py-error {
+.py-output-header .py-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.py-output-header .py-status.ok { color: #85e89d; }
+.py-output-header .py-status.err { color: #f97583; }
+
+/* body */
+.py-output-body {
+  padding: 12px 14px;
+  font-family: monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--highlighter-rouge-color);
+  min-height: 24px;
+}
+
+/* scrollbar */
+.py-output::-webkit-scrollbar { width: 6px; }
+.py-output::-webkit-scrollbar-thumb {
+  background: var(--language-border-color);
+  border-radius: 3px;
+}
+
+/* ---- Error / Success inline ---- */
+.py-error {
   color: #f97583;
 }
 
-.py-output .py-success {
+.py-success {
   color: #85e89d;
+}
+
+/* ---- Loading spinner ---- */
+@keyframes py-spin {
+  to { transform: rotate(360deg); }
+}
+.py-run-btn.running::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 2px solid rgba(249,199,79,0.3);
+  border-top-color: #f9c74f;
+  border-radius: 50%;
+  animation: py-spin 0.6s linear infinite;
 }
