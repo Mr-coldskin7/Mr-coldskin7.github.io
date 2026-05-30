@@ -10,13 +10,13 @@ async function loadPyodideOnce() {
 }
 
 function addRunButtons() {
-  document.querySelectorAll('.highlight').forEach(block => {
-    const code = block.querySelector('code.language-python');
-    if (!code) return;
+  document.querySelectorAll('div.language-python.highlighter-rouge').forEach(block => {
     if (block.querySelector('.py-run-btn')) return;
 
+    const code = block.querySelector('.highlight code, code');
+    if (!code) return;
+
     const header = block.querySelector('.code-header');
-    const target = header || block;
 
     const btn = document.createElement('button');
     btn.className = 'py-run-btn';
