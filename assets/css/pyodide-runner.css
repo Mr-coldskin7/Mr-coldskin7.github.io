@@ -2,12 +2,12 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 10px;
+  padding: 1px 10px;
   margin-left: 8px;
-  border: 1px solid var(--sidebar-active-color);
+  border: 1px solid var(--code-header-icon-color);
   border-radius: 4px;
   background: transparent;
-  color: var(--sidebar-active-color);
+  color: var(--code-header-icon-color);
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -16,8 +16,8 @@
 }
 
 .py-run-btn:hover {
-  background: var(--sidebar-active-color);
-  color: var(--card-bg);
+  background: var(--code-header-icon-color);
+  color: var(--highlight-bg-color);
 }
 
 .py-run-btn.running {
@@ -26,30 +26,44 @@
 }
 
 .py-output {
-  margin-top: 0;
-  padding: 12px 16px;
-  border: 1px solid var(--code-tab-border);
+  position: relative;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--language-border-color);
   border-top: none;
   border-radius: 0 0 6px 6px;
-  background: var(--code-tab-bg);
-  font-family: var(--font-family-monospace);
+  background: var(--highlight-bg-color);
+  font-family: monospace;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.6;
   white-space: pre-wrap;
-  word-break: break-word;
-  max-height: 400px;
+  word-break: break-all;
+  max-height: 500px;
   overflow-y: auto;
-  color: var(--text-color);
+  color: var(--highlighter-rouge-color);
 }
 
 .py-output:empty {
   display: none;
 }
 
+.py-output::before {
+  content: 'Output';
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 2px 8px;
+  font-size: 11px;
+  color: var(--code-header-muted-color);
+  background: var(--language-border-color);
+  border-radius: 0 5px 0 4px;
+  letter-spacing: 0.5px;
+}
+
 .py-output .py-error {
-  color: #e5534b;
+  color: #f97583;
 }
 
 .py-output .py-success {
-  color: #57ab5a;
+  color: #85e89d;
 }
