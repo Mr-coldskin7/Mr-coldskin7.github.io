@@ -1,33 +1,7 @@
+<link rel="stylesheet" href="{{ '/assets/css/blog-style.css' | relative_url }}">
+
 {% if page.layout == 'post' %}
 <link rel="stylesheet" href="{{ '/assets/css/pyodide-runner.css' | relative_url }}">
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js" async></script>
 <script src="{{ '/assets/js/pyodide-runner.js' | relative_url }}" defer></script>
 {% endif %}
-
-<style>
-  .card-wrapper {
-    border-radius: 8px;
-    overflow: hidden;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .card-wrapper:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-  }
-  .card-wrapper > .post-preview {
-    position: relative;
-  }
-  .card-wrapper > .post-preview::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    z-index: 1;
-  }
-  [data-mode="dark"] .card-wrapper:hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-  }
-</style>
