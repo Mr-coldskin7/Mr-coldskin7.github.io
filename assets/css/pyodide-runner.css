@@ -1,0 +1,55 @@
+.py-run-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  margin-left: 8px;
+  border: 1px solid var(--sidebar-active-color);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--sidebar-active-color);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1.6;
+}
+
+.py-run-btn:hover {
+  background: var(--sidebar-active-color);
+  color: var(--card-bg);
+}
+
+.py-run-btn.running {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.py-output {
+  margin-top: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--code-tab-border);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  background: var(--code-tab-bg);
+  font-family: var(--font-family-monospace);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 400px;
+  overflow-y: auto;
+  color: var(--text-color);
+}
+
+.py-output:empty {
+  display: none;
+}
+
+.py-output .py-error {
+  color: #e5534b;
+}
+
+.py-output .py-success {
+  color: #57ab5a;
+}
