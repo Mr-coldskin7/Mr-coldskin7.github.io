@@ -1,49 +1,39 @@
-# Chirpy Starter
+# Emanon的博客
 
-[![Gem Version](https://img.shields.io/gem/v/jekyll-theme-chirpy)][gem]&nbsp;
-[![GitHub license](https://img.shields.io/github/license/cotes2020/chirpy-starter.svg?color=blue)][mit]
+[![GitHub license](https://img.shields.io/github/license/Mr-coldskin7/Mr-coldskin7.github.io.svg?color=blue)](LICENSE)
 
-## 这是一个个人博客 使用的下述作者的克隆网页
+个人技术博客，记录 ML/NLP、C++、Linux 等方向的学习笔记与思考。
 
+**Live:** [mr-coldskin7.github.io](https://mr-coldskin7.github.io)
 
-## This is a personal blog. It's a clone of the project below.
+## Features
 
+- **Giscus 评论系统** — 基于 GitHub Discussions，支持读者互动
+- **LaTeX 公式** — MathJax 全局启用，支持行内与行间公式渲染
+- **Python 代码在线运行** — 基于 Pyodide (WebAssembly)，文章中的 Python 代码块可直接在浏览器执行
+- **深色模式** — 默认深色主题，支持亮/暗切换
+- **访问统计** — GoatCounter 轻量统计
+- **自定义视觉风格** — 紫蓝渐变主题、动画效果、卡片交互
 
-When installing the [**Chirpy**][chirpy] theme through [RubyGems.org][gem], Jekyll can only read files in the folders
-`_data`, `_layouts`, `_includes`, `_sass` and `assets`, as well as a small part of options of the `_config.yml` file
-from the theme's gem. If you have ever installed this theme gem, you can use the command
-`bundle info --path jekyll-theme-chirpy` to locate these files.
+## Content
 
-The Jekyll team claims that this is to leave the ball in the user’s court, but this also results in users not being
-able to enjoy the out-of-the-box experience when using feature-rich themes.
+| 分类 | 内容 |
+|------|------|
+| ML/NLP | Transformer、Attention、RNN/LSTM、Seq2Seq、UNet、CS231A |
+| DeepSeek | 蒸馏模型部署、R1 论文解读 |
+| C++ | 内存管理、模板、Vector、链接与静态变量 |
+| Linux | 内核分析、Shell 脚本、进程管理 |
+| Python | Pandas、OpenCV、PyTorch 自动微分 |
+| 其他 | 精神分析、经济学观点、读书笔记 |
 
-To fully use all the features of **Chirpy**, you need to copy the other critical files from the theme's gem to your
-Jekyll site. The following is a list of targets:
+## Tech Stack
 
-```shell
-.
-├── _config.yml
-├── _plugins
-├── _tabs
-└── index.html
-```
-
-To save you time, and also in case you lose some files while copying, we extract those files/configurations of the
-latest version of the **Chirpy** theme and the [CD][CD] workflow to here, so that you can start writing in minutes.
-
-## Usage
-
-Check out the [theme's docs](https://github.com/cotes2020/jekyll-theme-chirpy/wiki).
-
-## Contributing
-
-This repository is automatically updated with new releases from the theme repository. If you encounter any issues or want to contribute to its improvement, please visit the [theme repository][chirpy] to provide feedback.
+- [Jekyll](https://jekyllrb.com/) + [Chirpy Theme v7.2](https://github.com/cotes2020/jekyll-theme-chirpy)
+- GitHub Pages
+- [Pyodide](https://pyodide.org/) — Python in the browser
+- [Giscus](https://giscus.app/) — comments
+- [GoatCounter](https://www.goatcounter.com/) — analytics
 
 ## License
 
-This work is published under [MIT][mit] License.
-
-[gem]: https://rubygems.org/gems/jekyll-theme-chirpy
-[chirpy]: https://github.com/cotes2020/jekyll-theme-chirpy/
-[CD]: https://en.wikipedia.org/wiki/Continuous_deployment
-[mit]: https://github.com/cotes2020/chirpy-starter/blob/master/LICENSE
+This work is published under [MIT](LICENSE) License.

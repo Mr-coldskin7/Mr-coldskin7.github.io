@@ -5,3 +5,8 @@
 <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js" async></script>
 <script src="{{ '/assets/js/pyodide-runner.js' | relative_url }}" defer></script>
 {% endif %}
+
+{% if page.icon == 'fas fa-project-diagram' %}
+<link rel="stylesheet" href="{{ '/assets/css/knowledge-graph.css' | relative_url }}">
+<script src="{{ '/assets/js/knowledge-graph.js' | relative_url }}" defer></script>
+{% endif %}
