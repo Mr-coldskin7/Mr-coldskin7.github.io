@@ -4,19 +4,19 @@
   }
 </style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://mr-coldskin7.github.io/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B010/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
     initTheme();
-  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Claude code学习10 Permission 与 Hooks 系统</h1> <p class="post-meta"> Created on July 11, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/agent"> <i class="fa-solid fa-hashtag fa-sm"></i> agent</a>   <a href="/blog/tag/claude-code"> <i class="fa-solid fa-hashtag fa-sm"></i> claude-code</a>   <a href="/blog/tag/permission"> <i class="fa-solid fa-hashtag fa-sm"></i> permission</a>   <a href="/blog/tag/hooks"> <i class="fa-solid fa-hashtag fa-sm"></i> hooks</a>   ·   <a href="/blog/category/agent"> <i class="fa-solid fa-tag fa-sm"></i> agent</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h2 id="permission-与-hooks-系统">Permission 与 Hooks 系统</h2> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// src/types/permissions.ts</span>
-<span class="k">export</span> <span class="kd">type</span> <span class="nx">PermissionBehavior</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">allow</span><span class="dl">'</span> <span class="o">|</span> <span class="dl">'</span><span class="s1">deny</span><span class="dl">'</span> <span class="o">|</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span>
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item "> <a class="nav-link" href="/graph/">Knowledge Graph </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Claude code学习10 Permission 与 Hooks 系统</h1> <p class="post-meta"> Created on July 11, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/agent"> <i class="fa-solid fa-hashtag fa-sm"></i> agent</a>   <a href="/blog/tag/claude-code"> <i class="fa-solid fa-hashtag fa-sm"></i> claude-code</a>   <a href="/blog/tag/permission"> <i class="fa-solid fa-hashtag fa-sm"></i> permission</a>   <a href="/blog/tag/hooks"> <i class="fa-solid fa-hashtag fa-sm"></i> hooks</a>   ·   <a href="/blog/category/agent"> <i class="fa-solid fa-tag fa-sm"></i> agent</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h2 id="permission-与-hooks-系统">Permission 与 Hooks 系统</h2> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// src/types/permissions.ts</span>
+<span class="k">export</span> <span class="kd">type</span> <span class="nx">PermissionBehavior</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">allow</span><span class="dl">"</span> <span class="o">|</span> <span class="dl">"</span><span class="s2">deny</span><span class="dl">"</span> <span class="o">|</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span><span class="p">;</span>
 
 <span class="k">export</span> <span class="kd">type</span> <span class="nx">PermissionRule</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="na">source</span><span class="p">:</span> <span class="nx">PermissionRuleSource</span>
-  <span class="na">ruleBehavior</span><span class="p">:</span> <span class="nx">PermissionBehavior</span>
-  <span class="na">ruleValue</span><span class="p">:</span> <span class="nx">PermissionRuleValue</span>
-<span class="p">}</span>
+  <span class="na">source</span><span class="p">:</span> <span class="nx">PermissionRuleSource</span><span class="p">;</span>
+  <span class="nl">ruleBehavior</span><span class="p">:</span> <span class="nx">PermissionBehavior</span><span class="p">;</span>
+  <span class="nl">ruleValue</span><span class="p">:</span> <span class="nx">PermissionRuleValue</span><span class="p">;</span>
+<span class="p">};</span>
 
 <span class="k">export</span> <span class="kd">type</span> <span class="nx">PermissionRuleValue</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="na">toolName</span><span class="p">:</span> <span class="kr">string</span>
-  <span class="nx">ruleContent</span><span class="p">?:</span> <span class="kr">string</span>
-<span class="p">}</span>
+  <span class="na">toolName</span><span class="p">:</span> <span class="kr">string</span><span class="p">;</span>
+  <span class="nl">ruleContent</span><span class="p">?:</span> <span class="kr">string</span><span class="p">;</span>
+<span class="p">};</span>
 </code></pre></div></div> <p>一条规则由三部分组成：来源（source）——规定了规则从哪里加载；行为（ruleBehavior）——Allow、Deny 或 Ask；值（ruleValue）——指定哪个工具、什么条件下触发。</p> <p>ruleContent 是可选的，它允许对工具进行更精细的控制。例如 Bash(npm test:*) 表示仅对以 npm test 为前缀的 Bash 命令生效。</p> <h3 id="来源">来源</h3> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// src/utils/permissions/permissions.ts</span>
 <span class="kd">const</span> <span class="nx">PERMISSION_RULE_SOURCES</span> <span class="o">=</span> <span class="p">[</span>
   <span class="p">...</span><span class="nx">SETTING_SOURCES</span><span class="p">,</span>    <span class="c1">// userSettings, projectSettings, localSettings, flagSettings, policySettings</span>
@@ -26,54 +26,48 @@
   <span class="dl">'</span><span class="s1">session</span><span class="dl">'</span><span class="p">,</span>             <span class="c1">// 会话级临时规则</span>
 <span class="p">]</span> <span class="kd">as const</span> <span class="kd">satisfies </span><span class="k">readonly</span> <span class="nx">PermissionRuleSource</span><span class="p">[]</span>
 
-</code></pre></div></div> <h3 id="匹配逻辑">匹配逻辑</h3> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">toolMatchesRule</span><span class="p">(</span>
-  <span class="nx">tool</span><span class="p">:</span> <span class="nb">Pick</span><span class="o">&lt;</span><span class="nx">Tool</span><span class="p">,</span> <span class="dl">'</span><span class="s1">name</span><span class="dl">'</span> <span class="o">|</span> <span class="dl">'</span><span class="s1">mcpInfo</span><span class="dl">'</span><span class="o">&gt;</span><span class="p">,</span>
-  <span class="nx">rule</span><span class="p">:</span> <span class="nx">PermissionRule</span><span class="p">,</span>
-<span class="p">):</span> <span class="nx">boolean</span> <span class="p">{</span>
+</code></pre></div></div> <h3 id="匹配逻辑">匹配逻辑</h3> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">toolMatchesRule</span><span class="p">(</span><span class="nx">tool</span><span class="p">:</span> <span class="nb">Pick</span><span class="o">&lt;</span><span class="nx">Tool</span><span class="p">,</span> <span class="dl">"</span><span class="s2">name</span><span class="dl">"</span> <span class="o">|</span> <span class="dl">"</span><span class="s2">mcpInfo</span><span class="dl">"</span><span class="o">&gt;</span><span class="p">,</span> <span class="nx">rule</span><span class="p">:</span> <span class="nx">PermissionRule</span><span class="p">):</span> <span class="nx">boolean</span> <span class="p">{</span>
   <span class="c1">// 规则不含 ruleContent 时，匹配整个工具</span>
   <span class="k">if </span><span class="p">(</span><span class="nx">rule</span><span class="p">.</span><span class="nx">ruleValue</span><span class="p">.</span><span class="nx">ruleContent</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kc">false</span>
+    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
   <span class="p">}</span>
-  <span class="kd">const</span> <span class="nx">nameForRuleMatch</span> <span class="o">=</span> <span class="nf">getToolNameForPermissionCheck</span><span class="p">(</span><span class="nx">tool</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">nameForRuleMatch</span> <span class="o">=</span> <span class="nf">getToolNameForPermissionCheck</span><span class="p">(</span><span class="nx">tool</span><span class="p">);</span>
   <span class="k">if </span><span class="p">(</span><span class="nx">rule</span><span class="p">.</span><span class="nx">ruleValue</span><span class="p">.</span><span class="nx">toolName</span> <span class="o">===</span> <span class="nx">nameForRuleMatch</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="kc">true</span>
+    <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
   <span class="p">}</span>
   <span class="c1">// MCP 服务级权限：规则 "mcp__server1" 匹配 "mcp__server1__tool1"</span>
-  <span class="kd">const</span> <span class="nx">ruleInfo</span> <span class="o">=</span> <span class="nf">mcpInfoFromString</span><span class="p">(</span><span class="nx">rule</span><span class="p">.</span><span class="nx">ruleValue</span><span class="p">.</span><span class="nx">toolName</span><span class="p">)</span>
-  <span class="kd">const</span> <span class="nx">toolInfo</span> <span class="o">=</span> <span class="nf">mcpInfoFromString</span><span class="p">(</span><span class="nx">nameForRuleMatch</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">ruleInfo</span> <span class="o">=</span> <span class="nf">mcpInfoFromString</span><span class="p">(</span><span class="nx">rule</span><span class="p">.</span><span class="nx">ruleValue</span><span class="p">.</span><span class="nx">toolName</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="nx">toolInfo</span> <span class="o">=</span> <span class="nf">mcpInfoFromString</span><span class="p">(</span><span class="nx">nameForRuleMatch</span><span class="p">);</span>
   <span class="k">return </span><span class="p">(</span>
-    <span class="nx">ruleInfo</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="nx">toolInfo</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span>
-    <span class="p">(</span><span class="nx">ruleInfo</span><span class="p">.</span><span class="nx">toolName</span> <span class="o">===</span> <span class="kc">undefined</span> <span class="o">||</span> <span class="nx">ruleInfo</span><span class="p">.</span><span class="nx">toolName</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">*</span><span class="dl">'</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+    <span class="nx">ruleInfo</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span>
+    <span class="nx">toolInfo</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span>
+    <span class="p">(</span><span class="nx">ruleInfo</span><span class="p">.</span><span class="nx">toolName</span> <span class="o">===</span> <span class="kc">undefined</span> <span class="o">||</span> <span class="nx">ruleInfo</span><span class="p">.</span><span class="nx">toolName</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">*</span><span class="dl">"</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
     <span class="nx">ruleInfo</span><span class="p">.</span><span class="nx">serverName</span> <span class="o">===</span> <span class="nx">toolInfo</span><span class="p">.</span><span class="nx">serverName</span>
-  <span class="p">)</span>
+  <span class="p">);</span>
 <span class="p">}</span>
-
 </code></pre></div></div> <h3 id="权限检查流水线">权限检查流水线</h3> <p>在 Claude code学习7 里有详细写相关的，这里贴个简单的</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// src/utils/permissions/permissions.ts</span>
-<span class="k">export</span> <span class="kd">const</span> <span class="nx">hasPermissionsToUseTool</span><span class="p">:</span> <span class="nx">CanUseToolFn</span> <span class="o">=</span> <span class="k">async </span><span class="p">(</span>
-  <span class="nx">tool</span><span class="p">,</span> <span class="nx">input</span><span class="p">,</span> <span class="nx">context</span><span class="p">,</span> <span class="nx">assistantMessage</span><span class="p">,</span> <span class="nx">toolUseID</span><span class="p">,</span>
-<span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">PermissionDecision</span><span class="o">&gt;</span> <span class="o">=&gt;</span> <span class="p">{</span>
-  <span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">hasPermissionsToUseToolInner</span><span class="p">(</span><span class="nx">tool</span><span class="p">,</span> <span class="nx">input</span><span class="p">,</span> <span class="nx">context</span><span class="p">)</span>
+<span class="k">export</span> <span class="kd">const</span> <span class="nx">hasPermissionsToUseTool</span><span class="p">:</span> <span class="nx">CanUseToolFn</span> <span class="o">=</span> <span class="k">async </span><span class="p">(</span><span class="nx">tool</span><span class="p">,</span> <span class="nx">input</span><span class="p">,</span> <span class="nx">context</span><span class="p">,</span> <span class="nx">assistantMessage</span><span class="p">,</span> <span class="nx">toolUseID</span><span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">PermissionDecision</span><span class="o">&gt;</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">hasPermissionsToUseToolInner</span><span class="p">(</span><span class="nx">tool</span><span class="p">,</span> <span class="nx">input</span><span class="p">,</span> <span class="nx">context</span><span class="p">);</span>
 
   <span class="c1">// 成功的工具调用重置连续拒绝计数</span>
-  <span class="k">if </span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">allow</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">allow</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// ...重置 denial tracking</span>
-    <span class="k">return</span> <span class="nx">result</span>
+    <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
   <span class="p">}</span>
 
   <span class="c1">// dontAsk 模式：将 ask 转换为 deny</span>
-  <span class="k">if </span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">const</span> <span class="nx">appState</span> <span class="o">=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">getAppState</span><span class="p">()</span>
-    <span class="k">if </span><span class="p">(</span><span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">mode</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">dontAsk</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">appState</span> <span class="o">=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">getAppState</span><span class="p">();</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">mode</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">dontAsk</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
       <span class="k">return</span> <span class="p">{</span>
-        <span class="na">behavior</span><span class="p">:</span> <span class="dl">'</span><span class="s1">deny</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">behavior</span><span class="p">:</span> <span class="dl">"</span><span class="s2">deny</span><span class="dl">"</span><span class="p">,</span>
         <span class="na">message</span><span class="p">:</span> <span class="nc">DONT_ASK_REJECT_MESSAGE</span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">),</span>
-      <span class="p">}</span>
+      <span class="p">};</span>
     <span class="p">}</span>
     <span class="c1">// auto 模式：使用分类器代替人工确认</span>
   <span class="p">}</span>
-  <span class="k">return</span> <span class="nx">result</span>
-<span class="p">}</span>
-
+  <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+<span class="p">};</span>
 </code></pre></div></div> <hr> <p>权限系统拦截模型越权意图，Hooks 允许外部逻辑介入生命周期 deny-first：如果同一个输入同时命中 allow 和 deny，最终必须以 deny 为准。宽泛放行规则不能覆盖明确拒绝规则，ask 也不能把高危 deny 降级成弹窗确认。</p> <p>权限系统不是只读 settings.json。它更接近 6 层纵深防御：CLAUDE.md 软约束、Permission Rules 声明式拦截、Hooks 可编程拦截、YOLO Classifier 独立 AI 审查、Sandbox 操作系统隔离、Hardcoded Denials 硬编码禁写或禁操作。</p> <p>用户允许 Bash(git *)，企业策略拒绝 Bash(git push –force)，当前命令是 git push –force。最终应该是什么裁决？为什么？ 是拒绝，拒绝deny的权限是最高的</p> <p>权限模型不是一个 if 判断，而是软约束、声明规则、Hook、AI 分类器、沙盒和硬编码拒绝共同组成的评估管线。目标是让低风险动作快速通过，把危险动作拦到人类或硬规则面前。</p> <p>在hook的相关执行的权限中，是有权限的优先级之分对的</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
  * Resolve a PreToolUse hook's permission result into a final PermissionDecision.
  *
@@ -191,30 +185,30 @@ const parsed = parseClassifierResponse(toolUseBlock, yoloClassifierResponseSchem
 </code></pre></div></div> <p>Stage 2（thinking） 他的prompt如下所示</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">XML_S2_SUFFIX</span> <span class="o">=</span>
 <span class="dl">'</span><span class="s1">Review the classification process and follow it carefully,
 making sure you deny actions that should be blocked.
- As a reminder, explicit (not suggestive or implicit) user confirmation is required to override blocks. 
+ As a reminder, explicit (not suggestive or implicit) user confirmation is required to override blocks.
  Use &lt;thinking&gt; before responding with &lt;block&gt;.</span><span class="dl">'</span>
-</code></pre></div></div> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">return</span> <span class="p">{</span>
-      <span class="na">shouldBlock</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-      <span class="na">reason</span><span class="p">:</span> <span class="nx">tooLong</span>
-        <span class="p">?</span> <span class="dl">'</span><span class="s1">Classifier transcript exceeded context window</span><span class="dl">'</span>
-        <span class="p">:</span> <span class="nx">stage1Usage</span>
-          <span class="p">?</span> <span class="dl">'</span><span class="s1">Stage 2 classifier error - blocking based on stage 1 assessment</span><span class="dl">'</span>
-          <span class="p">:</span> <span class="dl">'</span><span class="s1">Classifier unavailable - blocking for safety</span><span class="dl">'</span><span class="p">,</span>
-      <span class="nx">model</span><span class="p">,</span>
-      <span class="na">unavailable</span><span class="p">:</span> <span class="nx">stage1Usage</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">,</span>
-      <span class="na">transcriptTooLong</span><span class="p">:</span> <span class="nc">Boolean</span><span class="p">(</span><span class="nx">tooLong</span><span class="p">),</span>
-      <span class="na">stage</span><span class="p">:</span> <span class="nx">stage1Usage</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">thinking</span><span class="dl">'</span> <span class="p">:</span> <span class="kc">undefined</span><span class="p">,</span>
-      <span class="na">durationMs</span><span class="p">:</span> <span class="nb">Date</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">-</span> <span class="nx">overallStart</span><span class="p">,</span>
-      <span class="nx">errorDumpPath</span><span class="p">,</span>
-      <span class="p">...(</span><span class="nx">stage1Usage</span> <span class="o">&amp;&amp;</span> <span class="p">{</span>
-        <span class="na">usage</span><span class="p">:</span> <span class="nx">stage1Usage</span><span class="p">,</span>
-        <span class="nx">stage1Usage</span><span class="p">,</span>
-        <span class="nx">stage1DurationMs</span><span class="p">,</span>
-        <span class="nx">stage1RequestId</span><span class="p">,</span>
-        <span class="nx">stage1MsgId</span><span class="p">,</span>
-      <span class="p">}),</span>
-      <span class="nx">promptLengths</span><span class="p">,</span>
-    <span class="p">}</span>
+</code></pre></div></div> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">return</span> <span class="p">{</span>
+  <span class="na">shouldBlock</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+  <span class="na">reason</span><span class="p">:</span> <span class="nx">tooLong</span>
+    <span class="p">?</span> <span class="dl">"</span><span class="s2">Classifier transcript exceeded context window</span><span class="dl">"</span>
+    <span class="p">:</span> <span class="nx">stage1Usage</span>
+      <span class="p">?</span> <span class="dl">"</span><span class="s2">Stage 2 classifier error - blocking based on stage 1 assessment</span><span class="dl">"</span>
+      <span class="p">:</span> <span class="dl">"</span><span class="s2">Classifier unavailable - blocking for safety</span><span class="dl">"</span><span class="p">,</span>
+  <span class="nx">model</span><span class="p">,</span>
+  <span class="na">unavailable</span><span class="p">:</span> <span class="nx">stage1Usage</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">,</span>
+  <span class="na">transcriptTooLong</span><span class="p">:</span> <span class="nc">Boolean</span><span class="p">(</span><span class="nx">tooLong</span><span class="p">),</span>
+  <span class="na">stage</span><span class="p">:</span> <span class="nx">stage1Usage</span> <span class="p">?</span> <span class="dl">"</span><span class="s2">thinking</span><span class="dl">"</span> <span class="p">:</span> <span class="kc">undefined</span><span class="p">,</span>
+  <span class="na">durationMs</span><span class="p">:</span> <span class="nb">Date</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">-</span> <span class="nx">overallStart</span><span class="p">,</span>
+  <span class="nx">errorDumpPath</span><span class="p">,</span>
+  <span class="p">...(</span><span class="nx">stage1Usage</span> <span class="o">&amp;&amp;</span> <span class="p">{</span>
+    <span class="na">usage</span><span class="p">:</span> <span class="nx">stage1Usage</span><span class="p">,</span>
+    <span class="nx">stage1Usage</span><span class="p">,</span>
+    <span class="nx">stage1DurationMs</span><span class="p">,</span>
+    <span class="nx">stage1RequestId</span><span class="p">,</span>
+    <span class="nx">stage1MsgId</span><span class="p">,</span>
+  <span class="p">}),</span>
+  <span class="nx">promptLengths</span><span class="p">,</span>
+<span class="p">};</span>
 </code></pre></div></div> <p>Stage 1 是过滤器，不是决策者：它的唯一作用是用最低成本放行”明显安全”的命令。但凡它没放行，决定权就交给 Stage 2。</p> <p>XML 解析：</p> <table> <tbody> <tr> <td>function parseXmlBlock(text: string): boolean</td> <td>null</td> </tr> <tr> <td>function parseXmlReason(text: string): string</td> <td>null</td> </tr> <tr> <td>function parseXmlThinking(text: string): string</td> <td>null</td> </tr> </tbody> </table> <p>先 strip <thinking>...</thinking>，避免推理内容里出现的 <block> 被误匹配。</block></p> <hr> <p>结果结构与消费</p> <p>返回 YoloClassifierResult：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>type YoloClassifierResult = {
   thinking?: string
 
@@ -283,110 +277,75 @@ unavailable        → 根据 iron_gate flag 决定 fail-closed 或回退弹窗
   <span class="nx">toolUseContext</span><span class="p">:</span> <span class="nx">ToolUseContext</span><span class="p">,</span>
   <span class="nx">canUseTool</span><span class="p">:</span> <span class="nx">CanUseToolFn</span><span class="p">,</span>
   <span class="nx">assistantMessage</span><span class="p">:</span> <span class="nx">AssistantMessage</span><span class="p">,</span>
-  <span class="nx">toolUseID</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span>
+  <span class="nx">toolUseID</span><span class="p">:</span> <span class="kr">string</span>
 <span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">{</span>
-  <span class="na">decision</span><span class="p">:</span> <span class="nx">PermissionDecision</span>
-  <span class="na">input</span><span class="p">:</span> <span class="nb">Record</span><span class="o">&lt;</span><span class="kr">string</span><span class="p">,</span> <span class="nx">unknown</span><span class="o">&gt;</span>
+  <span class="na">decision</span><span class="p">:</span> <span class="nx">PermissionDecision</span><span class="p">;</span>
+  <span class="nl">input</span><span class="p">:</span> <span class="nb">Record</span><span class="o">&lt;</span><span class="kr">string</span><span class="p">,</span> <span class="nx">unknown</span><span class="o">&gt;</span><span class="p">;</span>
 <span class="p">}</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="kd">const</span> <span class="nx">requiresInteraction</span> <span class="o">=</span> <span class="nx">tool</span><span class="p">.</span><span class="nx">requiresUserInteraction</span><span class="p">?.()</span>
-  <span class="kd">const</span> <span class="nx">requireCanUseTool</span> <span class="o">=</span> <span class="nx">toolUseContext</span><span class="p">.</span><span class="nx">requireCanUseTool</span>
+  <span class="kd">const</span> <span class="nx">requiresInteraction</span> <span class="o">=</span> <span class="nx">tool</span><span class="p">.</span><span class="nx">requiresUserInteraction</span><span class="p">?.();</span>
+  <span class="kd">const</span> <span class="nx">requireCanUseTool</span> <span class="o">=</span> <span class="nx">toolUseContext</span><span class="p">.</span><span class="nx">requireCanUseTool</span><span class="p">;</span>
 
-  <span class="k">if </span><span class="p">(</span><span class="nx">hookPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">allow</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">const</span> <span class="nx">hookInput</span> <span class="o">=</span> <span class="nx">hookPermissionResult</span><span class="p">.</span><span class="nx">updatedInput</span> <span class="o">??</span> <span class="nx">input</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">hookPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">allow</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">hookInput</span> <span class="o">=</span> <span class="nx">hookPermissionResult</span><span class="p">.</span><span class="nx">updatedInput</span> <span class="o">??</span> <span class="nx">input</span><span class="p">;</span>
 
     <span class="c1">// Hook provided updatedInput for an interactive tool — the hook IS the</span>
     <span class="c1">// user interaction (e.g. headless wrapper that collected AskUserQuestion</span>
     <span class="c1">// answers). Treat as non-interactive for the rule-check path.</span>
-    <span class="kd">const</span> <span class="nx">interactionSatisfied</span> <span class="o">=</span>
-      <span class="nx">requiresInteraction</span> <span class="o">&amp;&amp;</span> <span class="nx">hookPermissionResult</span><span class="p">.</span><span class="nx">updatedInput</span> <span class="o">!==</span> <span class="kc">undefined</span>
+    <span class="kd">const</span> <span class="nx">interactionSatisfied</span> <span class="o">=</span> <span class="nx">requiresInteraction</span> <span class="o">&amp;&amp;</span> <span class="nx">hookPermissionResult</span><span class="p">.</span><span class="nx">updatedInput</span> <span class="o">!==</span> <span class="kc">undefined</span><span class="p">;</span>
 
     <span class="k">if </span><span class="p">((</span><span class="nx">requiresInteraction</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">interactionSatisfied</span><span class="p">)</span> <span class="o">||</span> <span class="nx">requireCanUseTool</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nf">logForDebugging</span><span class="p">(</span>
-        <span class="s2">`Hook approved tool use for </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2">, but canUseTool is required`</span><span class="p">,</span>
-      <span class="p">)</span>
+      <span class="nf">logForDebugging</span><span class="p">(</span><span class="s2">`Hook approved tool use for </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2">, but canUseTool is required`</span><span class="p">);</span>
       <span class="k">return</span> <span class="p">{</span>
-        <span class="na">decision</span><span class="p">:</span> <span class="k">await</span> <span class="nf">canUseTool</span><span class="p">(</span>
-          <span class="nx">tool</span><span class="p">,</span>
-          <span class="nx">hookInput</span><span class="p">,</span>
-          <span class="nx">toolUseContext</span><span class="p">,</span>
-          <span class="nx">assistantMessage</span><span class="p">,</span>
-          <span class="nx">toolUseID</span><span class="p">,</span>
-        <span class="p">),</span>
+        <span class="na">decision</span><span class="p">:</span> <span class="k">await</span> <span class="nf">canUseTool</span><span class="p">(</span><span class="nx">tool</span><span class="p">,</span> <span class="nx">hookInput</span><span class="p">,</span> <span class="nx">toolUseContext</span><span class="p">,</span> <span class="nx">assistantMessage</span><span class="p">,</span> <span class="nx">toolUseID</span><span class="p">),</span>
         <span class="na">input</span><span class="p">:</span> <span class="nx">hookInput</span><span class="p">,</span>
-      <span class="p">}</span>
+      <span class="p">};</span>
     <span class="p">}</span>
 
     <span class="c1">// Hook allow skips the interactive prompt, but deny/ask rules still apply.</span>
-    <span class="kd">const</span> <span class="nx">ruleCheck</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">checkRuleBasedPermissions</span><span class="p">(</span>
-      <span class="nx">tool</span><span class="p">,</span>
-      <span class="nx">hookInput</span><span class="p">,</span>
-      <span class="nx">toolUseContext</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="kd">const</span> <span class="nx">ruleCheck</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">checkRuleBasedPermissions</span><span class="p">(</span><span class="nx">tool</span><span class="p">,</span> <span class="nx">hookInput</span><span class="p">,</span> <span class="nx">toolUseContext</span><span class="p">);</span>
     <span class="k">if </span><span class="p">(</span><span class="nx">ruleCheck</span> <span class="o">===</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
       <span class="nf">logForDebugging</span><span class="p">(</span>
         <span class="nx">interactionSatisfied</span>
           <span class="p">?</span> <span class="s2">`Hook satisfied user interaction for </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2"> via updatedInput`</span>
-          <span class="p">:</span> <span class="s2">`Hook approved tool use for </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2">, bypassing permission prompt`</span><span class="p">,</span>
-      <span class="p">)</span>
-      <span class="k">return</span> <span class="p">{</span> <span class="na">decision</span><span class="p">:</span> <span class="nx">hookPermissionResult</span><span class="p">,</span> <span class="na">input</span><span class="p">:</span> <span class="nx">hookInput</span> <span class="p">}</span>
+          <span class="p">:</span> <span class="s2">`Hook approved tool use for </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2">, bypassing permission prompt`</span>
+      <span class="p">);</span>
+      <span class="k">return</span> <span class="p">{</span> <span class="na">decision</span><span class="p">:</span> <span class="nx">hookPermissionResult</span><span class="p">,</span> <span class="na">input</span><span class="p">:</span> <span class="nx">hookInput</span> <span class="p">};</span>
     <span class="p">}</span>
-    <span class="k">if </span><span class="p">(</span><span class="nx">ruleCheck</span><span class="p">.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">deny</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nf">logForDebugging</span><span class="p">(</span>
-        <span class="s2">`Hook approved tool use for </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2">, but deny rule overrides: </span><span class="p">${</span><span class="nx">ruleCheck</span><span class="p">.</span><span class="nx">message</span><span class="p">}</span><span class="s2">`</span><span class="p">,</span>
-      <span class="p">)</span>
-      <span class="k">return</span> <span class="p">{</span> <span class="na">decision</span><span class="p">:</span> <span class="nx">ruleCheck</span><span class="p">,</span> <span class="na">input</span><span class="p">:</span> <span class="nx">hookInput</span> <span class="p">}</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">ruleCheck</span><span class="p">.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">deny</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nf">logForDebugging</span><span class="p">(</span><span class="s2">`Hook approved tool use for </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2">, but deny rule overrides: </span><span class="p">${</span><span class="nx">ruleCheck</span><span class="p">.</span><span class="nx">message</span><span class="p">}</span><span class="s2">`</span><span class="p">);</span>
+      <span class="k">return</span> <span class="p">{</span> <span class="na">decision</span><span class="p">:</span> <span class="nx">ruleCheck</span><span class="p">,</span> <span class="na">input</span><span class="p">:</span> <span class="nx">hookInput</span> <span class="p">};</span>
     <span class="p">}</span>
     <span class="c1">// ask rule — dialog required despite hook approval</span>
-    <span class="nf">logForDebugging</span><span class="p">(</span>
-      <span class="s2">`Hook approved tool use for </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2">, but ask rule requires prompt`</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="nf">logForDebugging</span><span class="p">(</span><span class="s2">`Hook approved tool use for </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2">, but ask rule requires prompt`</span><span class="p">);</span>
     <span class="k">return</span> <span class="p">{</span>
-      <span class="na">decision</span><span class="p">:</span> <span class="k">await</span> <span class="nf">canUseTool</span><span class="p">(</span>
-        <span class="nx">tool</span><span class="p">,</span>
-        <span class="nx">hookInput</span><span class="p">,</span>
-        <span class="nx">toolUseContext</span><span class="p">,</span>
-        <span class="nx">assistantMessage</span><span class="p">,</span>
-        <span class="nx">toolUseID</span><span class="p">,</span>
-      <span class="p">),</span>
+      <span class="na">decision</span><span class="p">:</span> <span class="k">await</span> <span class="nf">canUseTool</span><span class="p">(</span><span class="nx">tool</span><span class="p">,</span> <span class="nx">hookInput</span><span class="p">,</span> <span class="nx">toolUseContext</span><span class="p">,</span> <span class="nx">assistantMessage</span><span class="p">,</span> <span class="nx">toolUseID</span><span class="p">),</span>
       <span class="na">input</span><span class="p">:</span> <span class="nx">hookInput</span><span class="p">,</span>
-    <span class="p">}</span>
+    <span class="p">};</span>
   <span class="p">}</span>
 
-  <span class="k">if </span><span class="p">(</span><span class="nx">hookPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">deny</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nf">logForDebugging</span><span class="p">(</span><span class="s2">`Hook denied tool use for </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2">`</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">{</span> <span class="na">decision</span><span class="p">:</span> <span class="nx">hookPermissionResult</span><span class="p">,</span> <span class="nx">input</span> <span class="p">}</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">hookPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">deny</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">logForDebugging</span><span class="p">(</span><span class="s2">`Hook denied tool use for </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2">`</span><span class="p">);</span>
+    <span class="k">return</span> <span class="p">{</span> <span class="na">decision</span><span class="p">:</span> <span class="nx">hookPermissionResult</span><span class="p">,</span> <span class="nx">input</span> <span class="p">};</span>
   <span class="p">}</span>
 
   <span class="c1">// No hook decision or 'ask' — normal permission flow, possibly with</span>
   <span class="c1">// forceDecision so the dialog shows the hook's ask message.</span>
-  <span class="kd">const</span> <span class="nx">forceDecision</span> <span class="o">=</span>
-    <span class="nx">hookPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span> <span class="p">?</span> <span class="nx">hookPermissionResult</span> <span class="p">:</span> <span class="kc">undefined</span>
-  <span class="kd">const</span> <span class="nx">askInput</span> <span class="o">=</span>
-    <span class="nx">hookPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">hookPermissionResult</span><span class="p">.</span><span class="nx">updatedInput</span>
-      <span class="p">?</span> <span class="nx">hookPermissionResult</span><span class="p">.</span><span class="nx">updatedInput</span>
-      <span class="p">:</span> <span class="nx">input</span>
+  <span class="kd">const</span> <span class="nx">forceDecision</span> <span class="o">=</span> <span class="nx">hookPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span> <span class="p">?</span> <span class="nx">hookPermissionResult</span> <span class="p">:</span> <span class="kc">undefined</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">askInput</span> <span class="o">=</span> <span class="nx">hookPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span> <span class="o">&amp;&amp;</span> <span class="nx">hookPermissionResult</span><span class="p">.</span><span class="nx">updatedInput</span> <span class="p">?</span> <span class="nx">hookPermissionResult</span><span class="p">.</span><span class="nx">updatedInput</span> <span class="p">:</span> <span class="nx">input</span><span class="p">;</span>
   <span class="k">return</span> <span class="p">{</span>
-    <span class="na">decision</span><span class="p">:</span> <span class="k">await</span> <span class="nf">canUseTool</span><span class="p">(</span>
-      <span class="nx">tool</span><span class="p">,</span>
-      <span class="nx">askInput</span><span class="p">,</span>
-      <span class="nx">toolUseContext</span><span class="p">,</span>
-      <span class="nx">assistantMessage</span><span class="p">,</span>
-      <span class="nx">toolUseID</span><span class="p">,</span>
-      <span class="nx">forceDecision</span><span class="p">,</span>
-    <span class="p">),</span>
+    <span class="na">decision</span><span class="p">:</span> <span class="k">await</span> <span class="nf">canUseTool</span><span class="p">(</span><span class="nx">tool</span><span class="p">,</span> <span class="nx">askInput</span><span class="p">,</span> <span class="nx">toolUseContext</span><span class="p">,</span> <span class="nx">assistantMessage</span><span class="p">,</span> <span class="nx">toolUseID</span><span class="p">,</span> <span class="nx">forceDecision</span><span class="p">),</span>
     <span class="na">input</span><span class="p">:</span> <span class="nx">askInput</span><span class="p">,</span>
-  <span class="p">}</span>
+  <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div></div> <p>resolveHookPermissionDecision 是 PreToolUse hook 与正式权限流水线之间的适配器。</p> <p>它解决的问题是：hook 可能返回 allow/deny/ask，但这些决定不能直接使用，必须和 settings.json 规则、用户交互要求、以及完整权限流程做协调，因为作为一个hook，用户可能没有想到与其他场景发生冲突，如果要做一个合格的权限处理，必须考虑这些场景。</p> <hr> <p>调用时机</p> <p>在 toolExecution.ts:921 和 REPLTool/toolWrappers.ts 中调用：</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">resolved</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">resolveHookPermissionDecision</span><span class="p">(</span>
-  <span class="nx">hookPermissionResult</span><span class="p">,</span>  <span class="c1">// 来自 runPreToolUseHooks</span>
+  <span class="nx">hookPermissionResult</span><span class="p">,</span> <span class="c1">// 来自 runPreToolUseHooks</span>
   <span class="nx">tool</span><span class="p">,</span>
   <span class="nx">input</span><span class="p">,</span>
   <span class="nx">toolUseContext</span><span class="p">,</span>
-  <span class="nx">canUseTool</span><span class="p">,</span>            <span class="c1">// useCanUseTool 返回的函数</span>
+  <span class="nx">canUseTool</span><span class="p">,</span> <span class="c1">// useCanUseTool 返回的函数</span>
   <span class="nx">assistantMessage</span><span class="p">,</span>
-  <span class="nx">toolUseID</span><span class="p">,</span>
-<span class="p">)</span>
+  <span class="nx">toolUseID</span>
+<span class="p">);</span>
 </code></pre></div></div> <p>输入 hookPermissionResult 来自 runPreToolUseHooks（toolHooks.ts:435），也就是 PreToolUse hook 执行后的结果。</p> <hr> <p>完整决策树</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hookPermissionResult?.behavior
         │
         ├── 'allow'
@@ -452,13 +411,47 @@ requiresUserInteraction() 为 true 的工具（如 AskUserQuestionTool）通常�
 </code></pre></div></div> <p>第二个字段 input 很重要：hook 可能通过 updatedInput 修改了工具参数，后续执行必须用修改后的 input。</p> <p>例如：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const hookInput = hookPermissionResult.updatedInput ?? input
 // ...
 return { decision: hookPermissionResult, input: hookInput }
-</code></pre></div></div> <hr> <p>一个具体例子</p> <p>假设有个 PreToolUse hook 想自动允许 Bash 工具执行 ls：</p> <ol> <li>Hook 返回 { behavior: ‘allow’, updatedInput: { command: ‘ls’, timeout: 5000 } }</li> <li>resolveHookPermissionDecision 被调用</li> <li>hookInput = { command: ‘ls’, timeout: 5000 }</li> <li>Bash 不需要用户交互，requireCanUseTool 为 false</li> <li>调用 checkRuleBasedPermissions <ul> <li>没有 alwaysDeny: [‘Bash’]</li> <li>没有 alwaysAsk: [‘Bash’]</li> <li>Bash.checkPermissions(‘ls’) 返回 passthrough</li> <li>没有 safetyCheck</li> </ul> </li> <li>ruleCheck === null</li> <li>返回 { decision: hookPermissionResult, input: hookInput }</li> </ol> <p>但如果用户配置了 alwaysDeny: [‘Bash’]，第 5 步会返回 deny，resolveHookPermissionDecision 就返回 deny，hook 的 allow 被覆盖。</p> <h2 id="启动时序">启动时序</h2> <p>安全不只取决于规则覆盖，还取决于加载时序。 Hooks、MCP 和项目级 settings 都必须放在“用户信任确认之后”这个时间边界内审视。在用户同意之前允许读取了环境变量</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>脆弱时序:  启动 → 解析 .claude/settings.json → 加载 MCP/Hooks → 弹出信任对话框 → 用户点击"信任"
+</code></pre></div></div> <hr> <p>一个具体例子</p> <p>假设有个 PreToolUse hook 想自动允许 Bash 工具执行 ls：</p> <ol> <li>Hook 返回 { behavior: ‘allow’, updatedInput: { command: ‘ls’, timeout: 5000 } }</li> <li>resolveHookPermissionDecision 被调用</li> <li>hookInput = { command: ‘ls’, timeout: 5000 }</li> <li>Bash 不需要用户交互，requireCanUseTool 为 false</li> <li>调用 checkRuleBasedPermissions</li> </ol> <ul> <li>没有 alwaysDeny: [‘Bash’]</li> <li>没有 alwaysAsk: [‘Bash’]</li> <li>Bash.checkPermissions(‘ls’) 返回 passthrough</li> <li>没有 safetyCheck</li> </ul> <ol> <li>ruleCheck === null</li> <li>返回 { decision: hookPermissionResult, input: hookInput }</li> </ol> <p>但如果用户配置了 alwaysDeny: [‘Bash’]，第 5 步会返回 deny，resolveHookPermissionDecision 就返回 deny，hook 的 allow 被覆盖。</p> <h2 id="启动时序">启动时序</h2> <p>安全不只取决于规则覆盖，还取决于加载时序。 Hooks、MCP 和项目级 settings 都必须放在“用户信任确认之后”这个时间边界内审视。在用户同意之前允许读取了环境变量</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>脆弱时序:  启动 → 解析 .claude/settings.json → 加载 MCP/Hooks → 弹出信任对话框 → 用户点击"信任"
 安全时序:  启动 → 弹出信任对话框 → 用户点击"信任" → 解析 .claude/settings.json → 加载 MCP/Hooks
 </code></pre></div></div> <p>配置文件在 Agent 系统中确实不再是”被动文本”——.claude/settings.json 可以声明： mcpServers：启动子进程或网络连接 hooks：注册生命周期回调 env：注入环境变量（可能污染 PATH、LD_PRELOAD 等） 这些都属于 启动阶段的主动执行面，必须在用户显式授权后才能激活。 用户看到的对话框不再是”是否授权这些能力”，而是”这些能力已经运行，你点拒绝也晚了”。这是同意（consent）机制的结构性破坏。</p> <p>PreToolUse 拦截后如果只是抛异常或静默跳过，模型可能看不到真实原因并反复重试。更稳的做法是把 blockingErrors 打包成带纠偏指令的 User Message 回注上下文，并用 stopHookActive 等状态避免 Stop Hook 递归触发。 LLM 的推理模式是”遇到问题→尝试替代方案”。如果 PreToolUse 被拦截后只是静默失败或抛内部异常，模型上下文里缺少”这是策略禁止，不是技术故障”的明确信号。结果是： 换参数重试 换工具重试 分解步骤绕过 每一次重试都在消耗安全边界——可能触发其他 Hook、产生副作用、或把操作拆成更隐蔽的子步骤。 回注纠偏的本质是：把安全策略从”黑盒障碍”变成”模型可理解的约束条件”，让它进入模型的推理上下文，成为其规划的一部分，而非对抗对象。</p> <p>想象这么一个场景</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FileChanged Hook 每次做完整外部审计 → 大文件批量修改时 Loop 卡住
 → 用户/模型感知到"文件操作经常失败"
 → 改用更粗粒度的工具（如直接 shell 命令替换文件）来"绕过问题"
 → 反而失去了 FileChanged 本应提供的细粒度监控
-</code></pre></div></div> <p>性能也是 Hook 安全的一部分。PostToolUse、FileChanged 这类高频事件如果每次都启动外部进程、做完整 JSON 序列化或网络请求，会拖慢 Agent Loop，甚至诱发超时和恢复风暴。源码通过内部 callback hooks 等 fast path 处理会话文件访问记录这类高频任务，把重型外部 Hook 留给真正需要审批或审计的节点。 Fast path 不是”让体验更流畅”，而是把安全机制维持在”总是可承受”的阈值内，防止系统因性能压力而自我降级，或者说别让用户或模型不耐烦而做出妥协</p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/colpali-multimodal-rag-qa/">掌握 ColPali 多模态 RAG 需要回答的 8 个问题</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/proposition-chunking-summary/">Proposition Chunking 命题化切分总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/query-transformations-summary/">Query Transformations 查询转换技术总结</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+</code></pre></div></div> <p>性能也是 Hook 安全的一部分。PostToolUse、FileChanged 这类高频事件如果每次都启动外部进程、做完整 JSON 序列化或网络请求，会拖慢 Agent Loop，甚至诱发超时和恢复风暴。源码通过内部 callback hooks 等 fast path 处理会话文件访问记录这类高频任务，把重型外部 Hook 留给真正需要审批或审计的节点。 Fast path 不是”让体验更流畅”，而是把安全机制维持在”总是可承受”的阈值内，防止系统因性能压力而自我降级，或者说别让用户或模型不耐烦而做出妥协</p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/colpali-multimodal-rag-qa/">掌握 ColPali 多模态 RAG 需要回答的 8 个问题</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/proposition-chunking-summary/">Proposition Chunking 命题化切分总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/query-transformations-summary/">Query Transformations 查询转换技术总结</a> </li> </ul> <div id="giscus_thread" style="max-width: 930px; margin: 0 auto;"> <br> <script>
+    (function setupGiscus() {
+      function determineGiscusTheme() {
+        var theme = localStorage.getItem("theme") || document.documentElement.getAttribute("data-theme") || "system";
+if (theme === "dark") return "dark";
+if (theme === "light") return "light";
+var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+return prefersDark ? "dark" : "light";
+
+      }
+
+      var giscusTheme = determineGiscusTheme();
+      var attrs = {
+        src: "https://giscus.app/client.js",
+        "data-repo": "Mr-coldskin7/Mr-coldskin7.github.io",
+        "data-repo-id": "R_kgDONx3iVw",
+        "data-category": "Announcements",
+        "data-category-id": "DIC_kwDONx3iV84C-J1X",
+        "data-mapping": "pathname",
+        "data-strict": "0",
+        "data-reactions-enabled": "1",
+        "data-emit-metadata": "0",
+        "data-input-position": "bottom",
+        "data-theme": giscusTheme,
+        "data-lang": "zh-CN",
+        crossorigin: "anonymous",
+        async: true
+      };
+
+      var giscusScript = document.createElement("script");
+      Object.entries(attrs).forEach(function(entry) { giscusScript.setAttribute(entry[0], entry[1]); });
+      var host = document.getElementById("giscus_thread");
+      if (host) host.appendChild(giscusScript);
+    })();
+  </script> <noscript> Please enable JavaScript to view the <a href="http://giscus.app/?ref_noscript" rel="external nofollow noopener" target="_blank">comments powered by giscus.</a> </noscript> </div> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
   window.alFolio = {
     compatBootstrap: false
   };
@@ -482,6 +475,13 @@ ninja.data = [{
           section: "Navigation",
           handler: () => {
             window.location.href = "/cv/";
+          },
+        },{id: "nav-knowledge-graph",
+          title: "Knowledge Graph",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/graph/";
           },
         },{id: "nav-blog",
           title: "blog",
@@ -923,7 +923,7 @@ ninja.data = [{
         section: "Posts",
         handler: () => {
           
-            window.location.href = "/blog/2025/cppVector/";
+            window.location.href = "/blog/2025/cpp-vector-stl/";
           
         },
       },{id: "post-c-template",

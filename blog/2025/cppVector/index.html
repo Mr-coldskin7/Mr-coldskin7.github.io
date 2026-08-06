@@ -1,117 +1,121 @@
-<!DOCTYPE html> <html lang="zh"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> C++ Vector | leesanyee </title> <meta name="author" content="Lee SanYee"> <meta name="description" content="LeeSanYee 的技术博客，记录 ML/NLP、C++、Linux 等方向的学习笔记与思考。 "> <meta name="keywords" content="blog, ml, nlp, cpp, linux"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+<!DOCTYPE html> <html lang="zh"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> C++中的Vector | leesanyee </title> <meta name="author" content="Lee SanYee"> <meta name="description" content="LeeSanYee 的技术博客，记录 ML/NLP、C++、Linux 等方向的学习笔记与思考。 "> <meta name="keywords" content="blog, ml, nlp, cpp, linux"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
   :root {
     --max-content-width: 930px;
   }
 </style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://mr-coldskin7.github.io/blog/2025/cppVector/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
     initTheme();
-  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">C++ Vector</h1> <p class="post-meta"> Created on May 06, 2025 </p> <p class="post-tags"> <a href="/blog/2025"> <i class="fa-solid fa-calendar fa-sm"></i> 2025 </a>   ·   <a href="/blog/tag/cpp"> <i class="fa-solid fa-hashtag fa-sm"></i> cpp</a>   <a href="/blog/tag/vector"> <i class="fa-solid fa-hashtag fa-sm"></i> vector</a>   <a href="/blog/tag/stl"> <i class="fa-solid fa-hashtag fa-sm"></i> stl</a>   ·   <a href="/blog/category/cpp"> <i class="fa-solid fa-tag fa-sm"></i> Cpp</a>   <a href="/blog/category/vector"> <i class="fa-solid fa-tag fa-sm"></i> vector</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <p>C++ 中的 <code class="language-plaintext highlighter-rouge">std::vector&lt;std::string&gt;</code> 是标准模板库（STL）的动态数组容器，其底层实现和模板机制涉及内存管理、类型泛化等核心设计。</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">::</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;::</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">::&gt;</span>
-</code></pre></div></div> <p>Demo</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item "> <a class="nav-link" href="/graph/">Knowledge Graph </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">C++中的Vector</h1> <p class="post-meta"> Created on February 24, 2025 </p> <p class="post-tags"> <a href="/blog/2025"> <i class="fa-solid fa-calendar fa-sm"></i> 2025 </a>   ·   <a href="/blog/tag/cpp"> <i class="fa-solid fa-hashtag fa-sm"></i> cpp</a>   <a href="/blog/tag/vector"> <i class="fa-solid fa-hashtag fa-sm"></i> vector</a>   <a href="/blog/tag/stl"> <i class="fa-solid fa-hashtag fa-sm"></i> stl</a>   ·   <a href="/blog/category/algorithm"> <i class="fa-solid fa-tag fa-sm"></i> Algorithm</a>   <a href="/blog/category/cpp"> <i class="fa-solid fa-tag fa-sm"></i> Cpp</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h1 id="cpp中的vector">CPP中的vector</h1> <p>vector 是 C++ 标准库的动态数组，它可以动态地分配内存（不需要事先申明大小），可以方便地管理数组中的元素。</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp">
 </span>
-<span class="cp">#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp">
-</span>
-<span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">7</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>
 
-  
+<span class="c1">// 初始化一个 int 型的空数组 nums</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">nums</span><span class="p">;</span>
 
-<span class="kt">int</span> <span class="nf">main</span><span class="p">(){</span>
+<span class="c1">// 初始化一个大小为 n 的数组 nums，数组中的值默认都为 0</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">nums</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
 
-<span class="err"> </span> <span class="err"> </span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">array</span><span class="p">;</span>
+<span class="c1">// 初始化一个元素为 1, 3, 5 的数组 nums</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">nums</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">};</span>
 
-<span class="err"> </span> <span class="err"> </span> <span class="n">array</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="c1">// 初始化一个大小为 n 的数组 nums，其值全都为 2</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">nums</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
 
-<span class="err"> </span> <span class="err"> </span> <span class="n">array</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="c1">// 初始化一个二维 int 数组 dp</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">dp</span><span class="p">;</span>
 
-<span class="err"> </span> <span class="err"> </span> <span class="n">array</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<span class="c1">// 初始化一个大小为 m * n 的布尔数组 dp，</span>
+<span class="c1">// 其中的值都初始化为 true</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&gt;</span> <span class="n">dp</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">true</span><span class="p">));</span>
+</code></pre></div></div> <p>C++标准库中的vector采用动态扩容机制以支持高效的元素插入操作。 size()：当前存储的元素数量。 capacity()：无需重新分配内存时可容纳的最大元素数量。 当插入元素导致size()超过capacity()时，触发扩容。 扩容则根据编译器的不同而扩张的策略不同，总的来说都是扩展更大的地方，拷贝黏贴更新 常用操作</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;vector&gt;</span><span class="cp">
+</span><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
 
-<span class="err"> </span> <span class="err"> </span> <span class="n">array</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+    <span class="c1">// 数组大小为 10，元素值都为 0</span>
+    <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">nums</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+    <span class="c1">// 输出 0 (false)</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">nums</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+    <span class="c1">// 输出：10</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">nums</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
 
-<span class="err"> </span> <span class="err"> </span> <span class="n">array</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
+    <span class="c1">// 在数组尾部插入一个元素 20</span>
+    <span class="n">nums</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">20</span><span class="p">);</span>
+    <span class="c1">// 输出：11</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">nums</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
 
-<span class="err"> </span> <span class="err"> </span> <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">array</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="c1">// 得到数组最后一个元素的引用</span>
+    <span class="c1">// 输出：20</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">nums</span><span class="p">.</span><span class="n">back</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
 
-<span class="err"> </span> <span class="err"> </span> <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">array</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+    <span class="c1">// 删除数组的最后一个元素（无返回值）</span>
+    <span class="n">nums</span><span class="p">.</span><span class="n">pop_back</span><span class="p">();</span>
+    <span class="c1">// 输出：10</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">nums</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
 
-<span class="err"> </span> <span class="err"> </span> <span class="n">array</span><span class="p">.</span><span class="n">pop_back</span><span class="p">();</span>
+    <span class="c1">// 可以通过方括号直接取值或修改</span>
+    <span class="n">nums</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">11</span><span class="p">;</span>
+    <span class="c1">// 输出：11</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">nums</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
 
-<span class="err"> </span> <span class="err"> </span> <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="n">array</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="c1">// 在索引 3 处插入一个元素 99</span>
+    <span class="n">nums</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">nums</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">99</span><span class="p">);</span>
 
-<span class="err"> </span> <span class="err"> </span> <span class="p">{</span>
+    <span class="c1">// 删除索引 2 处的元素</span>
+    <span class="n">nums</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">nums</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">2</span><span class="p">);</span>
 
-<span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
+    <span class="c1">// 交换 nums[0] 和 nums[1]</span>
+    <span class="n">swap</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nums</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
 
-<span class="err"> </span> <span class="err"> </span> <span class="p">}</span>
-
-<span class="err"> </span> <span class="err"> </span> <span class="n">array</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">array</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>
-
-<span class="err"> </span> <span class="err"> </span> <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="n">array</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
-
-<span class="err"> </span> <span class="err"> </span> <span class="p">{</span>
-
-<span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="err"> </span> <span class="err"> </span> <span class="p">}</span>
-
-<span class="err"> </span> <span class="err"> </span> <span class="n">array</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">array</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span><span class="o">+</span><span class="mi">2</span><span class="p">);</span>
-
-<span class="err"> </span> <span class="err"> </span> <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="n">i</span><span class="o">&lt;</span><span class="n">array</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
-
-<span class="err"> </span> <span class="err"> </span> <span class="p">{</span>
-
-<span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="err"> </span> <span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">&lt;&lt;</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="err"> </span> <span class="err"> </span> <span class="p">}</span>
-
-<span class="err"> </span> <span class="err"> </span> <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-
+    <span class="c1">// 遍历数组</span>
+    <span class="c1">// 0 11 99 0 0 0 0 0 0 0</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nums</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">" "</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
 <span class="p">}</span>
-</code></pre></div></div> <p>vector的用法还是比较简单的，无非就是增删，在哪里加，在哪里删 vector作为一个容器，需要配套迭代器 于是</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">.</span><span class="n">begin</span><span class="p">()</span>
-<span class="p">.</span><span class="n">end</span><span class="p">()</span>
-</code></pre></div></div> <p>因为其支持迭代器，所以常见迭代器的用法例如 可以使用如下来进行循环</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="p">(</span><span class="k">const</span> <span class="k">auto</span><span class="o">&amp;</span> <span class="n">str</span> <span class="o">:</span> <span class="n">vec</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// 循环体</span>
-<span class="p">}</span>
-</code></pre></div></div> <p>这么写的好处第一点是const定义的常量，不可以被修改 若不需要修改元素，应使用 <code class="language-plaintext highlighter-rouge">const</code> 修饰以确保安全性 自动腿法哦类型auto可以不用写类型 使用引用传递&amp;避免拷贝容器元素</p> <p><code class="language-plaintext highlighter-rouge">.sort()</code>和<code class="language-plaintext highlighter-rouge">.find()</code>这两个用法 <strong>vector.emplace_back()</strong> <strong>emplace_back</strong>与<strong>push_back</strong>的主要区别在于它们的实现机制。<strong>push_back</strong>在向vector尾部添加元素时，会先创建一个元素，然后将其拷贝或移动到容器中。如果是拷贝操作，之后会自动销毁创建的临时元素。而<strong>emplace_back</strong>则是直接在容器尾部创建元素，省去了这个中间步骤。</p> <p>就十分合理了</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">.</span><span class="n">allocator</span><span class="p">()</span><span class="c1">//用于标记内存池（从谁那里借了内存？）便于之后归还</span>
-<span class="p">.</span><span class="n">data</span><span class="p">()</span><span class="c1">//获得第一个元素的指针</span>
-<span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="c1">//已经存了的元素的大小</span>
-<span class="p">.</span><span class="n">capacity</span><span class="p">()</span><span class="c1">//规划的大小</span>
-</code></pre></div></div> <ul> <li> <strong><code class="language-plaintext highlighter-rouge">_start</code>​</strong>​：指向动态内存块的起始位置（即首元素地址）。</li> <li>​<strong>​<code class="language-plaintext highlighter-rouge">_finish</code>​</strong>​：指向最后一个有效元素的下一个位置（<code class="language-plaintext highlighter-rouge">size = _finish - _start</code>）。</li> <li>​<strong>​<code class="language-plaintext highlighter-rouge">_end_of_storage</code>​</strong>​：指向当前分配内存的末尾（<code class="language-plaintext highlighter-rouge">capacity = _end_of_storage - _start</code>） 这种设计支持 ​<strong>​O(1)​</strong>​ 时间复杂度的随机访问，且对 CPU 缓存友好</li> <li> <strong><code class="language-plaintext highlighter-rouge">std::vector</code></strong>是<strong>类模板​</strong>​，通过模板参数 <code class="language-plaintext highlighter-rouge">T</code> 支持存储任意类型 <h1 id="具体的实现">具体的实现</h1> <p>定义 ```cpp // 模板类 vector，使用 alloc 作为默认的空间配置器 template &lt;class T, class Alloc = alloc&gt; class vector { public: // (1) 定义迭代器特征所需的五种类型 (符合STL规范) typedef T value_type; // 元素类型 typedef value_type* pointer; // 指针类型 typedef const value_type* const_pointer; typedef const value_type* const_iterator; typedef value_type&amp; reference; // 引用类型 typedef const value_type&amp; const_reference; typedef size_t size_type; // 容器大小类型 typedef ptrdiff_t difference_type; // 迭代器距离类型</p> <p>// 原生指针即可满足随机访问迭代器需求（因vector使用连续内存） typedef value_type* iterator;</p> <p>// 空间配置器（封装内存分配/释放操作） typedef simple_alloc&lt;value_type, Alloc&gt; data_allocator;</p> <p>// 核心指针成员 (三指针管理内存) iterator start; // 指向数据起始位置 iterator finish; // 指向最后一个元素的下一个位置 iterator end_of_storage; // 指向内存空间的末尾</p> <p>// 默认构造函数初始化空容器 vector() : start(0), finish(0), end_of_storage(0) {}</p> <p>// 获取迭代器范围 iterator begin() { return start; } iterator end() { return finish; }</p> <p>/<strong>**</strong><strong>**</strong><strong>**</strong>** 关键成员函数实现 <strong>**</strong><strong>**</strong><strong>**</strong>**/</p> <p>// 插入辅助函数（核心扩容逻辑） template &lt;class T, class Alloc&gt; void vector&lt;T, Alloc&gt;::insert_aux(iterator position, const T&amp; x) { if (finish != end_of_storage) { // Case 1: 存在备用空间 // 在备用空间尾部构造一个元素（使用最后一个元素的副本） construct(finish, *(finish - 1)); ++finish; // 调整水位</p> <div class="language-plaintext highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>      T x_copy = x;  // 防止x在后续操作中被修改
-      // 将position之后元素后移（使用逆向拷贝避免覆盖）
-      copy_backward(position, finish - 2, finish - 1);
-      *position = x_copy;  // 插入新元素
-  } 
-  else {  // Case 2: 需要扩容
-      const size_type old_size = size();
-      // 扩容策略：原大小为0则分配1，否则双倍扩容
-      const size_type len = old_size != 0 ? 2 * old_size : 1;
-        
-      iterator new_start = data_allocator::allocate(len);  // 申请新内存
-      iterator new_finish = new_start;
-      try {
-          // 分三段拷贝数据：
-          // 1. 原容器position前的元素
-          new_finish = uninitialized_copy(start, position, new_start);
-          // 2. 插入新元素x
-          construct(new_finish, x);
-          ++new_finish;
-          // 3. 原容器position后的元素
-          new_finish = uninitialized_copy(position, finish, new_finish);
-      } 
-      catch (...) {  // 异常安全处理 (RAII)
-          // 回滚：销毁已构造元素并释放内存
-          destroy(new_start, new_finish);
-          data_allocator::deallocate(new_start, len);
-          throw;  // 重新抛出异常
+</code></pre></div></div> <p>我觉得其中最重要的几个：</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">vector</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">vec</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">m</span><span class="p">));</span><span class="o">&lt;!--</span><span class="err">二维数组的初始化</span><span class="o">--&gt;</span>
+<span class="n">vec</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">&lt;!--</span><span class="err">容器大小</span><span class="o">--&gt;</span>
+<span class="n">vec</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span><span class="o">&lt;!--</span><span class="err">判断是否为空</span><span class="o">--&gt;</span>
+<span class="n">vec</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">&lt;!--</span><span class="err">在尾部插入元素</span><span class="o">--&gt;</span>
+<span class="n">vec</span><span class="p">.</span><span class="n">pop_back</span><span class="p">()</span><span class="o">&lt;!--</span><span class="err">删除尾部元素</span><span class="o">--&gt;</span>
+<span class="n">vec</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span><span class="n">x</span><span class="p">)</span><span class="o">&lt;!--</span><span class="err">在</span><span class="n">pos</span><span class="err">位置插入元素</span><span class="n">x</span><span class="o">--&gt;</span>
+<span class="n">vec</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span><span class="o">&lt;!--</span><span class="err">删除</span><span class="n">pos</span><span class="err">位置的元素</span><span class="o">--&gt;</span>
+</code></pre></div></div> <p>这些对于leetcode的刷题来说是绝对基础的东西，但是我每隔一段时间就会忘了（其实就是写少了）特地写这些来方便以后找 最后顺便带上api的连接：https://en.cppreference.com/w/cpp/container/vector</p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/colpali-multimodal-rag-qa/">掌握 ColPali 多模态 RAG 需要回答的 8 个问题</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/proposition-chunking-summary/">Proposition Chunking 命题化切分总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/query-transformations-summary/">Query Transformations 查询转换技术总结</a> </li> </ul> <div id="giscus_thread" style="max-width: 930px; margin: 0 auto;"> <br> <script>
+    (function setupGiscus() {
+      function determineGiscusTheme() {
+        var theme = localStorage.getItem("theme") || document.documentElement.getAttribute("data-theme") || "system";
+if (theme === "dark") return "dark";
+if (theme === "light") return "light";
+var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+return prefersDark ? "dark" : "light";
+
       }
 
-      // 销毁旧元素并释放旧内存
-      destroy(begin(), end());
-      deallocate();
+      var giscusTheme = determineGiscusTheme();
+      var attrs = {
+        src: "https://giscus.app/client.js",
+        "data-repo": "Mr-coldskin7/Mr-coldskin7.github.io",
+        "data-repo-id": "R_kgDONx3iVw",
+        "data-category": "Announcements",
+        "data-category-id": "DIC_kwDONx3iV84C-J1X",
+        "data-mapping": "pathname",
+        "data-strict": "0",
+        "data-reactions-enabled": "1",
+        "data-emit-metadata": "0",
+        "data-input-position": "bottom",
+        "data-theme": giscusTheme,
+        "data-lang": "zh-CN",
+        crossorigin: "anonymous",
+        async: true
+      };
 
-      // 更新指针指向新内存区
-      start = new_start;
-      finish = new_finish;
-      end_of_storage = new_start + len;
-  }   }
-</code></pre></div> </div> <p>// 尾部插入元素 void push_back(const T&amp; x) { if (finish != end_of_storage) { // 直接使用备用空间 construct(finish, x); // placement new构造对象 ++finish; // 调整水位 } else { // 触发扩容 insert_aux(end(), x); // 调用辅助函数 } }</p> <p>// 尾部删除元素 void pop_back() { –finish; // 前移结束指针 destroy(finish); // 调用析构函数 }</p> <p>// 删除指定位置元素 iterator erase(iterator position) { if (position + 1 != end()) {<br> // 将position后元素前移覆盖（普通拷贝） copy(position + 1, finish, position); } –finish; // 调整水位 destroy(finish); // 销毁末尾冗余元素 return position; // 返回新的position位置（注意：此时position内容已被覆盖） } };</p> </li> </ul> <p>```</p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/colpali-multimodal-rag-qa/">掌握 ColPali 多模态 RAG 需要回答的 8 个问题</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/proposition-chunking-summary/">Proposition Chunking 命题化切分总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/query-transformations-summary/">Query Transformations 查询转换技术总结</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+      var giscusScript = document.createElement("script");
+      Object.entries(attrs).forEach(function(entry) { giscusScript.setAttribute(entry[0], entry[1]); });
+      var host = document.getElementById("giscus_thread");
+      if (host) host.appendChild(giscusScript);
+    })();
+  </script> <noscript> Please enable JavaScript to view the <a href="http://giscus.app/?ref_noscript" rel="external nofollow noopener" target="_blank">comments powered by giscus.</a> </noscript> </div> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
   window.alFolio = {
     compatBootstrap: false
   };
@@ -135,6 +139,13 @@ ninja.data = [{
           section: "Navigation",
           handler: () => {
             window.location.href = "/cv/";
+          },
+        },{id: "nav-knowledge-graph",
+          title: "Knowledge Graph",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/graph/";
           },
         },{id: "nav-blog",
           title: "blog",
@@ -576,7 +587,7 @@ ninja.data = [{
         section: "Posts",
         handler: () => {
           
-            window.location.href = "/blog/2025/cppVector/";
+            window.location.href = "/blog/2025/cpp-vector-stl/";
           
         },
       },{id: "post-c-template",
