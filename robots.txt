@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://mr-coldskin7.github.io/sitemap.xml
+Sitemap: https://leesanyee.me/sitemap.xml

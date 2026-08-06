@@ -1,0 +1,941 @@
+<!DOCTYPE html> <html lang="zh"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Graph RAG with Milvus —— 纯向量库造图的多跳推理 | leesanyee </title> <meta name="author" content="Lee SanYee"> <meta name="description" content="LeeSanYee 的技术博客，记录 ML/NLP、C++、Linux 等方向的学习笔记与思考。 "> <meta name="keywords" content="blog, ml, nlp, cpp, linux"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://leesanyee.me/blog/2026/GraphRAG-with-Milvus/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item "> <a class="nav-link" href="/graph/">Knowledge Graph </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Graph RAG with Milvus —— 纯向量库造图的多跳推理</h1> <p class="post-meta"> Created on August 06, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/rag"> <i class="fa-solid fa-hashtag fa-sm"></i> rag</a>   <a href="/blog/tag/graphrag"> <i class="fa-solid fa-hashtag fa-sm"></i> graphrag</a>   <a href="/blog/tag/milvus"> <i class="fa-solid fa-hashtag fa-sm"></i> milvus</a>   <a href="/blog/tag/multi-hop"> <i class="fa-solid fa-hashtag fa-sm"></i> multi-hop</a>   <a href="/blog/tag/knowledge-graph"> <i class="fa-solid fa-hashtag fa-sm"></i> knowledge-graph</a>   ·   <a href="/blog/category/rag"> <i class="fa-solid fa-tag fa-sm"></i> RAG</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h1 id="graph-rag-with-milvus--纯向量库造图的多跳推理">Graph RAG with Milvus —— 纯向量库造图的多跳推理</h1> <h2 id="要解决的问题">要解决的问题</h2> <p>传统 RAG 在<strong>多跳问题</strong>上翻车：比如「欧拉（Euler）的老师（Johann）的儿子（Daniel）做了哪些贡献？」。</p> <p>普通相似度检索的原理是「查询和段落的语义贴近」，但答案藏在<strong>隔着两跳的关系</strong>里：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Euler ←是学生→ Johann ←是儿子→ Daniel ←贡献→ 流体力学
+</code></pre></div></div> <p>查询和 Daniel 的段落语义上离得很远，naive RAG 直接搜不到。</p> <p>答案：<strong>Graph RAG</strong> —— 用实体关系连成图，沿着图走多跳。但常见的 GraphRAG（如微软版）要装<strong>图数据库</strong>。这个 notebook 的创新是：<strong>只用向量库（Milvus）就做出图推理</strong>，不装图库。</p> <h2 id="核心思想不存图算图">核心思想：不存图，算图</h2> <p>整个系统的灵魂一句话：<strong>把「图」拆成 3 个向量集合，图结构不存，查询时用邻接矩阵现算多跳。</strong></p> <h2 id="入库3-个向量集合--邻接映射">入库：3 个向量集合 + 邻接映射</h2> <h3 id="原始数据段落--三元组">原始数据：段落 + 三元组</h3> <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"passage"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Jakob Bernoulli (1654–1705): ... 他做了X贡献 ..."</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"triplets"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">[</span><span class="s2">"Jakob Bernoulli"</span><span class="p">,</span><span class="w"> </span><span class="s2">"was the older brother of"</span><span class="p">,</span><span class="w"> </span><span class="s2">"Johann Bernoulli"</span><span class="p">],</span><span class="w">
+    </span><span class="p">[</span><span class="s2">"Jakob Bernoulli"</span><span class="p">,</span><span class="w"> </span><span class="s2">"is known for"</span><span class="p">,</span><span class="w"> </span><span class="s2">"the Bernoulli numbers"</span><span class="p">]</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div> <h3 id="拆成-3-类">拆成 3 类</h3> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">entities</span>  <span class="o">=</span> <span class="p">[]</span>   <span class="c1"># 实体：三元组的 subject 和 object
+</span><span class="n">relations</span> <span class="o">=</span> <span class="p">[]</span>   <span class="c1"># 关系：三元组拼成一句话
+</span><span class="n">passages</span>  <span class="o">=</span> <span class="p">[]</span>   <span class="c1"># 原文段落
+</span>
+<span class="k">for</span> <span class="n">triplet</span> <span class="ow">in</span> <span class="n">triplets</span><span class="p">:</span>
+    <span class="n">entities</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">triplet</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>   <span class="c1"># subject
+</span>    <span class="n">entities</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">triplet</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>   <span class="c1"># object
+</span>    <span class="n">relations</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="sh">"</span><span class="s"> </span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">triplet</span><span class="p">))</span>  <span class="c1"># "Jakob Bernoulli was the older brother..."
+</span></code></pre></div></div> <p><strong>关键</strong>：关系不是存结构化 (subject, predicate, object)，而是<strong>拼成自然语言句子</strong>再嵌入，这样向量才有语义。</p> <h3 id="建-2-张邻接映射表这才是图">建 2 张邻接映射表（这才是「图」）</h3> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">entityid_2_relationids</span> <span class="o">=</span> <span class="nf">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>  <span class="c1"># 实体 → 参与哪些关系
+</span><span class="n">relationid_2_passageids</span> <span class="o">=</span> <span class="nf">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span> <span class="c1"># 关系 → 出自哪个段落
+</span>
+<span class="n">entityid_2_relationids</span><span class="p">[</span><span class="n">entities</span><span class="p">.</span><span class="nf">index</span><span class="p">(</span><span class="n">triplet</span><span class="p">[</span><span class="mi">0</span><span class="p">])].</span><span class="nf">append</span><span class="p">(</span><span class="n">relation_id</span><span class="p">)</span>
+<span class="n">entityid_2_relationids</span><span class="p">[</span><span class="n">entities</span><span class="p">.</span><span class="nf">index</span><span class="p">(</span><span class="n">triplet</span><span class="p">[</span><span class="mi">2</span><span class="p">])].</span><span class="nf">append</span><span class="p">(</span><span class="n">relation_id</span><span class="p">)</span>  <span class="c1"># 两端都连
+</span><span class="n">relationid_2_passageids</span><span class="p">[</span><span class="n">relation_id</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="n">passage_id</span><span class="p">)</span>
+</code></pre></div></div> <p><strong>图从没作为图存过</strong> —— 就两张 Python dict 记录「实体↔关系」「关系↔段落」谁连着谁。</p> <h3 id="3-个向量集合milvus-标准的-embedding-入库">3 个向量集合（Milvus）—— 标准的 embedding 入库</h3> <p>3 个列表各自 embedding 进对应集合，跟普通 RAG 入库没区别：</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">create_milvus_collection</span><span class="p">(</span><span class="sh">"</span><span class="s">entity_collection</span><span class="sh">"</span><span class="p">)</span>   <span class="c1"># 实体向量
+</span><span class="nf">create_milvus_collection</span><span class="p">(</span><span class="sh">"</span><span class="s">relation_collection</span><span class="sh">"</span><span class="p">)</span> <span class="c1"># 关系向量
+</span><span class="nf">create_milvus_collection</span><span class="p">(</span><span class="sh">"</span><span class="s">passage_collection</span><span class="sh">"</span><span class="p">)</span>  <span class="c1"># 段落向量
+</span>
+<span class="k">def</span> <span class="nf">milvus_insert</span><span class="p">(</span><span class="n">collection_name</span><span class="p">,</span> <span class="n">text_list</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">row_id</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nf">len</span><span class="p">(</span><span class="n">text_list</span><span class="p">),</span> <span class="mi">512</span><span class="p">):</span>
+        <span class="n">batch_texts</span> <span class="o">=</span> <span class="n">text_list</span><span class="p">[</span><span class="n">row_id</span> <span class="p">:</span> <span class="n">row_id</span> <span class="o">+</span> <span class="mi">512</span><span class="p">]</span>
+        <span class="n">batch_embeddings</span> <span class="o">=</span> <span class="n">embedding_model</span><span class="p">.</span><span class="nf">embed_documents</span><span class="p">(</span><span class="n">batch_texts</span><span class="p">)</span>  <span class="c1"># 文本→向量
+</span>        <span class="n">batch_data</span> <span class="o">=</span> <span class="p">[{</span><span class="sh">"</span><span class="s">id</span><span class="sh">"</span><span class="p">:</span> <span class="n">id_</span><span class="p">,</span> <span class="sh">"</span><span class="s">text</span><span class="sh">"</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span> <span class="sh">"</span><span class="s">vector</span><span class="sh">"</span><span class="p">:</span> <span class="n">vector</span><span class="p">}</span> <span class="p">...]</span>
+        <span class="n">milvus_client</span><span class="p">.</span><span class="nf">insert</span><span class="p">(</span><span class="n">collection_name</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">batch_data</span><span class="p">)</span>
+
+<span class="nf">milvus_insert</span><span class="p">(</span><span class="n">relation_col_name</span><span class="p">,</span> <span class="n">relations</span><span class="p">)</span>  <span class="c1"># 关系列表 → relation 向量库
+</span><span class="nf">milvus_insert</span><span class="p">(</span><span class="n">entity_col_name</span><span class="p">,</span>   <span class="n">entities</span><span class="p">)</span>   <span class="c1"># 实体列表 → entity 向量库
+</span><span class="nf">milvus_insert</span><span class="p">(</span><span class="n">passage_col_name</span><span class="p">,</span>  <span class="n">passages</span><span class="p">)</span>   <span class="c1"># 段落列表 → passage 向量库
+</span></code></pre></div></div> <p>每条记录 <code class="language-plaintext highlighter-rouge">{id, text, vector}</code>：<code class="language-plaintext highlighter-rouge">id</code> = 在列表里的下标，<code class="language-plaintext highlighter-rouge">text</code> = 原文，<code class="language-plaintext highlighter-rouge">vector</code> = embedding。</p> <p><strong>注意</strong>：向量库是「3 列表分别 embedding」来的，<strong>不是从 dict 转的</strong>。dict 和向量库是两条平行线，都来自同一批 3 列表，dict 只记连接、向量库存向量，靠 <strong>id 对齐</strong>。</p> <h2 id="邻接矩阵把-dict-变成能算的矩阵">邻接矩阵：把 dict 变成能算的矩阵</h2> <p>查询前把「实体-关系」dict 转成稀疏矩阵：</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">entity_relation_adj</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">zeros</span><span class="p">((</span><span class="nf">len</span><span class="p">(</span><span class="n">entities</span><span class="p">),</span> <span class="nf">len</span><span class="p">(</span><span class="n">relations</span><span class="p">)))</span>
+<span class="n">entity_relation_adj</span><span class="p">[</span><span class="n">entity_id</span><span class="p">,</span> <span class="n">entityid_2_relationids</span><span class="p">[</span><span class="n">entity_id</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">entity_relation_adj</span> <span class="o">=</span> <span class="nf">csr_matrix</span><span class="p">(</span><span class="n">entity_relation_adj</span><span class="p">)</span>  <span class="c1"># 稀疏省内存
+</span></code></pre></div></div> <p><code class="language-plaintext highlighter-rouge">entity_relation_adj[i][j]=1</code> ⟺ 实体 i 参与了关系 j。</p> <p><strong>矩阵乘法 = 图遍历</strong>（核心魔法）：</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 1跳：A @ A.T
+</span><span class="n">entity_adj_1_degree</span> <span class="o">=</span> <span class="n">entity_relation_adj</span> <span class="o">@</span> <span class="n">entity_relation_adj</span><span class="p">.</span><span class="n">T</span>
+<span class="c1"># N跳：乘 N 次
+</span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">target_degree</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">entity_adj_target_degree</span> <span class="o">=</span> <span class="n">entity_adj_target_degree</span> <span class="o">@</span> <span class="n">entity_adj_1_degree</span><span class="p">.</span><span class="n">T</span>
+</code></pre></div></div> <p>直觉：<code class="language-plaintext highlighter-rouge">A @ A.T</code> 里，实体 i 和 k 若连到同一关系 j，乘积为 1 —— 说明 i、k 隔一跳相连。<strong>乘一次 = 扩一跳</strong>。</p> <h2 id="查询向量召回--矩阵展开--llm-过滤--回段落">查询：向量召回 → 矩阵展开 → LLM 过滤 → 回段落</h2> <h3 id="-双路向量召回找图的入口种子">① 双路向量召回（找「图的入口种子」）</h3> <p>查询进来，两条路并行去向量库搜，各得一个种子：</p> <p><strong>路 1：实体路</strong> —— NER 提实体，搜实体库</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">query_ner_list</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">Euler</span><span class="sh">"</span><span class="p">]</span>            <span class="c1"># NER 从查询里抽出实体名
+# query_ner_list = ner(query)         # 实际做法，这里写死省事
+</span><span class="n">query_ner_emb</span> <span class="o">=</span> <span class="n">embedding_model</span><span class="p">.</span><span class="nf">embed_query</span><span class="p">(</span><span class="sh">"</span><span class="s">Euler</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">entity_search</span> <span class="o">=</span> <span class="n">milvus_client</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">entity_collection</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">query_ner_emb</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div></div> <p>目的：精确定位到查询里<strong>明确提到的实体节点</strong>（如 “Euler”）。</p> <p><strong>路 2：关系路</strong> —— 整句查询，搜关系库</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">query_emb</span> <span class="o">=</span> <span class="n">embedding_model</span><span class="p">.</span><span class="nf">embed_query</span><span class="p">(</span><span class="sh">"</span><span class="s">What contribution did the son of Euler</span><span class="sh">'</span><span class="s">s teacher make?</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">relation_search</span> <span class="o">=</span> <span class="n">milvus_client</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">relation_collection</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">query_emb</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div></div> <p>目的：整句语义去匹配<strong>意图接近的关系</strong>（如「师生/父子」这类模式）。</p> <p><strong>为什么两路都要</strong>：实体是「点」，关系是「线」。多跳问题光有点（Euler）不够，还得有线（谁是谁的老师/儿子）。实体路抓锚点，关系路抓结构，一路漏了另一路补。</p> <blockquote> <p>NER = Named Entity Recognition，命名实体识别，从文本里抽出人名/地名/机构名这类专有名词。</p> </blockquote> <h3 id="-邻接矩阵多跳展开">② 邻接矩阵多跳展开</h3> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 从召回的关系出发，扩出所有邻居关系
+</span><span class="k">for</span> <span class="n">hit_id</span> <span class="ow">in</span> <span class="n">召回的关系</span><span class="p">:</span>
+    <span class="n">expanded_from_relation</span> <span class="o">|=</span> <span class="n">relation_adj_target_degree</span><span class="p">[</span><span class="n">hit_id</span><span class="p">].</span><span class="nf">nonzero</span><span class="p">()</span>
+
+<span class="c1"># 从召回的实体出发，扩出相关的所有关系
+</span><span class="k">for</span> <span class="n">hit_id</span> <span class="ow">in</span> <span class="n">召回的实体</span><span class="p">:</span>
+    <span class="n">expanded_from_entity</span> <span class="o">|=</span> <span class="n">entity_relation_adj_target_degree</span><span class="p">[</span><span class="n">hit_id</span><span class="p">].</span><span class="nf">nonzero</span><span class="p">()</span>
+
+<span class="n">relation_candidate_ids</span> <span class="o">=</span> <span class="n">expanded_from_relation</span> <span class="o">|</span> <span class="n">expanded_from_entity</span>  <span class="c1"># 并集
+</span></code></pre></div></div> <p>这一步是<strong>图遍历</strong>：拿到种子实体/关系，用矩阵查出它们一跳（或多跳）能连到的所有关系。</p> <h3 id="-llm-rerankcot-挑关系">③ LLM rerank（CoT 挑关系）</h3> <p>候选关系太多，用 LLM 聪明地挑 3 条，带 one-shot 例子 + 思维链：</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">rerank_res</span> <span class="o">=</span> <span class="n">rerank_chain</span><span class="p">.</span><span class="nf">invoke</span><span class="p">({</span><span class="sh">"</span><span class="s">question</span><span class="sh">"</span><span class="p">:</span> <span class="n">query</span><span class="p">,</span> <span class="sh">"</span><span class="s">relation_des_str</span><span class="sh">"</span><span class="p">:</span> <span class="n">候选关系</span><span class="p">})</span>
+</code></pre></div></div> <p>LLM 理解「欧拉的老师是谁 → 谁是他儿子 → 儿子做了啥」，选中关键关系。</p> <h3 id="-映射回段落生成答案">④ 映射回段落，生成答案</h3> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="n">relation_id</span> <span class="ow">in</span> <span class="n">rerank_relation_ids</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">passage_id</span> <span class="ow">in</span> <span class="n">relationid_2_passageids</span><span class="p">[</span><span class="n">relation_id</span><span class="p">]:</span>  <span class="c1"># 靠 dict 找原文
+</span>        <span class="k">if</span> <span class="n">passage_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">final_passages</span><span class="p">:</span>
+            <span class="n">final_passages</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">passages</span><span class="p">[</span><span class="n">passage_id</span><span class="p">])</span>
+</code></pre></div></div> <p>选中关系 → 用 <code class="language-plaintext highlighter-rouge">relationid_2_passageids</code> 找回段落 → 喂 LLM 生成。</p> <h2 id="完整流程">完整流程</h2> <p>入库是<strong>两条平行线</strong>：向量线（3列表→embedding→3向量库）和图线（3列表→数id→2张邻接dict），靠 id 对齐，dict 不是向量库的来源。</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>入库: 文本 → 三元组
+   ├─ 向量线: 实体/关系/段落 3列表 → 各自embedding → 3个Milvus向量库
+   └─ 图线:   同一批3列表 → 数id → 2张邻接dict（只记连接，不产生向量）
+                                 │ 查询时 dict 转稀疏邻接矩阵
+
+查询: 查询文本
+   ├─ 路1: NER提实体("Euler") → embed → 搜【实体库】 → 种子实体 id
+   ├─ 路2: 整句embed → 搜【关系库】 → 种子关系 id
+   └─ 两路种子 → 邻接矩阵扩N跳 → 候选关系集
+      → LLM CoT rerank 挑3条关键关系
+      → 靠 relationid_2_passageids 找回段落 → 生成答案
+</code></pre></div></div> <p>双路召回：实体路（NER 抽名词搜实体库）+ 关系路（整句搜关系库），各提供一个「图的入口种子」。<strong>召回找入口，矩阵做蔓延</strong>，然后 LLM 挑关系、dict 回段落。</p> <h2 id="效果对比">效果对比</h2> <p>同一个多跳问题，naive RAG 和本方法：</p> <table> <thead> <tr> <th> </th> <th>naive RAG</th> <th>Graph RAG with Milvus</th> </tr> </thead> <tbody> <tr> <td>召回到</td> <td>欧拉本人、Johann 的段落</td> <td>欧拉 + <strong>Daniel（答案所在段）</strong> </td> </tr> <tr> <td>答案</td> <td>“I don’t know”</td> <td>Daniel 贡献流体力学/概率/统计</td> </tr> </tbody> </table> <p>naive RAG 失败原因：查询与 Daniel 段落语义距离远，表面关键词对不上。GraphRAG 靠矩阵展开 + rerank 沿着关系链找到了答案。</p> <h2 id="技术要点">技术要点</h2> <ul> <li> <strong>只用向量库</strong>做出图推理，省掉图数据库</li> <li> <strong>稀疏矩阵</strong>做多跳展开，向量化快、省内存，可扩展到数千实体毫秒级</li> <li> <strong>双路召回</strong>（实体 + 关系）提供冗余，一路漏了另一路补</li> <li> <strong>LLM CoT rerank</strong> 模拟图的社区过滤，比纯相似度更懂多跳意图</li> </ul> <h2 id="一句话总结">一句话总结</h2> <blockquote> <p>Graph RAG with Milvus = <strong>向量召回找入口 + 邻接矩阵现算多跳 ≈ 图遍历 + LLM rerank 过滤 ≈ 社区</strong>。用「一个向量库」拼出伪图推理，省掉图数据库，代价是这些都得现算。</p> </blockquote> <h2 id="参考">参考</h2> <ul> <li>仓库：https://github.com/NirDiamant/RAG_Techniques</li> <li>Milvus / Zilliz Cloud：https://cloud.zilliz.com</li> </ul> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/Hierarchical-Indices/">Hierarchical Indices 层级索引 —— 先粗后细的两级检索</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/HyDE-HyPE-Hypothetical-Retrieval/">HyDE 与 HyPE —— 假设检索技术的两个方向</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/colpali-multimodal-rag-qa/">掌握 ColPali 多模态 RAG 需要回答的 8 个问题</a> </li> </ul> <div id="giscus_thread" style="max-width: 930px; margin: 0 auto;"> <br> <script>
+    (function setupGiscus() {
+      function determineGiscusTheme() {
+        var theme = localStorage.getItem("theme") || document.documentElement.getAttribute("data-theme") || "system";
+if (theme === "dark") return "dark";
+if (theme === "light") return "light";
+var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+return prefersDark ? "dark" : "light";
+
+      }
+
+      var giscusTheme = determineGiscusTheme();
+      var attrs = {
+        src: "https://giscus.app/client.js",
+        "data-repo": "Mr-coldskin7/Mr-coldskin7.github.io",
+        "data-repo-id": "R_kgDONx3iVw",
+        "data-category": "Announcements",
+        "data-category-id": "DIC_kwDONx3iV84C-J1X",
+        "data-mapping": "pathname",
+        "data-strict": "0",
+        "data-reactions-enabled": "1",
+        "data-emit-metadata": "0",
+        "data-input-position": "bottom",
+        "data-theme": giscusTheme,
+        "data-lang": "zh-CN",
+        crossorigin: "anonymous",
+        async: true
+      };
+
+      var giscusScript = document.createElement("script");
+      Object.entries(attrs).forEach(function(entry) { giscusScript.setAttribute(entry[0], entry[1]); });
+      var host = document.getElementById("giscus_thread");
+      if (host) host.appendChild(giscusScript);
+    })();
+  </script> <noscript> Please enable JavaScript to view the <a href="http://giscus.app/?ref_noscript" rel="external nofollow noopener" target="_blank">comments powered by giscus.</a> </noscript> </div> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "about",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-cv",
+          title: "CV",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/cv/";
+          },
+        },{id: "nav-knowledge-graph",
+          title: "Knowledge Graph",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/graph/";
+          },
+        },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "nav-repositories",
+          title: "repositories",
+          description: "Edit the `_data/repositories.yml` and change the `github_users` and `github_repos` lists to include your own GitHub profile and repositories.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/repositories/";
+          },
+        },{id: "post-graph-rag-with-milvus-纯向量库造图的多跳推理",
+        
+          title: "Graph RAG with Milvus —— 纯向量库造图的多跳推理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/GraphRAG-with-Milvus/";
+          
+        },
+      },{id: "post-hierarchical-indices-层级索引-先粗后细的两级检索",
+        
+          title: "Hierarchical Indices 层级索引 —— 先粗后细的两级检索",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Hierarchical-Indices/";
+          
+        },
+      },{id: "post-hyde-与-hype-假设检索技术的两个方向",
+        
+          title: "HyDE 与 HyPE —— 假设检索技术的两个方向",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/HyDE-HyPE-Hypothetical-Retrieval/";
+          
+        },
+      },{id: "post-二叉树刷题总结",
+        
+          title: "二叉树刷题总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/";
+          
+        },
+      },{id: "post-rag-技术体系化分类-从-pipeline-阶段到失败模式",
+        
+          title: "RAG 技术体系化分类——从 Pipeline 阶段到失败模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/RAG-techniques-pipeline-categorization/";
+          
+        },
+      },{id: "post-memorag-记忆增强型-rag-总结",
+        
+          title: "MemoRAG 记忆增强型 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/memorag-summary/";
+          
+        },
+      },{id: "post-microsoft-graphrag-基于知识图谱的-rag-总结",
+        
+          title: "Microsoft GraphRAG 基于知识图谱的 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/microsoft-graphrag-summary/";
+          
+        },
+      },{id: "post-multimodal-rag-with-captioning-图像描述型多模态-rag-总结",
+        
+          title: "Multimodal RAG with Captioning 图像描述型多模态 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/multimodal-rag-with-captioning-summary/";
+          
+        },
+      },{id: "post-掌握-colpali-多模态-rag-需要回答的-8-个问题",
+        
+          title: "掌握 ColPali 多模态 RAG 需要回答的 8 个问题",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/colpali-multimodal-rag-qa/";
+          
+        },
+      },{id: "post-proposition-chunking-命题化切分总结",
+        
+          title: "Proposition Chunking 命题化切分总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/proposition-chunking-summary/";
+          
+        },
+      },{id: "post-query-transformations-查询转换技术总结",
+        
+          title: "Query Transformations 查询转换技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/query-transformations-summary/";
+          
+        },
+      },{id: "post-raptor-技术总结",
+        
+          title: "RAPTOR 技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/raptor-summary/";
+          
+        },
+      },{id: "post-relevant-segment-extraction-rse-学习笔记-从片段到段落",
+        
+          title: "Relevant Segment Extraction (RSE) 学习笔记 —— 从片段到段落",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/relevant-segment-extraction/";
+          
+        },
+      },{id: "post-reranking-with-llamaindex-学习笔记-llm-与-cross-encoder-重排",
+        
+          title: "Reranking with LlamaIndex 学习笔记 —— LLM 与 Cross-Encoder 重排",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/reranking-with-llamaindex/";
+          
+        },
+      },{id: "post-rag-with-feedback-loop-学习笔记-从机制到隐患",
+        
+          title: "RAG with Feedback Loop 学习笔记 —— 从机制到隐患",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rag-feedback-loop/";
+          
+        },
+      },{id: "post-self-rag-学习笔记-从论文思想到代码实现",
+        
+          title: "Self-RAG 学习笔记 —— 从论文思想到代码实现",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/self-rag/";
+          
+        },
+      },{id: "post-claude-code学习13-memory",
+        
+          title: "Claude code学习13 Memory",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B013/";
+          
+        },
+      },{id: "post-claude-code学习12-fileedittool",
+        
+          title: "Claude code学习12 FileEditTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B012/";
+          
+        },
+      },{id: "post-claude-code学习11-bashtool",
+        
+          title: "Claude code学习11 BashTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B011/";
+          
+        },
+      },{id: "post-claude-code学习10-permission-与-hooks-系统",
+        
+          title: "Claude code学习10 Permission 与 Hooks 系统",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B010/";
+          
+        },
+      },{id: "post-claude-code学习9-agent-loop",
+        
+          title: "Claude code学习9 Agent loop",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B09/";
+          
+        },
+      },{id: "post-claude-code学习8-system-reminder-动态信息是如何入prompt的",
+        
+          title: "Claude code学习8 system-reminder，动态信息是如何入prompt的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B08/";
+          
+        },
+      },{id: "post-claude-code学习7-权限模式",
+        
+          title: "Claude code学习7 权限模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B07/";
+          
+        },
+      },{id: "post-claude-code学习6-动态prompt的组装2",
+        
+          title: "Claude code学习6 动态prompt的组装2",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B06/";
+          
+        },
+      },{id: "post-claude-code学习5-动态prompt的组装1",
+        
+          title: "Claude code学习5 动态prompt的组装1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B05/";
+          
+        },
+      },{id: "post-claude-code学习4-静态prompt里面有什么以及claude-code启动时做了些什么",
+        
+          title: "Claude code学习4 静态prompt里面有什么以及Claude code启动时做了些什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B04/";
+          
+        },
+      },{id: "post-claude-code学习3-为什么claude-code工程化设计是这样的",
+        
+          title: "Claude code学习3 为什么Claude code工程化设计是这样的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/";
+          
+        },
+      },{id: "post-claude-code学习2-claude-code的上下文管理",
+        
+          title: "Claude code学习2 Claude code的上下文管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02/";
+          
+        },
+      },{id: "post-claude-code学习1-我们要从这个项目里学到什么",
+        
+          title: "Claude code学习1 我们要从这个项目里学到什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B01/";
+          
+        },
+      },{id: "post-learn-claude-code项目学习",
+        
+          title: "learn claude code项目学习",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/learn-claude-code%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/";
+          
+        },
+      },{id: "post-如何理解transformer",
+        
+          title: "如何理解transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformer-a/";
+          
+        },
+      },{id: "post-旋转矩阵的理解",
+        
+          title: "旋转矩阵的理解",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformation/";
+          
+        },
+      },{id: "post-cs231a-相机模型笔记",
+        
+          title: "CS231A 相机模型笔记",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cs231a-1/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv2/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv1/";
+          
+        },
+      },{id: "post-linux权限",
+        
+          title: "Linux权限",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP3/";
+          
+        },
+      },{id: "post-linux命令格式",
+        
+          title: "Linux命令格式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP2/";
+          
+        },
+      },{id: "post-excel常用操作",
+        
+          title: "Excel常用操作",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/excel/";
+          
+        },
+      },{id: "post-linux文件路径",
+        
+          title: "Linux文件路径",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP1/";
+          
+        },
+      },{id: "post-常见linux命令和shell脚本",
+        
+          title: "常见Linux命令和shell脚本",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/shellLinux/";
+          
+        },
+      },{id: "post-micropytorch",
+        
+          title: "microPytorch",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/.microPYtorch/";
+          
+        },
+      },{id: "post-c-vector",
+        
+          title: "C++ Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cpp-vector-stl/";
+          
+        },
+      },{id: "post-c-template",
+        
+          title: "C++ Template",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppTemplate/";
+          
+        },
+      },{id: "post-pandas库的基本使用",
+        
+          title: "pandas库的基本使用",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/pandas1/";
+          
+        },
+      },{id: "post-c-中的static和const-1",
+        
+          title: "C++中的static和const 1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppStaticandConst/";
+          
+        },
+      },{id: "post-c-的内外部连接",
+        
+          title: "C++的内外部连接",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppLink/";
+          
+        },
+      },{id: "post-用c-实现内存池1",
+        
+          title: "用C++实现内存池1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo_pool/";
+          
+        },
+      },{id: "post-c-的内存管理",
+        
+          title: "C++的内存管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo/";
+          
+        },
+      },{id: "post-每日一题2296-设计一个文本编辑器",
+        
+          title: "每日一题2296. 设计一个文本编辑器",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LC/";
+          
+        },
+      },{id: "post-c-中的vector",
+        
+          title: "C++中的Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-transformer",
+        
+          title: "Transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transfomer/";
+          
+        },
+      },{id: "post-深度学习和机器学习中的重要概念",
+        
+          title: "深度学习和机器学习中的重要概念",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/MLfun/";
+          
+        },
+      },{id: "post-attention注意力机制-修正补充版",
+        
+          title: "Attention注意力机制（修正补充版）",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention2/";
+          
+        },
+      },{id: "post-attention注意力机制",
+        
+          title: "Attention注意力机制",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention/";
+          
+        },
+      },{id: "post-unet网络",
+        
+          title: "Unet网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Unet/";
+          
+        },
+      },{id: "post-seq2seq的模型-构建以及损失函数",
+        
+          title: "Seq2Seq的模型，构建以及损失函数",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Seq2Seq-1/";
+          
+        },
+      },{id: "post-text-generation",
+        
+          title: "Text Generation",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Text-Generation/";
+          
+        },
+      },{id: "post-rnn的优化",
+        
+          title: "RNN的优化",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/RNN%E7%9A%84%E4%BC%98%E5%8C%96/";
+          
+        },
+      },{id: "post-lstm长短记忆网络",
+        
+          title: "LSTM长短记忆网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LSTM%E9%95%BF%E7%9F%AD%E8%AE%B0%E5%BF%86%E7%BD%91%E7%BB%9C/";
+          
+        },
+      },{id: "post-simple-rnn",
+        
+          title: "Simple RNN",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Simple-RNN/";
+          
+        },
+      },{id: "post-linux内核全注释阅读-linux内核体系结构1",
+        
+          title: "Linux内核全注释阅读 Linux内核体系结构1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Linux%E5%86%85%E6%A0%B8%E5%85%A8%E6%B3%A8%E9%87%8A%E9%98%85%E8%AF%BB-Linux%E5%86%85%E6%A0%B8%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%841/";
+          
+        },
+      },{id: "post-nlp的数据处理-文本处理以及词嵌套",
+        
+          title: "NLP的数据处理 文本处理以及词嵌套",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/NLP%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86-%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%BB%A5%E5%8F%8A%E8%AF%8D%E5%B5%8C%E5%A5%97/";
+          
+        },
+      },{id: "post-deepseek-r1论文解读",
+        
+          title: "DeepSeek R1论文解读",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/DeepSeek-R1%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/";
+          
+        },
+      },{id: "post-deepseek蒸馏模型的本地部署",
+        
+          title: "Deepseek蒸馏模型的本地部署",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Deepseek%E8%92%B8%E9%A6%8F%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/";
+          
+        },
+      },{id: "post-测试博客",
+        
+          title: "测试博客",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Test/";
+          
+        },
+      },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
+        
+          title: 'Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "We’re sharing updates across our Gemini family of models and a glimpse of Project Astra, our vision for the future of AI assistants.",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/", "_blank");
+          
+        },
+      },{id: "post-displaying-external-posts-on-your-al-folio-blog",
+        
+          title: 'Displaying External Posts on Your al-folio Blog <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2", "_blank");
+          
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/Mr-coldskin7", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/feed.xml", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>
