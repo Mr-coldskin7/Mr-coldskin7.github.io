@@ -4,6 +4,7 @@ title: learn claude code项目学习
 date: 2026-05-10 11:21:00 +0800
 categories: [agent]
 tags: [agent, claude-code, coding-agent]
+giscus_comments: true
 ---
 
 这是一个学习关于agent一些架构的项目

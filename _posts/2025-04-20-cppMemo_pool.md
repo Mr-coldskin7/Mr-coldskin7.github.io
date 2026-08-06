@@ -4,6 +4,7 @@ title: 用C++实现内存池1
 date: 2025-04-20 14:22:00 +0800
 categories: [Cpp, memory]
 tags: [cpp, memory-pool]
+giscus_comments: true
 ---
 
 ## 内存池

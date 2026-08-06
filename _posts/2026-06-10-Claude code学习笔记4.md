@@ -4,6 +4,7 @@ title: Claude code学习4 静态prompt里面有什么以及Claude code启动时�
 date: 2026-06-08 22:21:00 +0800
 categories: [agent]
 tags: [agent, claude-code, prompt]
+giscus_comments: true
 ---
 
 ## Claude code启动前要做什么

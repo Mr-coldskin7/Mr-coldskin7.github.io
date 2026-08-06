@@ -4,6 +4,7 @@ title: Proposition Chunking 命题化切分总结
 date: 2026-07-30 21:00:00 +0800
 categories: [RAG]
 tags: [rag, chunking, proposition, retrieval]
+giscus_comments: true
 ---
 
 ## 1. 一句话理解

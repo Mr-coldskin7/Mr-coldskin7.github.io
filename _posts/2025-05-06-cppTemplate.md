@@ -4,6 +4,7 @@ title: C++ Template
 date: 2025-05-06 10:22:00 +0800
 categories: [Cpp, template]
 tags: [cpp, template, generics]
+giscus_comments: true
 ---
 
 # C++模板核心知识总结

@@ -4,6 +4,7 @@ title: Claude code学习3 为什么Claude code工程化设计是这样的
 date: 2026-06-08 22:21:00 +0800
 categories: [agent]
 tags: [agent, claude-code, architecture]
+giscus_comments: true
 ---
 
 ## 三条物理暗线：缓存、防幻觉、错误扣留

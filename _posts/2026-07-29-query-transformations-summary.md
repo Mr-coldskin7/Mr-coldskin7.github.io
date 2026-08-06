@@ -4,6 +4,7 @@ title: Query Transformations 查询转换技术总结
 date: 2026-07-29 22:00:00 +0800
 categories: [RAG]
 tags: [rag, query-transformation, retrieval]
+giscus_comments: true
 ---
 
 ## 1. 什么是 Query Transformations？

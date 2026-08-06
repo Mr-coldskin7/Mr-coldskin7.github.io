@@ -4,6 +4,7 @@ title: 旋转矩阵的理解
 date: 2025-09-25 17:21:00 +0800
 categories: [CS231A]
 tags: [cs231a, rotation, linear-algebra, computer-vision]
+giscus_comments: true
 ---
 
 ## active transformation

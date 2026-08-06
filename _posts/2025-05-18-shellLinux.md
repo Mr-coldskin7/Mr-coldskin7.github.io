@@ -4,6 +4,7 @@ title: 常见Linux命令和shell脚本
 date: 2025-05-18 10:33:00 +0800
 categories: [Linux, shell]
 tags: [linux, shell, command-line]
+giscus_comments: true
 ---
 
 # Linux常见命令

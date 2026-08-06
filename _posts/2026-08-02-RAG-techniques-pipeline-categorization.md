@@ -4,6 +4,7 @@ title: RAG 技术体系化分类——从 Pipeline 阶段到失败模式
 date: 2026-08-02 17:30:00 +0800
 categories: [RAG]
 tags: [rag]
+giscus_comments: true
 ---
 
 # RAG 技术体系化分类——从 Pipeline 阶段到失败模式

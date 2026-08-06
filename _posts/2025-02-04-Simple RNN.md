@@ -4,6 +4,7 @@ title: Simple RNN
 date: 2025-02-04 21:09:00 +0800
 categories: [LLM]
 tags: [llm, rnn, nlp]
+giscus_comments: true
 ---
 
 # Simple RNN

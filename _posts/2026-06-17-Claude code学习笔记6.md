@@ -4,6 +4,7 @@ title: Claude code学习6 动态prompt的组装2
 date: 2026-06-17 22:21:00 +0800
 categories: [agent]
 tags: [agent, claude-code, prompt-engineering]
+giscus_comments: true
 ---
 
 ## 动态prompt的组装

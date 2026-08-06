@@ -4,6 +4,7 @@ title: C++中的static和const 1
 date: 2025-04-21 11:18:00 +0800
 categories: [Cpp, Fundamentals]
 tags: [cpp, static, const]
+giscus_comments: true
 ---
 
 ## C++中的static和const

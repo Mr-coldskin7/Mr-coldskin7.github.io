@@ -4,6 +4,7 @@ title: Reranking with LlamaIndex 学习笔记 —— LLM 与 Cross-Encoder 重�
 date: 2026-07-27 20:00:00 +0800
 categories: [RAG]
 tags: [rag, llm, llamaindex, reranking, cross-encoder]
+giscus_comments: true
 ---
 
 ## 一、Reranking 解决什么问题？

@@ -4,6 +4,7 @@ title: Multimodal RAG with Captioning 图像描述型多模态 RAG 总结
 date: 2026-07-31 21:00:00 +0800
 categories: [RAG]
 tags: [rag, multimodal, captioning, vision]
+giscus_comments: true
 ---
 
 ## 1. 一句话理解

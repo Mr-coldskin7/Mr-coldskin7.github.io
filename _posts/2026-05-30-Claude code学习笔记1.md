@@ -4,6 +4,7 @@ title: Claude code学习1 我们要从这个项目里学到什么
 date: 2026-05-30 21:21:00 +0800
 categories: [agent]
 tags: [agent, claude-code]
+giscus_comments: true
 ---
 
 作为agent项目中可以说是最出名的一个项目，Claude code无疑是十分值得学习的项目。

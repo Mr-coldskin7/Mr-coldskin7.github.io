@@ -2,8 +2,10 @@
 layout: post
 title: C++ Vector
 date: 2025-05-06 10:22:00 +0800
+permalink: /blog/2025/cpp-vector-stl/
 categories: [Cpp, vector]
 tags: [cpp, vector, stl]
+giscus_comments: true
 ---
 
 C++ 中的 `std::vector<std::string>` 是标准模板库（STL）的动态数组容器，其底层实现和模板机制涉及内存管理、类型泛化等核心设计。

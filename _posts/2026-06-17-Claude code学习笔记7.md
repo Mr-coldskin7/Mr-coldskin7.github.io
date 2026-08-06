@@ -4,6 +4,7 @@ title: Claude code学习7 权限模式
 date: 2026-06-17 22:21:00 +0800
 categories: [agent]
 tags: [agent, claude-code, permissions]
+giscus_comments: true
 ---
 
 ## 权限模式

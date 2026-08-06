@@ -4,6 +4,7 @@ title: MemoRAG 记忆增强型 RAG 总结
 date: 2026-08-02 17:00:00 +0800
 categories: [RAG]
 tags: [rag, memorag, memory, query-rewriting]
+giscus_comments: true
 ---
 
 ## 1. 一句话理解

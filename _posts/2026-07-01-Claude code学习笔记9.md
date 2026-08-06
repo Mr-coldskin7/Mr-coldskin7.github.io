@@ -4,6 +4,7 @@ title: Claude code学习9 Agent loop
 date: 2026-07-01 12:21:00 +0800
 categories: [agent]
 tags: [agent, claude-code, agent-loop]
+giscus_comments: true
 ---
 
 ## agent loop

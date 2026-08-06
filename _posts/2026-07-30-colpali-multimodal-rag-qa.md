@@ -4,6 +4,7 @@ title: 掌握 ColPali 多模态 RAG 需要回答的 8 个问题
 date: 2026-07-30 22:30:00 +0800
 categories: [RAG]
 tags: [rag, colpali, multimodal, retrieval]
+giscus_comments: true
 ---
 
 ## 一句话总结

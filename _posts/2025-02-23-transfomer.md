@@ -4,6 +4,7 @@ title: Transformer
 date: 2025-02-23 23:00:00 +0800
 categories: [LLM]
 tags: [llm, transformer, attention, nlp]
+giscus_comments: true
 ---
 
 # Transformer

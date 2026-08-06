@@ -4,6 +4,7 @@ title: Microsoft GraphRAG 基于知识图谱的 RAG 总结
 date: 2026-08-01 21:00:00 +0800
 categories: [RAG]
 tags: [rag, graphrag, knowledge-graph, microsoft]
+giscus_comments: true
 ---
 
 ## 1. 一句话理解

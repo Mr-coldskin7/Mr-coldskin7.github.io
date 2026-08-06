@@ -4,6 +4,7 @@ title: Hierarchical Indices 层级索引 —— 先粗后细的两级检索
 date: 2026-08-06 21:30:00 +0800
 categories: [RAG]
 tags: [rag, hierarchical-index, retrieval, summarization]
+giscus_comments: true
 ---
 
 # Hierarchical Indices 层级索引 —— 先粗后细的两级检索

@@ -4,6 +4,7 @@ title: Linux内核全注释阅读 Linux内核体系结构1
 date: 2025-02-03 17:34:00 +0800
 categories: [Linux]
 tags: [linux, kernel]
+giscus_comments: true
 ---
 
 # Linux内核全注释阅读 Linux内核体系结构1

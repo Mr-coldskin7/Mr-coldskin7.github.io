@@ -4,6 +4,7 @@ title: 如何理解transformer
 date: 2025-09-26 17:21:00 +0800
 categories: [attention]
 tags: [attention, transformer, llm]
+giscus_comments: true
 ---
 
 如何正确以及完整理解transformer是一件困难的事情，表述能力的不同，观众也会听到完全不一样的理解，这里谈谈我的理解

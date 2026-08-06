@@ -4,6 +4,7 @@ title: RAPTOR 技术总结
 date: 2026-07-29 21:30:00 +0800
 categories: [RAG]
 tags: [rag, raptor, retrieval, summarization]
+giscus_comments: true
 ---
 
 ## 1. RAPTOR 是什么？

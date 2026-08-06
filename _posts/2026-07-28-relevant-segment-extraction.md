@@ -4,6 +4,7 @@ title: Relevant Segment Extraction (RSE) 学习笔记 —— 从片段到段落
 date: 2026-07-28 21:00:00 +0800
 categories: [RAG]
 tags: [rag, chunking, rse, retrieval, cohere]
+giscus_comments: true
 ---
 
 ## 一、RSE 解决什么问题？

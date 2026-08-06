@@ -4,6 +4,7 @@ title: Claude code学习2 Claude code的上下文管理
 date: 2026-06-05 20:21:00 +0800
 categories: [agent]
 tags: [agent, claude-code, context-management]
+giscus_comments: true
 ---
 
 从管理上下文的角度上来看，如果把读文件的内容原封不动给回llm，llm大概率是会超出上下文或者注意力涣散的

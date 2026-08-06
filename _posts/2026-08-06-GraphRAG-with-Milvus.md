@@ -4,6 +4,7 @@ title: Graph RAG with Milvus —— 纯向量库造图的多跳推理
 date: 2026-08-06 22:00:00 +0800
 categories: [RAG]
 tags: [rag, graphrag, milvus, multi-hop, knowledge-graph]
+giscus_comments: true
 ---
 
 # Graph RAG with Milvus —— 纯向量库造图的多跳推理

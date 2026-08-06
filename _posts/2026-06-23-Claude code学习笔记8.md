@@ -4,6 +4,7 @@ title: Claude code学习8 system-reminder，动态信息是如何入prompt的
 date: 2026-06-23 22:21:00 +0800
 categories: [agent]
 tags: [agent, claude-code, system-reminder]
+giscus_comments: true
 ---
 
 ### system-reminder

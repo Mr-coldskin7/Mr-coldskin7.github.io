@@ -4,6 +4,7 @@ title: RAG with Feedback Loop 学习笔记 —— 从机制到隐患
 date: 2026-07-27 20:00:00 +0800
 categories: [RAG]
 tags: [rag, llm, feedback-loop, retrieval]
+giscus_comments: true
 ---
 
 ## 一、这个概念解决什么问题？

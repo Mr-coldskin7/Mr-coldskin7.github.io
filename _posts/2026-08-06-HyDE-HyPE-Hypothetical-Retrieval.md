@@ -4,6 +4,7 @@ title: HyDE 与 HyPE —— 假设检索技术的两个方向
 date: 2026-08-06 21:00:00 +0800
 categories: [RAG]
 tags: [rag, hyde, hype, retrieval, query-expansion]
+giscus_comments: true
 ---
 
 # HyDE 与 HyPE —— 假设检索技术的两个方向
