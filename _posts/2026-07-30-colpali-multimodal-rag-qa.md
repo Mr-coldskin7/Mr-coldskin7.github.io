@@ -5,6 +5,7 @@ date: 2026-07-30 22:30:00 +0800
 categories: [RAG]
 tags: [rag, colpali, multimodal, retrieval]
 ---
+
 ## 一句话总结
 
 ColPali 不是传统 RAG 的替代品，而是处理**视觉密集型文档**的专用工具。它把 PDF 页面当作图像直接检索，再由多模态 LLM 读懂返回的页面图像。
@@ -21,13 +22,13 @@ ColPali 让检索器直接"看"PDF 页面图像，绕过 OCR，保留完整的�
 
 ## 2. ColPali 和普通的 text embedding 模型有什么区别？
 
-| | text embedding | ColPali |
-|---|---|---|
-| 输入 | 文本 | 页面图像 + 文本 query |
-| 输出 | 单个向量 | 多组 token-patch 相似度 |
-| 匹配方式 | 余弦相似度 | late interaction（后期交互） |
-| 粒度 | 整个文档/段落 | 页面级别 |
-| 优势 | 轻量、成熟 | 保留视觉布局、不依赖 OCR |
+|          | text embedding | ColPali                      |
+| -------- | -------------- | ---------------------------- |
+| 输入     | 文本           | 页面图像 + 文本 query        |
+| 输出     | 单个向量       | 多组 token-patch 相似度      |
+| 匹配方式 | 余弦相似度     | late interaction（后期交互） |
+| 粒度     | 整个文档/段落  | 页面级别                     |
+| 优势     | 轻量、成熟     | 保留视觉布局、不依赖 OCR     |
 
 普通 embedding 把 query 和文档各压缩成一个向量；ColPali 保留 query token 和图像 patch 之间的细粒度对应关系。
 
@@ -88,13 +89,13 @@ ColPali 负责"找哪一页" → 多模态 LLM 负责"读懂这一页"
 
 ## 8. 整个 pipeline 里各组件分别负责什么？
 
-| 组件 | 职责 |
-|---|---|
-| `RAGMultiModalModel.from_pretrained("vidore/colpali-v1.2")` | 加载 ColPali 检索模型 |
-| `RAG.index(...)` | 把 PDF 每页建索引，同时存 base64 图片 |
-| `RAG.search(query, k=1)` | 用文本 query 检索最相关的页面 |
-| `base64.b64decode(...)` | 把检索结果还原成图片字节 |
-| `Gemini / Qwen-VL` | 读取图片并生成最终答案 |
+| 组件                                                        | 职责                                  |
+| ----------------------------------------------------------- | ------------------------------------- |
+| `RAGMultiModalModel.from_pretrained("vidore/colpali-v1.2")` | 加载 ColPali 检索模型                 |
+| `RAG.index(...)`                                            | 把 PDF 每页建索引，同时存 base64 图片 |
+| `RAG.search(query, k=1)`                                    | 用文本 query 检索最相关的页面         |
+| `base64.b64decode(...)`                                     | 把检索结果还原成图片字节              |
+| `Gemini / Qwen-VL`                                          | 读取图片并生成最终答案                |
 
 ## 核心 Insight
 

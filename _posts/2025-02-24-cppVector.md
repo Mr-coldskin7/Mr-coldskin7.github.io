@@ -5,8 +5,11 @@ date: 2025-02-24 23:00:00 +0800
 categories: [Algorithm, Cpp]
 tags: [cpp, vector, stl]
 ---
+
 # CPP中的vector
+
 vector 是 C++ 标准库的动态数组，它可以动态地分配内存（不需要事先申明大小），可以方便地管理数组中的元素。
+
 ```cpp
 #include <vector>
 
@@ -31,12 +34,14 @@ vector<vector<int>> dp;
 // 其中的值都初始化为 true
 vector<vector<bool>> dp(m, vector<bool>(n, true));
 ```
+
 C++标准库中的vector采用动态扩容机制以支持高效的元素插入操作。
 size()：当前存储的元素数量。
 capacity()：无需重新分配内存时可容纳的最大元素数量。
 当插入元素导致size()超过capacity()时，触发扩容。
 扩容则根据编译器的不同而扩张的策略不同，总的来说都是扩展更大的地方，拷贝黏贴更新
 常用操作
+
 ```cpp
 #include <iostream>
 #include <vector>
@@ -87,7 +92,9 @@ int main() {
     cout << endl;
 }
 ```
+
 我觉得其中最重要的几个：
+
 ```cpp
 vector<vector<int>> vec(n, vector<int>(m));<!--二维数组的初始化-->
 vec.size()<!--容器大小-->
@@ -97,6 +104,6 @@ vec.pop_back()<!--删除尾部元素-->
 vec.insert(pos,x)<!--在pos位置插入元素x-->
 vec.erase(pos)<!--删除pos位置的元素-->
 ```
+
 这些对于leetcode的刷题来说是绝对基础的东西，但是我每隔一段时间就会忘了（其实就是写少了）特地写这些来方便以后找
 最后顺便带上api的连接：https://en.cppreference.com/w/cpp/container/vector
-

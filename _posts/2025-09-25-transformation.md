@@ -5,8 +5,11 @@ date: 2025-09-25 17:21:00 +0800
 categories: [CS231A]
 tags: [cs231a, rotation, linear-algebra, computer-vision]
 ---
+
 ## active transformation
+
 由于运动是相对的，所以分为主动和被动的变换，就例如我主动平移点是一种平移，我变换坐标轴也是一种平移
+
 ## passive transformation
 
 如果一般的三维重构的话，应该考虑都是被动的变换，因为点是不变的变得是自己的视角
@@ -17,6 +20,7 @@ tags: [cs231a, rotation, linear-algebra, computer-vision]
 $$
 X_c = X_w + t_{cw}
 $$
+
 在三维重构的场景中，应该把X_w看作是不变的，变得是t
 
 **Active or Passive?**
@@ -33,7 +37,7 @@ $$
 - $t_wc$ 也是相机光心在世界坐标系中的坐标，也是实实在在的向量，可被直观、可视化、几何图形化地理解。
 - $t_cw$ 也是相机光心指向世界坐标系，摄像头看世界
 
-那么旋转矩阵 $R$ 呢？ 
+那么旋转矩阵 $R$ 呢？
 
 $$
 X_c = R_{cw} X_w
@@ -76,9 +80,9 @@ $$R_{wc}的列$$
 由于 R wc 是 R cw的逆，它们在几何上描述了相反的变换，因此它们的行和列向量分别表示相反的基向量关系
 
 \[
-\tilde{X}_c = M_{cw} \tilde{X}_w = \begin{pmatrix} R & t \\ 0 & 1 \end{pmatrix} \tilde{X}_w = \begin{pmatrix} R_{cw} & t_{cw} \\ 0 & 1 \end{pmatrix} \tilde{X}_w
+\tilde{X}_c = M_{cw} \tilde{X}_w = \begin{pmatrix} R & t \\ 0 & 1 \end{pmatrix} \tilde{X}*w = \begin{pmatrix} R*{cw} & t_{cw} \\ 0 & 1 \end{pmatrix} \tilde{X}_w
 \]
 
 \[
-\tilde{X}_w = M_{wc} \tilde{X}_c = \begin{pmatrix} R^T & -R^T t \\ 0 & 1 \end{pmatrix} \tilde{X}_c = \begin{pmatrix} R_{wc} & t_{wc} \\ 0 & 1 \end{pmatrix} \tilde{X}_c
+\tilde{X}_w = M_{wc} \tilde{X}_c = \begin{pmatrix} R^T & -R^T t \\ 0 & 1 \end{pmatrix} \tilde{X}*c = \begin{pmatrix} R*{wc} & t_{wc} \\ 0 & 1 \end{pmatrix} \tilde{X}_c
 \]

@@ -5,6 +5,7 @@ date: 2026-08-06 21:30:00 +0800
 categories: [RAG]
 tags: [rag, hierarchical-index, retrieval, summarization]
 ---
+
 # Hierarchical Indices 层级索引 —— 先粗后细的两级检索
 
 ## 要解决的问题
@@ -91,6 +92,7 @@ def retrieve_hierarchical(query, summary_vectorstore, detailed_vectorstore,
 ```
 
 **流程**：
+
 ```
 用户查询 → 扫夏摘要库 → 找到相关文档(页码) → 限定该页 → 扫chunk库 → 返回细节块
 ```
@@ -99,13 +101,13 @@ def retrieve_hierarchical(query, summary_vectorstore, detailed_vectorstore,
 
 ## 对比 flat index
 
-| 维度 | Flat Index | Hierarchical Index |
-|------|-----------|---------------------|
-| 索引 | 一层，全 chunk | 两层：摘要 + chunk |
-| 首次检索 | 全局扫 chunk | 先扫摘要（数据量小） |
-| 上下文 | chunk 孤立 | 摘要提供文档级上下文 |
-| 效率 | 大语料慢 | 先粗筛，快 |
-| 适用 | 小文档/小语料 | 大文档/大语料 |
+| 维度     | Flat Index     | Hierarchical Index   |
+| -------- | -------------- | -------------------- |
+| 索引     | 一层，全 chunk | 两层：摘要 + chunk   |
+| 首次检索 | 全局扫 chunk   | 先扫摘要（数据量小） |
+| 上下文   | chunk 孤立     | 摘要提供文档级上下文 |
+| 效率     | 大语料慢       | 先粗筛，快           |
+| 适用     | 小文档/小语料  | 大文档/大语料        |
 
 ## 技术细节亮点
 

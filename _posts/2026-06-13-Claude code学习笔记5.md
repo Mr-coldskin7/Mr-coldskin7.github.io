@@ -5,137 +5,116 @@ date: 2026-06-13 22:21:00 +0800
 categories: [agent]
 tags: [agent, claude-code, prompt-engineering]
 ---
+
 ## 动态prompt的组装
+
 前面的静态prompt，由于KV cache的最大利用化，把动态变化的prompt放在了最后面
+
 ```ts
 const dynamicSections = [
-    systemPromptSection('session_guidance', () =>
-      getSessionSpecificGuidanceSection(enabledTools, skillToolCommands),
-    ),
-    systemPromptSection('memory', () => loadMemoryPrompt()),
-    systemPromptSection('ant_model_override', () =>
-      getAntModelOverrideSection(),
-    ),
-    systemPromptSection('env_info_simple', () =>
-      computeSimpleEnvInfo(model, additionalWorkingDirectories),
-    ),
-    systemPromptSection('language', () =>
-      getLanguageSection(settings.language),
-    ),
-    systemPromptSection('output_style', () =>
-      getOutputStyleSection(outputStyleConfig),
-    ),
-    // When delta enabled, instructions are announced via persisted
-    // mcp_instructions_delta attachments (attachments.ts) instead of this
-    // per-turn recompute, which busts the prompt cache on late MCP connect.
-    // Gate check inside compute (not selecting between section variants)
-    // so a mid-session gate flip doesn't read a stale cached value.
-    DANGEROUS_uncachedSystemPromptSection(
-      'mcp_instructions',
-      () =>
-        isMcpInstructionsDeltaEnabled()
-          ? null
-          : getMcpInstructionsSection(mcpClients),
-      'MCP servers connect/disconnect between turns',
-    ),
-    systemPromptSection('scratchpad', () => getScratchpadInstructions()),
-    systemPromptSection('frc', () => getFunctionResultClearingSection(model)),
-    systemPromptSection(
-      'summarize_tool_results',
-      () => SUMMARIZE_TOOL_RESULTS_SECTION,
-    ),
-    // Numeric length anchors — research shows ~1.2% output token reduction vs
-    // qualitative "be concise". Ant-only to measure quality impact first.
-    ...(process.env.USER_TYPE === 'ant'
-      ? [
-          systemPromptSection(
-            'numeric_length_anchors',
-            () =>
-              'Length limits: keep text between tool calls to \u226425 words. Keep final responses to \u2264100 words unless the task requires more detail.',
-          ),
-        ]
-      : []),
-    ...(feature('TOKEN_BUDGET')
-      ? [
-          // Cached unconditionally — the "When the user specifies..." phrasing
-          // makes it a no-op with no budget active. Was DANGEROUS_uncached
-          // (toggled on getCurrentTurnTokenBudget()), busting ~20K tokens per
-          // budget flip. Not moved to a tail attachment: first-response and
-          // budget-continuation paths don't see attachments (#21577).
-          systemPromptSection(
-            'token_budget',
-            () =>
-              'When the user specifies a token target (e.g., "+500k", "spend 2M tokens", "use 1B tokens"), your output token count will be shown each turn. Keep working until you approach the target \u2014 plan your work to fill it productively. The target is a hard minimum, not a suggestion. If you stop early, the system will automatically continue you.',
-          ),
-        ]
-      : []),
-    ...(feature('KAIROS') || feature('KAIROS_BRIEF')
-      ? [systemPromptSection('brief', () => getBriefSection())]
-      : []),
-  ]
+  systemPromptSection("session_guidance", () => getSessionSpecificGuidanceSection(enabledTools, skillToolCommands)),
+  systemPromptSection("memory", () => loadMemoryPrompt()),
+  systemPromptSection("ant_model_override", () => getAntModelOverrideSection()),
+  systemPromptSection("env_info_simple", () => computeSimpleEnvInfo(model, additionalWorkingDirectories)),
+  systemPromptSection("language", () => getLanguageSection(settings.language)),
+  systemPromptSection("output_style", () => getOutputStyleSection(outputStyleConfig)),
+  // When delta enabled, instructions are announced via persisted
+  // mcp_instructions_delta attachments (attachments.ts) instead of this
+  // per-turn recompute, which busts the prompt cache on late MCP connect.
+  // Gate check inside compute (not selecting between section variants)
+  // so a mid-session gate flip doesn't read a stale cached value.
+  DANGEROUS_uncachedSystemPromptSection(
+    "mcp_instructions",
+    () => (isMcpInstructionsDeltaEnabled() ? null : getMcpInstructionsSection(mcpClients)),
+    "MCP servers connect/disconnect between turns"
+  ),
+  systemPromptSection("scratchpad", () => getScratchpadInstructions()),
+  systemPromptSection("frc", () => getFunctionResultClearingSection(model)),
+  systemPromptSection("summarize_tool_results", () => SUMMARIZE_TOOL_RESULTS_SECTION),
+  // Numeric length anchors — research shows ~1.2% output token reduction vs
+  // qualitative "be concise". Ant-only to measure quality impact first.
+  ...(process.env.USER_TYPE === "ant"
+    ? [
+        systemPromptSection(
+          "numeric_length_anchors",
+          () =>
+            "Length limits: keep text between tool calls to \u226425 words. Keep final responses to \u2264100 words unless the task requires more detail."
+        ),
+      ]
+    : []),
+  ...(feature("TOKEN_BUDGET")
+    ? [
+        // Cached unconditionally — the "When the user specifies..." phrasing
+        // makes it a no-op with no budget active. Was DANGEROUS_uncached
+        // (toggled on getCurrentTurnTokenBudget()), busting ~20K tokens per
+        // budget flip. Not moved to a tail attachment: first-response and
+        // budget-continuation paths don't see attachments (#21577).
+        systemPromptSection(
+          "token_budget",
+          () =>
+            'When the user specifies a token target (e.g., "+500k", "spend 2M tokens", "use 1B tokens"), your output token count will be shown each turn. Keep working until you approach the target \u2014 plan your work to fill it productively. The target is a hard minimum, not a suggestion. If you stop early, the system will automatically continue you.'
+        ),
+      ]
+    : []),
+  ...(feature("KAIROS") || feature("KAIROS_BRIEF") ? [systemPromptSection("brief", () => getBriefSection())] : []),
+];
 ```
+
 这里看到有两种类型的prompt，一种是
+
 ```ts
 /**
  * Create a memoized system prompt section.
  * Computed once, cached until /clear or /compact.
  */
-export function systemPromptSection(
-  name: string,
-  compute: ComputeFn,
-): SystemPromptSection {
-  return { name, compute, cacheBreak: false }
+export function systemPromptSection(name: string, compute: ComputeFn): SystemPromptSection {
+  return { name, compute, cacheBreak: false };
 }
 ```
+
 另一种是
+
 ```ts
 /**
  * Create a volatile system prompt section that recomputes every turn.
  * This WILL break the prompt cache when the value changes.
  * Requires a reason explaining why cache-breaking is necessary.
  */
-export function DANGEROUS_uncachedSystemPromptSection(
-  name: string,
-  compute: ComputeFn,
-  _reason: string,
-): SystemPromptSection {
-  return { name, compute, cacheBreak: true }
+export function DANGEROUS_uncachedSystemPromptSection(name: string, compute: ComputeFn, _reason: string): SystemPromptSection {
+  return { name, compute, cacheBreak: true };
 }
 ```
+
 二者也可以从注释中看出二者的生命周期的区别，一个是除了/compact和/clear之外，其他任何时候都会被缓存，一个是每次都会被计算的
 之后将运行等在这里进行执行
+
 ### session_guidance
+
 ```ts
-export async function resolveSystemPromptSections(
-  sections: SystemPromptSection[],
-): Promise<(string | null)[]> {
-  const cache = getSystemPromptSectionCache()
+export async function resolveSystemPromptSections(sections: SystemPromptSection[]): Promise<(string | null)[]> {
+  const cache = getSystemPromptSectionCache();
 
   return Promise.all(
-    sections.map(async s => {
+    sections.map(async (s) => {
       if (!s.cacheBreak && cache.has(s.name)) {
-        return cache.get(s.name) ?? null
+        return cache.get(s.name) ?? null;
       }
-      const value = await s.compute()
-      setSystemPromptSectionCacheEntry(s.name, value)
-      return value
-    }),
-  )
+      const value = await s.compute();
+      setSystemPromptSectionCacheEntry(s.name, value);
+      return value;
+    })
+  );
 }
 ```
+
 在组装动态prompt的时候，第一个组装的是类似与工具一类的prompt 主要逻辑是这个函数
+
 ```ts
-function getSessionSpecificGuidanceSection(
-  enabledTools: Set<string>,
-  skillToolCommands: Command[],
-): string | null {
-  const hasAskUserQuestionTool = enabledTools.has(ASK_USER_QUESTION_TOOL_NAME)
-  const hasSkills =
-    skillToolCommands.length > 0 && enabledTools.has(SKILL_TOOL_NAME)
-  const hasAgentTool = enabledTools.has(AGENT_TOOL_NAME)
-  const searchTools = hasEmbeddedSearchTools()
-    ? `\`find\` or \`grep\` via the ${BASH_TOOL_NAME} tool`
-    : `the ${GLOB_TOOL_NAME} or ${GREP_TOOL_NAME}`
+function getSessionSpecificGuidanceSection(enabledTools: Set<string>, skillToolCommands: Command[]): string | null {
+  const hasAskUserQuestionTool = enabledTools.has(ASK_USER_QUESTION_TOOL_NAME);
+  const hasSkills = skillToolCommands.length > 0 && enabledTools.has(SKILL_TOOL_NAME);
+  const hasAgentTool = enabledTools.has(AGENT_TOOL_NAME);
+  const searchTools = hasEmbeddedSearchTools() ? `\`find\` or \`grep\` via the ${BASH_TOOL_NAME} tool` : `the ${GLOB_TOOL_NAME} or ${GREP_TOOL_NAME}`;
 
   const items = [
     hasAskUserQuestionTool
@@ -147,9 +126,7 @@ function getSessionSpecificGuidanceSection(
     // isForkSubagentEnabled() reads getIsNonInteractiveSession() — must be
     // post-boundary or it fragments the static prefix on session type.
     hasAgentTool ? getAgentToolSection() : null,
-    ...(hasAgentTool &&
-    areExplorePlanAgentsEnabled() &&
-    !isForkSubagentEnabled()
+    ...(hasAgentTool && areExplorePlanAgentsEnabled() && !isForkSubagentEnabled()
       ? [
           `For simple, directed codebase searches (e.g. for a specific file/class/function) use ${searchTools} directly.`,
           `For broader codebase exploration and deep research, use the ${AGENT_TOOL_NAME} tool with subagent_type=${EXPLORE_AGENT.agentType}. This is slower than using ${searchTools} directly, so use this only when a simple, directed search proves to be insufficient or when your task will clearly require more than ${EXPLORE_AGENT_MIN_QUERIES} queries.`,
@@ -158,41 +135,43 @@ function getSessionSpecificGuidanceSection(
     hasSkills
       ? `/<skill-name> (e.g., /commit) is shorthand for users to invoke a user-invocable skill. When executed, the skill gets expanded to a full prompt. Use the ${SKILL_TOOL_NAME} tool to execute them. IMPORTANT: Only use ${SKILL_TOOL_NAME} for skills listed in its user-invocable skills section - do not guess or use built-in CLI commands.`
       : null,
-    DISCOVER_SKILLS_TOOL_NAME !== null &&
-    hasSkills &&
-    enabledTools.has(DISCOVER_SKILLS_TOOL_NAME)
-      ? getDiscoverSkillsGuidance()
-      : null,
+    DISCOVER_SKILLS_TOOL_NAME !== null && hasSkills && enabledTools.has(DISCOVER_SKILLS_TOOL_NAME) ? getDiscoverSkillsGuidance() : null,
     hasAgentTool &&
-    feature('VERIFICATION_AGENT') &&
+    feature("VERIFICATION_AGENT") &&
     // 3P default: false — verification agent is ant-only A/B
-    getFeatureValue_CACHED_MAY_BE_STALE('tengu_hive_evidence', false)
+    getFeatureValue_CACHED_MAY_BE_STALE("tengu_hive_evidence", false)
       ? `The contract: when non-trivial implementation happens on your turn, independent adversarial verification must happen before you report completion \u2014 regardless of who did the implementing (you directly, a fork you spawned, or a subagent). You are the one reporting to the user; you own the gate. Non-trivial means: 3+ file edits, backend/API changes, or infrastructure changes. Spawn the ${AGENT_TOOL_NAME} tool with subagent_type="${VERIFICATION_AGENT_TYPE}". Your own checks, caveats, and a fork's self-checks do NOT substitute \u2014 only the verifier assigns a verdict; you cannot self-assign PARTIAL. Pass the original user request, all files changed (by anyone), the approach, and the plan file path if applicable. Flag concerns if you have them but do NOT share test results or claim things work. On FAIL: fix, resume the verifier with its findings plus your fix, repeat until PASS. On PASS: spot-check it \u2014 re-run 2-3 commands from its report, confirm every PASS has a Command run block with output that matches your re-run. If any PASS lacks a command block or diverges, resume the verifier with the specifics. On PARTIAL (from the verifier): report what passed and what could not be verified.`
       : null,
-  ].filter(item => item !== null)
+  ].filter((item) => item !== null);
 
-  if (items.length === 0) return null
-  return ['# Session-specific guidance', ...prependBullets(items)].join('\n')
+  if (items.length === 0) return null;
+  return ["# Session-specific guidance", ...prependBullets(items)].join("\n");
 }
 ```
+
 这里主要处理了几个工具的关系
 第一个就是`hasAskUserQuestionTool`，如果有的话模型可以主动向用户提问 prompt引导模型去这么做
 第二个`getIsNonInteractiveSession()`，这个函数会判断当前是否是交互式会话，如果是的话，模型将不能进行交互式的操作，只能进行非交互式的操作，比如执行命令，或者调用工具
 第三个`hasAgentTool`，这个主要是关于子agent fork的，会告诉模型怎么去fork一个subagent
+
 ```ts
-    // isForkSubagentEnabled() reads getIsNonInteractiveSession() — must be
-    // post-boundary or it fragments the static prefix on session type.
+// isForkSubagentEnabled() reads getIsNonInteractiveSession() — must be
+// post-boundary or it fragments the static prefix on session type.
 function getAgentToolSection(): string {
   return isForkSubagentEnabled()
     ? `Calling ${AGENT_TOOL_NAME} without a subagent_type creates a fork, which runs in the background and keeps its tool output out of your context \u2014 so you can keep chatting with the user while it works. Reach for it when research or multi-step implementation work would otherwise fill your context with raw output you won't need again. **If you ARE the fork** \u2014 execute directly; do not re-delegate.`
-    : `Use the ${AGENT_TOOL_NAME} tool with specialized agents when the task at hand matches the agent's description. Subagents are valuable for parallelizing independent queries or for protecting the main context window from excessive results, but they should not be used excessively when not needed. Importantly, avoid duplicating work that subagents are already doing - if you delegate research to a subagent, do not also perform the same searches yourself.`
+    : `Use the ${AGENT_TOOL_NAME} tool with specialized agents when the task at hand matches the agent's description. Subagents are valuable for parallelizing independent queries or for protecting the main context window from excessive results, but they should not be used excessively when not needed. Importantly, avoid duplicating work that subagents are already doing - if you delegate research to a subagent, do not also perform the same searches yourself.`;
 }
 ```
+
 `areExplorePlanAgentsEnabled()`但没有subagent的时候，会引导在较为复杂的任务上使用这个ExplorePlanAgents
 `hasSkills`故名思意，就是有关于skill的相关配置，引导llm可以使用skill
 总的来说，这里都是引导并且告诉llm什么工具可以用，怎么用的
+
 ### memory
+
 `systemPromptSection('memory', () => loadMemoryPrompt()),`这是 Claude Code 的记忆系统加载器，负责把用户的记忆文件注入到 system prompt 里
+
 ```ts
 /**
  * Load the unified memory prompt for inclusion in the system prompt.
@@ -205,38 +184,30 @@ function getAgentToolSection(): string {
  * Returns null when auto memory is disabled.
  */
 export async function loadMemoryPrompt(): Promise<string | null> {
-  const autoEnabled = isAutoMemoryEnabled()
+  const autoEnabled = isAutoMemoryEnabled();
 
-  const skipIndex = getFeatureValue_CACHED_MAY_BE_STALE(
-    'tengu_moth_copse',
-    false,
-  )
+  const skipIndex = getFeatureValue_CACHED_MAY_BE_STALE("tengu_moth_copse", false);
 
   // KAIROS daily-log mode takes precedence over TEAMMEM: the append-only
   // log paradigm does not compose with team sync (which expects a shared
   // MEMORY.md that both sides read + write). Gating on `autoEnabled` here
   // means the !autoEnabled case falls through to the tengu_memdir_disabled
   // telemetry block below, matching the non-KAIROS path.
-  if (feature('KAIROS') && autoEnabled && getKairosActive()) {
+  if (feature("KAIROS") && autoEnabled && getKairosActive()) {
     logMemoryDirCounts(getAutoMemPath(), {
-      memory_type:
-        'auto' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
-    return buildAssistantDailyLogPrompt(skipIndex)
+      memory_type: "auto" as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+    });
+    return buildAssistantDailyLogPrompt(skipIndex);
   }
 
   // Cowork injects memory-policy text via env var; thread into all builders.
-  const coworkExtraGuidelines =
-    process.env.CLAUDE_COWORK_MEMORY_EXTRA_GUIDELINES
-  const extraGuidelines =
-    coworkExtraGuidelines && coworkExtraGuidelines.trim().length > 0
-      ? [coworkExtraGuidelines]
-      : undefined
+  const coworkExtraGuidelines = process.env.CLAUDE_COWORK_MEMORY_EXTRA_GUIDELINES;
+  const extraGuidelines = coworkExtraGuidelines && coworkExtraGuidelines.trim().length > 0 ? [coworkExtraGuidelines] : undefined;
 
-  if (feature('TEAMMEM')) {
+  if (feature("TEAMMEM")) {
     if (teamMemPaths!.isTeamMemoryEnabled()) {
-      const autoDir = getAutoMemPath()
-      const teamDir = teamMemPaths!.getTeamMemPath()
+      const autoDir = getAutoMemPath();
+      const teamDir = teamMemPaths!.getTeamMemPath();
       // Harness guarantees these directories exist so the model can write
       // without checking. The prompt text reflects this ("already exists").
       // Only creating teamDir is sufficient: getTeamMemPath() is defined as
@@ -244,58 +215,46 @@ export async function loadMemoryPrompt(): Promise<string | null> {
       // creates the auto dir as a side effect. If the team dir ever moves
       // out from under the auto dir, add a second ensureMemoryDirExists call
       // for autoDir here.
-      await ensureMemoryDirExists(teamDir)
+      await ensureMemoryDirExists(teamDir);
       logMemoryDirCounts(autoDir, {
-        memory_type:
-          'auto' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
+        memory_type: "auto" as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      });
       logMemoryDirCounts(teamDir, {
-        memory_type:
-          'team' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      })
-      return teamMemPrompts!.buildCombinedMemoryPrompt(
-        extraGuidelines,
-        skipIndex,
-      )
+        memory_type: "team" as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+      });
+      return teamMemPrompts!.buildCombinedMemoryPrompt(extraGuidelines, skipIndex);
     }
   }
 
   if (autoEnabled) {
-    const autoDir = getAutoMemPath()
+    const autoDir = getAutoMemPath();
     // Harness guarantees the directory exists so the model can write without
     // checking. The prompt text reflects this ("already exists").
-    await ensureMemoryDirExists(autoDir)
+    await ensureMemoryDirExists(autoDir);
     logMemoryDirCounts(autoDir, {
-      memory_type:
-        'auto' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-    })
-    return buildMemoryLines(
-      'auto memory',
-      autoDir,
-      extraGuidelines,
-      skipIndex,
-    ).join('\n')
+      memory_type: "auto" as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
+    });
+    return buildMemoryLines("auto memory", autoDir, extraGuidelines, skipIndex).join("\n");
   }
 
-  logEvent('tengu_memdir_disabled', {
-    disabled_by_env_var: isEnvTruthy(
-      process.env.CLAUDE_CODE_DISABLE_AUTO_MEMORY,
-    ),
-    disabled_by_setting:
-      !isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_AUTO_MEMORY) &&
-      getInitialSettings().autoMemoryEnabled === false,
-  })
+  logEvent("tengu_memdir_disabled", {
+    disabled_by_env_var: isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_AUTO_MEMORY),
+    disabled_by_setting: !isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_AUTO_MEMORY) && getInitialSettings().autoMemoryEnabled === false,
+  });
   // Gate on the GB flag directly, not isTeamMemoryEnabled() — that function
   // checks isAutoMemoryEnabled() first, which is definitionally false in this
   // branch. We want "was this user in the team-memory cohort at all."
-  if (getFeatureValue_CACHED_MAY_BE_STALE('tengu_herring_clock', false)) {
-    logEvent('tengu_team_memdir_disabled', {})
+  if (getFeatureValue_CACHED_MAY_BE_STALE("tengu_herring_clock", false)) {
+    logEvent("tengu_team_memdir_disabled", {});
   }
-  return null
+  return null;
 }
 ```
+
 他有三种记忆模式，分别是`Auto Memory（标准个人模式）`、`Team Memory（团队模式）`和`Kairos Daily Log（Kairos 日志模式）`
+
 #### Auto memory
+
 CLAUDE.md 更像“长期指令/规则”
 AutoMem / TeamMem 更像“长期知识库”
 这里的设计可以参考一下b站这位up讲的视频
@@ -417,6 +376,7 @@ reference: 不是存事实本身，而是存“去哪找事实”。
 指令层次结构
 
 buildMemoryLines 拼装出的完整指令结构：
+
 ```
 # auto memory                           ← 标题
                                         ← 1. 总体定位
@@ -438,90 +398,87 @@ If the user explicitly asks...           ← 用户说"记住这个" → 立即�
                                         ← 9. 搜索历史
 ## Searching past context               ← grep 记忆目录和会话记录
 ```
+
 下面是拼装的代码
-```ts
+
+````ts
 export const MEMORY_FRONTMATTER_EXAMPLE: readonly string[] = [
-  '```markdown',
-  '---',
-  'name: {{memory name}}',
-  'description: {{one-line description — used to decide relevance in future conversations, so be specific}}',
-  `type: {{${MEMORY_TYPES.join(', ')}}}`,
-  '---',
-  '',
-  '{{memory content — for feedback/project types, structure as: rule/fact, then **Why:** and **How to apply:** lines}}',
-  '```',
-]
+  "```markdown",
+  "---",
+  "name: {{memory name}}",
+  "description: {{one-line description — used to decide relevance in future conversations, so be specific}}",
+  `type: {{${MEMORY_TYPES.join(", ")}}}`,
+  "---",
+  "",
+  "{{memory content — for feedback/project types, structure as: rule/fact, then **Why:** and **How to apply:** lines}}",
+  "```",
+];
 
-
-export function buildMemoryLines(
-  displayName: string,
-  memoryDir: string,
-  extraGuidelines?: string[],
-  skipIndex = false,
-): string[] {
+export function buildMemoryLines(displayName: string, memoryDir: string, extraGuidelines?: string[], skipIndex = false): string[] {
   const howToSave = skipIndex
     ? [
-        '## How to save memories',
-        '',
-        'Write each memory to its own file (e.g., `user_role.md`, `feedback_testing.md`) using this frontmatter format:',
-        '',
+        "## How to save memories",
+        "",
+        "Write each memory to its own file (e.g., `user_role.md`, `feedback_testing.md`) using this frontmatter format:",
+        "",
         ...MEMORY_FRONTMATTER_EXAMPLE,
-        '',
-        '- Keep the name, description, and type fields in memory files up-to-date with the content',
-        '- Organize memory semantically by topic, not chronologically',
-        '- Update or remove memories that turn out to be wrong or outdated',
-        '- Do not write duplicate memories. First check if there is an existing memory you can update before writing a new one.',
+        "",
+        "- Keep the name, description, and type fields in memory files up-to-date with the content",
+        "- Organize memory semantically by topic, not chronologically",
+        "- Update or remove memories that turn out to be wrong or outdated",
+        "- Do not write duplicate memories. First check if there is an existing memory you can update before writing a new one.",
       ]
     : [
-        '## How to save memories',
-        '',
-        'Saving a memory is a two-step process:',
-        '',
-        '**Step 1** — write the memory to its own file (e.g., `user_role.md`, `feedback_testing.md`) using this frontmatter format:',
-        '',
+        "## How to save memories",
+        "",
+        "Saving a memory is a two-step process:",
+        "",
+        "**Step 1** — write the memory to its own file (e.g., `user_role.md`, `feedback_testing.md`) using this frontmatter format:",
+        "",
         ...MEMORY_FRONTMATTER_EXAMPLE,
-        '',
+        "",
         `**Step 2** — add a pointer to that file in \`${ENTRYPOINT_NAME}\`. \`${ENTRYPOINT_NAME}\` is an index, not a memory — each entry should be one line, under ~150 characters: \`- [Title](file.md) — one-line hook\`. It has no frontmatter. Never write memory content directly into \`${ENTRYPOINT_NAME}\`.`,
-        '',
+        "",
         `- \`${ENTRYPOINT_NAME}\` is always loaded into your conversation context — lines after ${MAX_ENTRYPOINT_LINES} will be truncated, so keep the index concise`,
-        '- Keep the name, description, and type fields in memory files up-to-date with the content',
-        '- Organize memory semantically by topic, not chronologically',
-        '- Update or remove memories that turn out to be wrong or outdated',
-        '- Do not write duplicate memories. First check if there is an existing memory you can update before writing a new one.',
-      ]
+        "- Keep the name, description, and type fields in memory files up-to-date with the content",
+        "- Organize memory semantically by topic, not chronologically",
+        "- Update or remove memories that turn out to be wrong or outdated",
+        "- Do not write duplicate memories. First check if there is an existing memory you can update before writing a new one.",
+      ];
 
   const lines: string[] = [
     `# ${displayName}`,
-    '',
+    "",
     `You have a persistent, file-based memory system at \`${memoryDir}\`. ${DIR_EXISTS_GUIDANCE}`,
-    '',
+    "",
     "You should build up this memory system over time so that future conversations can have a complete picture of who the user is, how they'd like to collaborate with you, what behaviors to avoid or repeat, and the context behind the work the user gives you.",
-    '',
-    'If the user explicitly asks you to remember something, save it immediately as whichever type fits best. If they ask you to forget something, find and remove the relevant entry.',
-    '',
+    "",
+    "If the user explicitly asks you to remember something, save it immediately as whichever type fits best. If they ask you to forget something, find and remove the relevant entry.",
+    "",
     ...TYPES_SECTION_INDIVIDUAL,
     ...WHAT_NOT_TO_SAVE_SECTION,
-    '',
+    "",
     ...howToSave,
-    '',
+    "",
     ...WHEN_TO_ACCESS_SECTION,
-    '',
+    "",
     ...TRUSTING_RECALL_SECTION,
-    '',
-    '## Memory and other forms of persistence',
-    'Memory is one of several persistence mechanisms available to you as you assist the user in a given conversation. The distinction is often that memory can be recalled in future conversations and should not be used for persisting information that is only useful within the scope of the current conversation.',
-    '- When to use or update a plan instead of memory: If you are about to start a non-trivial implementation task and would like to reach alignment with the user on your approach you should use a Plan rather than saving this information to memory. Similarly, if you already have a plan within the conversation and you have changed your approach persist that change by updating the plan rather than saving a memory.',
-    '- When to use or update tasks instead of memory: When you need to break your work in current conversation into discrete steps or keep track of your progress use tasks instead of saving to memory. Tasks are great for persisting information about the work that needs to be done in the current conversation, but memory should be reserved for information that will be useful in future conversations.',
-    '',
+    "",
+    "## Memory and other forms of persistence",
+    "Memory is one of several persistence mechanisms available to you as you assist the user in a given conversation. The distinction is often that memory can be recalled in future conversations and should not be used for persisting information that is only useful within the scope of the current conversation.",
+    "- When to use or update a plan instead of memory: If you are about to start a non-trivial implementation task and would like to reach alignment with the user on your approach you should use a Plan rather than saving this information to memory. Similarly, if you already have a plan within the conversation and you have changed your approach persist that change by updating the plan rather than saving a memory.",
+    "- When to use or update tasks instead of memory: When you need to break your work in current conversation into discrete steps or keep track of your progress use tasks instead of saving to memory. Tasks are great for persisting information about the work that needs to be done in the current conversation, but memory should be reserved for information that will be useful in future conversations.",
+    "",
     ...(extraGuidelines ?? []),
-    '',
-  ]
+    "",
+  ];
 
-  lines.push(...buildSearchingPastContextSection(memoryDir))
+  lines.push(...buildSearchingPastContextSection(memoryDir));
 
-  return lines
+  return lines;
 }
-```
+````
+
 buildMemoryLines 本质上是一份精心编排的 system prompt，每个 section 都经过 eval 验证（注释里多次提到 eval case 编号）。它不是一次性写好的——是通过 A/B 测试逐步迭代出来的：
 
 - H1（验证函数/文件引用）：0/2 → 3/3
@@ -535,11 +492,11 @@ buildMemoryLines 本质上是一份精心编排的 system prompt，每个 sectio
 
 硬排除列表，即使用户明确要求也保存：
 
-❌ 代码模式、架构、文件路径、项目结构  → 能从代码推导
-❌ Git 历史、最近改动                 → git log 是权威来源
-❌ 调试方案、修复方法                  → 修复在代码里，上下文在 commit 里
-❌ CLAUDE.md 已有的内容                → 重复
-❌ 临时任务状态                        → 会话结束就失效
+❌ 代码模式、架构、文件路径、项目结构 → 能从代码推导
+❌ Git 历史、最近改动 → git log 是权威来源
+❌ 调试方案、修复方法 → 修复在代码里，上下文在 commit 里
+❌ CLAUDE.md 已有的内容 → 重复
+❌ 临时任务状态 → 会话结束就失效
 
 最后一句是关键防线：
 
@@ -550,6 +507,7 @@ buildMemoryLines 本质上是一份精心编排的 system prompt，每个 sectio
 用户说"保存这周的 PR 列表" → Claude 不应该照做，而是问"其中有什么出乎意料或非显而易见的部分"——那才是值得保存的。
 
 ---
+
 2. howToSave —— 怎么写
 
 由 buildMemoryLines 根据 skipIndex 动态生成两种版本：
@@ -557,29 +515,32 @@ buildMemoryLines 本质上是一份精心编排的 system prompt，每个 sectio
 标准模式（两步）：
 Step 1: 写记忆文件（带 frontmatter: name/description/type）
 Step 2: 在 MEMORY.md 添加一行索引指针
-        格式: `- [Title](file.md) — one-line hook`（<150 字符）
+格式: `- [Title](file.md) — one-line hook`（<150 字符）
 
 简化模式（skipIndex = true，跳过索引）：
 直接写记忆文件，不维护 MEMORY.md
 
 两种模式共有的规则：
+
 - name/description/type 保持与内容一致
 - 按主题组织，不按时间
 - 过时的记忆更新或删除
 - 写之前先检查是否已有可更新的记忆（防重复）
 
 ---
+
 3. WHEN_TO_ACCESS_SECTION —— 何时读
 
 文件：memoryTypes.ts:216-222
 
 '- When memories seem relevant, or the user references prior-conversation work.',
 '- You MUST access memory when the user explicitly asks you to check, recall, or remember.',
-'- If the user says to *ignore* or *not use* memory: proceed as if MEMORY.md were empty.
-   Do not apply remembered facts, cite, compare against, or mention memory content.',
+'- If the user says to _ignore_ or _not use_ memory: proceed as if MEMORY.md were empty.
+Do not apply remembered facts, cite, compare against, or mention memory content.',
 MEMORY_DRIFT_CAVEAT,
 
 三条规则对应三种场景：
+
 ```
 ┌──────────────────────┬─────────────────────────────────┐
 │       用户行为       │           Claude 响应           │
@@ -591,12 +552,14 @@ MEMORY_DRIFT_CAVEAT,
 │ "忽略关于 X 的记忆"  │ 当作 MEMORY.md 是空的，完全不提 │
 └──────────────────────┴─────────────────────────────────┘
 ```
+
 MEMORY_DRIFT_CAVEAT 是读取端的防御：
 
 ▎ 记忆可能过时。把记忆当作某个时间点的事实。回答前验证记忆是否仍然正确。
 ▎ 如果记忆与当前信息冲突，信任当前观察——并更新或删除过时的记忆。
 
 ---
+
 4. TRUSTING_RECALL_SECTION —— 读完怎么用
 
 文件：memoryTypes.ts:240-256
@@ -604,7 +567,7 @@ MEMORY_DRIFT_CAVEAT 是读取端的防御：
 标题故意用了行动导向的措辞（Before recommending from memory 而不是抽象的 Trusting what you recall），因为 eval 证明标题的措辞影响执行率。
 
 'A memory that names a specific function, file, or flag is a claim that it
-existed *when the memory was written*. It may have been renamed, removed,
+existed _when the memory was written_. It may have been renamed, removed,
 or never merged. Before recommending it:'
 
 '- If the memory names a file path: check the file exists.',
@@ -621,13 +584,14 @@ or never merged. Before recommending it:'
 ▎ 而不是回忆快照。
 
 ---
+
 五个 Section 的逻辑链
 
-TYPES_SECTION     →  记忆的"数据模型"（存什么、什么结构）
-WHAT_NOT_TO_SAVE  →  过滤器（什么不该进模型）
-howToSave         →  写入协议（怎么持久化）
-WHEN_TO_ACCESS    →  读取策略（什么时候读、什么时候不读）
-TRUSTING_RECALL   →  使用策略（读完之后怎么用、怎么验证）
+TYPES_SECTION → 记忆的"数据模型"（存什么、什么结构）
+WHAT_NOT_TO_SAVE → 过滤器（什么不该进模型）
+howToSave → 写入协议（怎么持久化）
+WHEN_TO_ACCESS → 读取策略（什么时候读、什么时候不读）
+TRUSTING_RECALL → 使用策略（读完之后怎么用、怎么验证）
 
 这条链从写入到读取到使用，形成完整闭环。每个环节都有 eval 验证过的具体指令，不是泛泛而谈的"请使用记忆系统"。
 
@@ -640,18 +604,19 @@ TRUSTING_RECALL   →  使用策略（读完之后怎么用、怎么验证）
 目录结构
 
 ~/.claude/projects/<sanitized-git-root>/memory/
-├── MEMORY.md              ← 个人索引
-├── user_role.md           ← 个人记忆（private）
-├── feedback_style.md      ← 个人反馈（private）
-└── team/                  ← 团队共享目录
-    ├── MEMORY.md          ← 团队索引
-    ├── feedback_policy.md ← 团队约定（team）
-    ├── project_freeze.md  ← 项目状态（team）
-    └── reference_linear.md← 外部指针（team）
+├── MEMORY.md ← 个人索引
+├── user_role.md ← 个人记忆（private）
+├── feedback_style.md ← 个人反馈（private）
+└── team/ ← 团队共享目录
+├── MEMORY.md ← 团队索引
+├── feedback_policy.md ← 团队约定（team）
+├── project_freeze.md ← 项目状态（team）
+└── reference_linear.md← 外部指针（team）
 
 scope 分配规则
 
 每个记忆类型有明确的 private/team 倾向（memoryTypes.ts:37-106）：
+
 ```
 ┌───────────┬───────────────────────────┬────────────────────────────┐
 │   类型    │           scope           │            理由            │
@@ -674,6 +639,7 @@ scope 分配规则
 │ reference │ usually team              │ 外部系统指针对所有人生效   │
 └───────────┴───────────────────────────┴────────────────────────────┘
 ```
+
 模型在写入时需要判断 scope，选择写到 memory/ 还是 memory/team/。
 
 同步机制
@@ -681,20 +647,23 @@ scope 分配规则
 不是 git，不是共享挂载——是 Anthropic 服务器 API：
 
 API 端点：
-GET  /api/claude_code/team_memory?repo={owner/repo}      ← 拉取全部
-GET  /api/claude_code/team_memory?repo={owner/repo}&view=hashes  ← 仅校验和
-PUT  /api/claude_code/team_memory?repo={owner/repo}      ← 推送变更
+GET /api/claude_code/team_memory?repo={owner/repo} ← 拉取全部
+GET /api/claude_code/team_memory?repo={owner/repo}&view=hashes ← 仅校验和
+PUT /api/claude_code/team_memory?repo={owner/repo} ← 推送变更
 
 同步流程：
+
 1. Pull first — 从服务器拉取，写入本地 team/ 目录（服务器优先）
 2. Push second — 计算 delta（本地 SHA-256 与服务器校验和不同的 key），只上传变更部分
 
 冲突解决：
+
 - 使用 ETag 条件请求（If-Match）
 - 412 Precondition Failed → 刷新校验和，重试最多 2 次
 - 本地胜出 — 同一 key 双方都改了，本地版本覆盖
 
 实时同步：
+
 - fs.watch({ recursive: true }) 监听 team/ 目录
 - 2 秒 debounce 后触发 push
 - notifyTeamMemoryWrite() hook 在 FileWriteTool/FileEditTool 后触发（防止 fs.watch 漏事件）
@@ -704,10 +673,12 @@ PUT  /api/claude_code/team_memory?repo={owner/repo}      ← 推送变更
 1. 路径遍历防护（teamMemPaths.ts）：
 
 两轮验证：
+
 - 第一轮：字符串级 resolve() + startsWith(teamDir) 检查
 - 第二轮：realpath() 解析符号链接，确认真实路径仍在 team 目录内
 
 防攻击手段：
+
 - 空字节注入（\0）
 - URL 编码遍历（%2e%2e%2f）
 - Unicode 规范化攻击（NFKC 全角字符）
@@ -723,7 +694,6 @@ PUT  /api/claude_code/team_memory?repo={owner/repo}      ← 推送变更
 
 autoMemoryDirectory 在 settings.json 中配置时，projectSettings（.claude/settings.json）被故意排除——防止恶意仓库提交 settings.json 把记忆目录指向 ~/.ssh。
 
-
 #### 模式三：Assistant Daily-Log（助手日志模式）
 
 本质
@@ -731,6 +701,7 @@ autoMemoryDirectory 在 settings.json 中配置时，projectSettings（.claude/s
 追加写入的日志 + 异步蒸馏。适配长期运行的助手会话（KAIROS feature）。
 
 目录结构
+
 ```
 ~/.claude/projects/<sanitized-git-root>/memory/
 ├── MEMORY.md                    ← 蒸馏后的索引（/dream 维护）
@@ -742,16 +713,19 @@ autoMemoryDirectory 在 settings.json 中配置时，projectSettings（.claude/s
             ├── 2026-06-14.md   ← 每日日志（append-only）
             └── 2026-06-15.md
 ```
+
 写入流程（append-only）
 
 模型只做一件事：往当天的日志文件追加带时间戳的条目。
 
- 2026-06-15
+2026-06-15
+
 - 10:30 用户说他们团队用 Linear 跟踪 pipeline bug，项目名 INGEST
 - 11:15 用户纠正：不要用 npm，用 bun
 - 14:00 了解到 auth middleware 重写是因为法律合规要求
 
 关键设计：
+
 - 路径用模式 logs/YYYY/MM/YYYY-MM-DD.md 描述，不是今天的字面路径
 - 因为系统提示被 systemPromptSection 缓存，不会因日期变化而失效
 - 模型从 date_change attachment 推导当前日期
@@ -762,35 +736,36 @@ autoMemoryDirectory 在 settings.json 中配置时，projectSettings（.claude/s
 /dream 是一个 4 阶段结构化 prompt（consolidationPrompt.ts）：
 
 Phase 1: Orient
-  → ls 记忆目录，读 MEMORY.md，浏览现有主题文件
+→ ls 记忆目录，读 MEMORY.md，浏览现有主题文件
 
 Phase 2: Gather recent signal
-  → 读日志文件（logs/YYYY/MM/YYYY-MM-DD.md）
-  → 识别漂移的记忆
-  → 可选：grep JSONL 会话记录
+→ 读日志文件（logs/YYYY/MM/YYYY-MM-DD.md）
+→ 识别漂移的记忆
+→ 可选：grep JSONL 会话记录
 
 Phase 3: Consolidate
-  → 写入或更新主题文件
-  → 合并新信号到现有文件（去重）
-  → 相对日期转绝对日期（"昨天" → "2026-06-14"）
-  → 删除被推翻的事实
+→ 写入或更新主题文件
+→ 合并新信号到现有文件（去重）
+→ 相对日期转绝对日期（"昨天" → "2026-06-14"）
+→ 删除被推翻的事实
 
 Phase 4: Prune and index
-  → 更新 MEMORY.md，保持 200 行 / 25KB 以内
-  → 每条索引一行，< 150 字符
-  → 删除过时指针，解决矛盾
+→ 更新 MEMORY.md，保持 200 行 / 25KB 以内
+→ 每条索引一行，< 150 字符
+→ 删除过时指针，解决矛盾
 
 autoDream（自动蒸馏）
 
 autoDream 是后台自动运行 /dream 的机制（autoDream.ts）。5 层 gate：
 
-1. Feature gate    → isAutoDreamEnabled()（settings.json 或 GrowthBook）
-2. Time gate       → 距上次蒸馏 ≥ 24 小时
-3. Scan throttle   → 至多每 10 分钟检查一次
-4. Session gate    → 自上次蒸馏后 ≥ 5 个新会话
-5. Lock gate       → 无其他进程在蒸馏（PID 锁文件）
+1. Feature gate → isAutoDreamEnabled()（settings.json 或 GrowthBook）
+2. Time gate → 距上次蒸馏 ≥ 24 小时
+3. Scan throttle → 至多每 10 分钟检查一次
+4. Session gate → 自上次蒸馏后 ≥ 5 个新会话
+5. Lock gate → 无其他进程在蒸馏（PID 锁文件）
 
 全部通过后：
+
 1. 获取锁（.consolidate-lock，mtime = lastConsolidatedAt，body = PID）
 2. 注册 DreamTask（UI 可见）
 3. 运行 forked agent（受限工具访问）
@@ -803,10 +778,9 @@ autoDream 是后台自动运行 /dream 的机制（autoDream.ts）。5 层 gate�
 getDateChangeAttachments()（attachments.ts:1415-1444）：
 
 每 turn 检查：
-  当前日期 vs 上次发出的日期
-  ↓ 不同（跨午夜）
-  → 发出 { type: 'date_change', newDate: '2026-06-16' }
-  → 渲染为："The date has changed. Today's date is now 2026-06-16."
+当前日期 vs 上次发出的日期
+↓ 不同（跨午夜）
+→ 发出 { type: 'date_change', newDate: '2026-06-16' }
+→ 渲染为："The date has changed. Today's date is now 2026-06-16."
 
 为什么追加在尾部而不是头部：保留 prompt cache 前缀。如果清除头部的日期，整个对话会变成 cache_creation（~920K tokens），凌晨跨日的代价极大。尾部的 stale date 是缓存稳定性的刻意权衡。
-

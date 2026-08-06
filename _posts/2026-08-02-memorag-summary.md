@@ -5,6 +5,7 @@ date: 2026-08-02 17:00:00 +0800
 categories: [RAG]
 tags: [rag, memorag, memory, query-rewriting]
 ---
+
 ## 1. 一句话理解
 
 MemoRAG 在标准 RAG 的检索阶段之前，增加了一个**记忆模型**。这个模型先对文档库做一次压缩记忆，查询时基于记忆生成更精确的检索线索，从而提高模糊、隐式、长上下文查询的检索质量。
@@ -62,10 +63,10 @@ LLM 生成最终答案
 
 ```json
 {
-    "pairs": [
-        {"topic": "气候变暖对生物多样性的影响", "details": "气温上升导致许多物种因栖息地丧失而面临灭绝。"},
-        {"topic": "海洋酸化", "details": "海洋吸收过量二氧化碳，导致酸化加剧。"}
-    ]
+  "pairs": [
+    { "topic": "气候变暖对生物多样性的影响", "details": "气温上升导致许多物种因栖息地丧失而面临灭绝。" },
+    { "topic": "海洋酸化", "details": "海洋吸收过量二氧化碳，导致酸化加剧。" }
+  ]
 }
 ```
 
@@ -88,10 +89,10 @@ def memorize(self, document: str):
 def create_retrieval_queries(self, query: str):
     # 1. 在 memory store 中检索相关 topic-details
     results = self.store.similarity_search_with_score(query, k=10)
-    
+
     # 2. 生成 text spans（关键词/片段线索）
     # 3. 生成 surrogate queries（替代/子问题）
-    
+
     return text_spans + surrogate_queries + [query]
 ```
 

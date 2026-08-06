@@ -5,6 +5,7 @@ date: 2026-07-31 21:00:00 +0800
 categories: [RAG]
 tags: [rag, multimodal, captioning, vision]
 ---
+
 ## 1. 一句话理解
 
 Multimodal RAG with Captioning 不是直接检索图片，而是**先用多模态模型把图片/表格生成文字描述（caption），再把 caption 和原始文本一起存入向量库做传统文本检索**。
@@ -47,7 +48,7 @@ with fitz.open('attention_is_all_you_need.pdf') as pdf_file:
 用 Gemini-1.5-flash 看图并生成适合检索的摘要：
 
 ```python
-response = model.generate_content([image, 
+response = model.generate_content([image,
     "You are an assistant tasked with summarizing tables, images and text for retrieval. ..."])
 ```
 
@@ -79,15 +80,15 @@ generation = rag_chain.invoke({"documents": docs[0].page_content, "question": qu
 
 ## 4. 与 ColPali 路线的对比
 
-| | ColPali 路线 | Captioning 路线 |
-|---|---|---|
-| 图片处理方式 | 直接当图像检索 | 先生成文字描述 |
-| 检索方式 | 视觉特征 + late interaction | 文本 embedding |
-| 索引内容 | base64 图片 + 视觉特征 | 文字 + 图片描述 |
-| 检索粒度 | 整页 | 文本 chunk / 单个 caption |
-| 生成阶段输入 | 原始图片 | 检索到的文字/caption |
-| 优点 | 保留完整视觉信息 | 复用成熟文本 RAG 链路 |
-| 缺点 | 索引大、需要多模态 LLM 读图 | caption 质量决定检索上限 |
+|              | ColPali 路线                | Captioning 路线           |
+| ------------ | --------------------------- | ------------------------- |
+| 图片处理方式 | 直接当图像检索              | 先生成文字描述            |
+| 检索方式     | 视觉特征 + late interaction | 文本 embedding            |
+| 索引内容     | base64 图片 + 视觉特征      | 文字 + 图片描述           |
+| 检索粒度     | 整页                        | 文本 chunk / 单个 caption |
+| 生成阶段输入 | 原始图片                    | 检索到的文字/caption      |
+| 优点         | 保留完整视觉信息            | 复用成熟文本 RAG 链路     |
+| 缺点         | 索引大、需要多模态 LLM 读图 | caption 质量决定检索上限  |
 
 ## 5. 优缺点
 
@@ -107,14 +108,14 @@ generation = rag_chain.invoke({"documents": docs[0].page_content, "question": qu
 
 ## 6. 选型建议
 
-| 场景 | 推荐方案 |
-|---|---|
-| 需要复用现有文本 RAG 系统 | Captioning |
-| 图片内容可被文字较好描述 | Captioning |
-| 需要精确到图表中的某个数值 | 两者皆可 |
-| 需要保留布局、颜色、视觉关系 | ColPali |
-| 扫描件/手写/复杂排版为主 | ColPali |
-| 追求实现简单、成本低 | Captioning |
+| 场景                         | 推荐方案   |
+| ---------------------------- | ---------- |
+| 需要复用现有文本 RAG 系统    | Captioning |
+| 图片内容可被文字较好描述     | Captioning |
+| 需要精确到图表中的某个数值   | 两者皆可   |
+| 需要保留布局、颜色、视觉关系 | ColPali    |
+| 扫描件/手写/复杂排版为主     | ColPali    |
+| 追求实现简单、成本低         | Captioning |
 
 ## 7. 实践注意事项
 

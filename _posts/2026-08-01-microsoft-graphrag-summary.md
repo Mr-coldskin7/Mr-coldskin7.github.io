@@ -5,6 +5,7 @@ date: 2026-08-01 21:00:00 +0800
 categories: [RAG]
 tags: [rag, graphrag, knowledge-graph, microsoft]
 ---
+
 ## 1. 一句话理解
 
 Microsoft GraphRAG 是一种把文档先转换成**知识图谱**，再基于图谱中的实体、关系和社区进行检索与回答的 RAG 方案。它擅长处理需要跨文档连接信息、全局综合理解的复杂查询。
@@ -37,13 +38,13 @@ Community Summarization（为每个社区生成摘要）
 
 ### 各步骤说明
 
-| 步骤 | 作用 |
-|------|------|
-| **Chunking** | 把长文本切分成 manageable 的小块 |
-| **Element Extraction** | LLM 识别实体（如 Elon Musk、Tesla）和关系（如 founded、CEO of） |
-| **Graph Construction** | 实体作为节点，关系作为边，构建知识图谱 |
-| **Community Detection** | 用 Leiden 等算法发现紧密相关的节点簇 |
-| **Community Summarization** | 为每个社区生成摘要，供全局搜索使用 |
+| 步骤                        | 作用                                                            |
+| --------------------------- | --------------------------------------------------------------- |
+| **Chunking**                | 把长文本切分成 manageable 的小块                                |
+| **Element Extraction**      | LLM 识别实体（如 Elon Musk、Tesla）和关系（如 founded、CEO of） |
+| **Graph Construction**      | 实体作为节点，关系作为边，构建知识图谱                          |
+| **Community Detection**     | 用 Leiden 等算法发现紧密相关的节点簇                            |
+| **Community Summarization** | 为每个社区生成摘要，供全局搜索使用                              |
 
 ## 4. 查询阶段：两种搜索模式
 
@@ -52,6 +53,7 @@ Community Summarization（为每个社区生成摘要）
 针对**具体实体**的查询，展开该实体的邻居节点和相关概念。
 
 示例：
+
 > "What and how many companies and subsidiaries founded by Elon Musk?"
 
 ### 4.2 Global Search（全局搜索）
@@ -59,6 +61,7 @@ Community Summarization（为每个社区生成摘要）
 针对**整体语料**的查询，综合多个社区摘要给出宏观回答。
 
 示例：
+
 > "What are the major accomplishments of Elon Musk?"
 
 ## 5. 代码实现要点
@@ -90,14 +93,14 @@ notebook 用 BeautifulSoup 抓取 Wikipedia 上 Elon Musk 的词条，保存为 
 
 ## 6. 与传统 RAG 的对比
 
-| | 传统 RAG | GraphRAG |
-|---|---|---|
-| 检索单元 | 文本 chunk | 实体、关系、社区 |
-| 擅长问题 | "某段文字说了什么" | "这些实体有什么关系" |
-| 索引成本 | 低（embedding 一次） | 高（大量 LLM 调用） |
-| 查询成本 | 低 | 中到高 |
-| 全局理解 | 弱 | 强 |
-| 可解释性 | 低（黑盒相似度） | 较高（可追溯关系） |
+|          | 传统 RAG             | GraphRAG             |
+| -------- | -------------------- | -------------------- |
+| 检索单元 | 文本 chunk           | 实体、关系、社区     |
+| 擅长问题 | "某段文字说了什么"   | "这些实体有什么关系" |
+| 索引成本 | 低（embedding 一次） | 高（大量 LLM 调用）  |
+| 查询成本 | 低                   | 中到高               |
+| 全局理解 | 弱                   | 强                   |
+| 可解释性 | 低（黑盒相似度）     | 较高（可追溯关系）   |
 
 ## 7. 主要局限
 

@@ -5,6 +5,7 @@ date: 2026-07-29 22:00:00 +0800
 categories: [RAG]
 tags: [rag, query-transformation, retrieval]
 ---
+
 ## 1. 什么是 Query Transformations？
 
 Query Transformations 是 RAG 中的一种前置优化技术：在把用户问题送进向量检索器之前，先用 LLM 对问题做一次改写、泛化或拆分，从而召回更相关、更全面的文档。
@@ -29,10 +30,10 @@ Query Transformations 通过改变 query 的形式，让检索阶段拿到更好
 
 **示例：**
 
-| | 文本 |
-|---|---|
-| 原始 query | What are the impacts of climate change on the environment? |
-| 重写后 | What are the specific effects of climate change on various ecosystems, including changes in temperature, precipitation patterns, sea levels, and biodiversity? |
+|            | 文本                                                                                                                                                           |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 原始 query | What are the impacts of climate change on the environment?                                                                                                     |
+| 重写后     | What are the specific effects of climate change on various ecosystems, including changes in temperature, precipitation patterns, sea levels, and biodiversity? |
 
 **适用场景：** 用户 query 太笼统，需要补充关键词和维度。
 
@@ -42,10 +43,10 @@ Query Transformations 通过改变 query 的形式，让检索阶段拿到更好
 
 **示例：**
 
-| | 文本 |
-|---|---|
-| 原始 query | What are the impacts of climate change on the environment? |
-| Step-back query | What are the general effects of climate change? |
+|                 | 文本                                                       |
+| --------------- | ---------------------------------------------------------- |
+| 原始 query      | What are the impacts of climate change on the environment? |
+| Step-back query | What are the general effects of climate change?            |
 
 **适用场景：** 问题很细节，但需要先理解宏观背景，比如医学、法律、科研领域。
 
@@ -56,9 +57,11 @@ Query Transformations 通过改变 query 的形式，让检索阶段拿到更好
 **示例：**
 
 原始 query：
+
 > What are the impacts of climate change on the environment?
 
 分解后：
+
 1. How does climate change affect biodiversity and ecosystems?
 2. What are the impacts of climate change on oceanic conditions and marine life?
 3. How does climate change influence weather patterns and extreme weather events?
@@ -104,18 +107,18 @@ response = chain.invoke(original_query)
 
 实际使用时不必三种都用：
 
-| 问题类型 | 推荐技术 |
-|---|---|
-| 太模糊 | Query Rewriting |
-| 太具体缺背景 | Step-back Prompting |
-| 涉及多方面 | Sub-query Decomposition |
+| 问题类型     | 推荐技术                |
+| ------------ | ----------------------- |
+| 太模糊       | Query Rewriting         |
+| 太具体缺背景 | Step-back Prompting     |
+| 涉及多方面   | Sub-query Decomposition |
 
 ## 6. 注意事项
 
 `Sub-query Decomposition` 的解析逻辑比较脆弱：
 
 ```python
-sub_queries = [q.strip() for q in response.split('\n') 
+sub_queries = [q.strip() for q in response.split('\n')
                if q.strip() and not q.strip().startswith('Sub-queries:')]
 ```
 

@@ -5,6 +5,7 @@ date: 2026-08-02 17:30:00 +0800
 categories: [RAG]
 tags: [rag]
 ---
+
 # RAG 技术体系化分类——从 Pipeline 阶段到失败模式
 
 ## 一、核心观点
@@ -54,6 +55,7 @@ Query → Query处理 → Embedding → 检索 → 重排/压缩 → 上下文�
 | `document_augmentation`           | 给文档片段生成问题，把问题也嵌入         |
 
 **Insight**：
+
 - `proposition_chunking` 做语义粒度精细化，代价是索引膨胀。
 - `document_augmentation` 做查询-文档对齐。
 - ColPali 是端到端视觉检索，captioning 是间接文本检索。

@@ -5,6 +5,7 @@ date: 2026-07-27 20:00:00 +0800
 categories: [RAG]
 tags: [rag, llm, feedback-loop, retrieval]
 ---
+
 ## 一、这个概念解决什么问题？
 
 传统 RAG 是“一次性”的：查询 → 检索 → 生成 → 结束。问题是：
@@ -59,6 +60,7 @@ doc.metadata['relevance_score'] *= (avg_relevance / 3)
 它影响的是：**FAISS 召回后、传给 LLM 前的重新排序**。
 
 ### 2. `adjust_relevance_scores` 和 `fine_tune_index` 有什么区别？
+
 ```
 |          | `adjust_relevance_scores`    | `fine_tune_index`            |
 | -------- | ---------------------------- | ---------------------------- |
@@ -68,6 +70,7 @@ doc.metadata['relevance_score'] *= (avg_relevance / 3)
 | 机制     | 乘性调整 relevance_score     | 把高质量 QA 重新编码进向量库 |
 | 代价     | 每次查询都要调 LLM           | 需要重新编码，计算量大       |
 ```
+
 简单说：**调分是“软调整”，重索引是“硬写入”**。
 
 ### 3. 这是“融合检索”吗？
@@ -171,6 +174,7 @@ if result.lower() == 'yes':
 - 人工抽检 top-k 文档质量。
 
 ### 上线后监控什么？
+
 ```
 | 指标             | 原因                                          |
 | ---------------- | --------------------------------------------- |
@@ -180,6 +184,7 @@ if result.lower() == 'yes':
 | 索引重建耗时     | `fine_tune_index` 是批量重编码                |
 | 相关性判断准确率 | 人工抽检 LLM 的 Yes/No 是否正确               |
 ```
+
 ## 七、一句话记忆
 
 > **FAISS 负责“找得到”，`adjust_relevance_scores` 负责“挑得好”，`fine_tune_index` 负责“记得牢”。但“挑得好”的前提是反馈归因要准，否则负面反馈会污染上下文。**

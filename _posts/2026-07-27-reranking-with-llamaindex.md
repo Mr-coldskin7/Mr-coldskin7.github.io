@@ -5,6 +5,7 @@ date: 2026-07-27 20:00:00 +0800
 categories: [RAG]
 tags: [rag, llm, llamaindex, reranking, cross-encoder]
 ---
+
 ## 一、Reranking 解决什么问题？
 
 向量检索（embedding similarity）只能找到“语义相近”的文档，但不一定能找到“真正对回答 query 有用”的文档。
@@ -88,6 +89,7 @@ Cross-encoder 是一个**专门训练来做 query-document 相关性打分**的�
 ### 6. LLM-based 和 Cross-Encoder 的本质区别是什么？
 
 真正区别是：
+
 ```
 |           | LLM-based Rerank              | Cross-Encoder Rerank       |
 | --------- | ----------------------------- | -------------------------- |
@@ -98,7 +100,9 @@ Cross-encoder 是一个**专门训练来做 query-document 相关性打分**的�
 | 成本/延迟 | 高                            | 低                         |
 | 稳定性    | 较低，受 prompt 影响          | 较高                       |
 ```
+
 ### 7. Cross-Encoder 为什么比 Bi-Encoder 准？
+
 ```
 |            | Bi-Encoder（普通向量检索）         | Cross-Encoder（重排）   |
 | ---------- | ---------------------------------- | ----------------------- |
@@ -107,6 +111,7 @@ Cross-encoder 是一个**专门训练来做 query-document 相关性打分**的�
 | 速度       | 快，可预计算文档向量               | 慢，每对都要过模型      |
 | 准确度     | 较低                               | 更高                    |
 ```
+
 Cross-encoder 的“cross”指的是**交叉注意力**：query 和 doc 的 token 互相看，能捕捉更细粒度的匹配关系。
 
 ### 8. LlamaIndex 里 `node_postprocessors` 怎么工作？
@@ -154,7 +159,6 @@ Rerank 后，LLM 或 cross-encoder 发现真正回答这个问题的是包含 �
 
 同样的 query 和文档，换 prompt 或换 LLM，结果可能不同。
 
-
 ```python
 Settings.embed_model
 ## 四、怎么选择？
@@ -176,3 +180,4 @@ Settings.embed_model
 2. **LLM rerank 的瓶颈不在模型大小，而在“每对 query-doc 都要生成文本”**，文档越多越贵；cross-encoder 虽然也要每对过模型，但模型小得多。
 3. **生产里最稳的架构是三段式**：bi-encoder 快速召回 → cross-encoder 精排 → LLM 生成答案。这是性价比最高的组合。
 `─────────────────────────────────────────────────`
+```
