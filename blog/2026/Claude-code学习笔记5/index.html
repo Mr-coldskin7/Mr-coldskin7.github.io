@@ -4,120 +4,87 @@
   }
 </style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://mr-coldskin7.github.io/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B05/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
     initTheme();
-  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Claude code学习5 动态prompt的组装1</h1> <p class="post-meta"> Created on June 13, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/agent"> <i class="fa-solid fa-hashtag fa-sm"></i> agent</a>   <a href="/blog/tag/claude-code"> <i class="fa-solid fa-hashtag fa-sm"></i> claude-code</a>   <a href="/blog/tag/prompt-engineering"> <i class="fa-solid fa-hashtag fa-sm"></i> prompt-engineering</a>   ·   <a href="/blog/category/agent"> <i class="fa-solid fa-tag fa-sm"></i> agent</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h2 id="动态prompt的组装">动态prompt的组装</h2> <p>前面的静态prompt，由于KV cache的最大利用化，把动态变化的prompt放在了最后面</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">dynamicSections</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">session_guidance</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
-      <span class="nf">getSessionSpecificGuidanceSection</span><span class="p">(</span><span class="nx">enabledTools</span><span class="p">,</span> <span class="nx">skillToolCommands</span><span class="p">),</span>
-    <span class="p">),</span>
-    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">memory</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">loadMemoryPrompt</span><span class="p">()),</span>
-    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">ant_model_override</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
-      <span class="nf">getAntModelOverrideSection</span><span class="p">(),</span>
-    <span class="p">),</span>
-    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">env_info_simple</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
-      <span class="nf">computeSimpleEnvInfo</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">additionalWorkingDirectories</span><span class="p">),</span>
-    <span class="p">),</span>
-    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">language</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
-      <span class="nf">getLanguageSection</span><span class="p">(</span><span class="nx">settings</span><span class="p">.</span><span class="nx">language</span><span class="p">),</span>
-    <span class="p">),</span>
-    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">output_style</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
-      <span class="nf">getOutputStyleSection</span><span class="p">(</span><span class="nx">outputStyleConfig</span><span class="p">),</span>
-    <span class="p">),</span>
-    <span class="c1">// When delta enabled, instructions are announced via persisted</span>
-    <span class="c1">// mcp_instructions_delta attachments (attachments.ts) instead of this</span>
-    <span class="c1">// per-turn recompute, which busts the prompt cache on late MCP connect.</span>
-    <span class="c1">// Gate check inside compute (not selecting between section variants)</span>
-    <span class="c1">// so a mid-session gate flip doesn't read a stale cached value.</span>
-    <span class="nc">DANGEROUS_uncachedSystemPromptSection</span><span class="p">(</span>
-      <span class="dl">'</span><span class="s1">mcp_instructions</span><span class="dl">'</span><span class="p">,</span>
-      <span class="p">()</span> <span class="o">=&gt;</span>
-        <span class="nf">isMcpInstructionsDeltaEnabled</span><span class="p">()</span>
-          <span class="p">?</span> <span class="kc">null</span>
-          <span class="p">:</span> <span class="nf">getMcpInstructionsSection</span><span class="p">(</span><span class="nx">mcpClients</span><span class="p">),</span>
-      <span class="dl">'</span><span class="s1">MCP servers connect/disconnect between turns</span><span class="dl">'</span><span class="p">,</span>
-    <span class="p">),</span>
-    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">scratchpad</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getScratchpadInstructions</span><span class="p">()),</span>
-    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">frc</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getFunctionResultClearingSection</span><span class="p">(</span><span class="nx">model</span><span class="p">)),</span>
-    <span class="nf">systemPromptSection</span><span class="p">(</span>
-      <span class="dl">'</span><span class="s1">summarize_tool_results</span><span class="dl">'</span><span class="p">,</span>
-      <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">SUMMARIZE_TOOL_RESULTS_SECTION</span><span class="p">,</span>
-    <span class="p">),</span>
-    <span class="c1">// Numeric length anchors — research shows ~1.2% output token reduction vs</span>
-    <span class="c1">// qualitative "be concise". Ant-only to measure quality impact first.</span>
-    <span class="p">...(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ant</span><span class="dl">'</span>
-      <span class="p">?</span> <span class="p">[</span>
-          <span class="nf">systemPromptSection</span><span class="p">(</span>
-            <span class="dl">'</span><span class="s1">numeric_length_anchors</span><span class="dl">'</span><span class="p">,</span>
-            <span class="p">()</span> <span class="o">=&gt;</span>
-              <span class="dl">'</span><span class="s1">Length limits: keep text between tool calls to </span><span class="se">\</span><span class="s1">u226425 words. Keep final responses to </span><span class="se">\</span><span class="s1">u2264100 words unless the task requires more detail.</span><span class="dl">'</span><span class="p">,</span>
-          <span class="p">),</span>
-        <span class="p">]</span>
-      <span class="p">:</span> <span class="p">[]),</span>
-    <span class="p">...(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">TOKEN_BUDGET</span><span class="dl">'</span><span class="p">)</span>
-      <span class="p">?</span> <span class="p">[</span>
-          <span class="c1">// Cached unconditionally — the "When the user specifies..." phrasing</span>
-          <span class="c1">// makes it a no-op with no budget active. Was DANGEROUS_uncached</span>
-          <span class="c1">// (toggled on getCurrentTurnTokenBudget()), busting ~20K tokens per</span>
-          <span class="c1">// budget flip. Not moved to a tail attachment: first-response and</span>
-          <span class="c1">// budget-continuation paths don't see attachments (#21577).</span>
-          <span class="nf">systemPromptSection</span><span class="p">(</span>
-            <span class="dl">'</span><span class="s1">token_budget</span><span class="dl">'</span><span class="p">,</span>
-            <span class="p">()</span> <span class="o">=&gt;</span>
-              <span class="dl">'</span><span class="s1">When the user specifies a token target (e.g., "+500k", "spend 2M tokens", "use 1B tokens"), your output token count will be shown each turn. Keep working until you approach the target </span><span class="se">\</span><span class="s1">u2014 plan your work to fill it productively. The target is a hard minimum, not a suggestion. If you stop early, the system will automatically continue you.</span><span class="dl">'</span><span class="p">,</span>
-          <span class="p">),</span>
-        <span class="p">]</span>
-      <span class="p">:</span> <span class="p">[]),</span>
-    <span class="p">...(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">KAIROS</span><span class="dl">'</span><span class="p">)</span> <span class="o">||</span> <span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">KAIROS_BRIEF</span><span class="dl">'</span><span class="p">)</span>
-      <span class="p">?</span> <span class="p">[</span><span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">brief</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getBriefSection</span><span class="p">())]</span>
-      <span class="p">:</span> <span class="p">[]),</span>
-  <span class="p">]</span>
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Claude code学习5 动态prompt的组装1</h1> <p class="post-meta"> Created on June 13, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/agent"> <i class="fa-solid fa-hashtag fa-sm"></i> agent</a>   <a href="/blog/tag/claude-code"> <i class="fa-solid fa-hashtag fa-sm"></i> claude-code</a>   <a href="/blog/tag/prompt-engineering"> <i class="fa-solid fa-hashtag fa-sm"></i> prompt-engineering</a>   ·   <a href="/blog/category/agent"> <i class="fa-solid fa-tag fa-sm"></i> agent</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h2 id="动态prompt的组装">动态prompt的组装</h2> <p>前面的静态prompt，由于KV cache的最大利用化，把动态变化的prompt放在了最后面</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">dynamicSections</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">"</span><span class="s2">session_guidance</span><span class="dl">"</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getSessionSpecificGuidanceSection</span><span class="p">(</span><span class="nx">enabledTools</span><span class="p">,</span> <span class="nx">skillToolCommands</span><span class="p">)),</span>
+  <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">"</span><span class="s2">memory</span><span class="dl">"</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">loadMemoryPrompt</span><span class="p">()),</span>
+  <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">"</span><span class="s2">ant_model_override</span><span class="dl">"</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getAntModelOverrideSection</span><span class="p">()),</span>
+  <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">"</span><span class="s2">env_info_simple</span><span class="dl">"</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">computeSimpleEnvInfo</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">additionalWorkingDirectories</span><span class="p">)),</span>
+  <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">"</span><span class="s2">language</span><span class="dl">"</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getLanguageSection</span><span class="p">(</span><span class="nx">settings</span><span class="p">.</span><span class="nx">language</span><span class="p">)),</span>
+  <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">"</span><span class="s2">output_style</span><span class="dl">"</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getOutputStyleSection</span><span class="p">(</span><span class="nx">outputStyleConfig</span><span class="p">)),</span>
+  <span class="c1">// When delta enabled, instructions are announced via persisted</span>
+  <span class="c1">// mcp_instructions_delta attachments (attachments.ts) instead of this</span>
+  <span class="c1">// per-turn recompute, which busts the prompt cache on late MCP connect.</span>
+  <span class="c1">// Gate check inside compute (not selecting between section variants)</span>
+  <span class="c1">// so a mid-session gate flip doesn't read a stale cached value.</span>
+  <span class="nc">DANGEROUS_uncachedSystemPromptSection</span><span class="p">(</span>
+    <span class="dl">"</span><span class="s2">mcp_instructions</span><span class="dl">"</span><span class="p">,</span>
+    <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">(</span><span class="nf">isMcpInstructionsDeltaEnabled</span><span class="p">()</span> <span class="p">?</span> <span class="kc">null</span> <span class="p">:</span> <span class="nf">getMcpInstructionsSection</span><span class="p">(</span><span class="nx">mcpClients</span><span class="p">)),</span>
+    <span class="dl">"</span><span class="s2">MCP servers connect/disconnect between turns</span><span class="dl">"</span>
+  <span class="p">),</span>
+  <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">"</span><span class="s2">scratchpad</span><span class="dl">"</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getScratchpadInstructions</span><span class="p">()),</span>
+  <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">"</span><span class="s2">frc</span><span class="dl">"</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getFunctionResultClearingSection</span><span class="p">(</span><span class="nx">model</span><span class="p">)),</span>
+  <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">"</span><span class="s2">summarize_tool_results</span><span class="dl">"</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">SUMMARIZE_TOOL_RESULTS_SECTION</span><span class="p">),</span>
+  <span class="c1">// Numeric length anchors — research shows ~1.2% output token reduction vs</span>
+  <span class="c1">// qualitative "be concise". Ant-only to measure quality impact first.</span>
+  <span class="p">...(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ant</span><span class="dl">"</span>
+    <span class="p">?</span> <span class="p">[</span>
+        <span class="nf">systemPromptSection</span><span class="p">(</span>
+          <span class="dl">"</span><span class="s2">numeric_length_anchors</span><span class="dl">"</span><span class="p">,</span>
+          <span class="p">()</span> <span class="o">=&gt;</span>
+            <span class="dl">"</span><span class="s2">Length limits: keep text between tool calls to </span><span class="se">\</span><span class="s2">u226425 words. Keep final responses to </span><span class="se">\</span><span class="s2">u2264100 words unless the task requires more detail.</span><span class="dl">"</span>
+        <span class="p">),</span>
+      <span class="p">]</span>
+    <span class="p">:</span> <span class="p">[]),</span>
+  <span class="p">...(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">"</span><span class="s2">TOKEN_BUDGET</span><span class="dl">"</span><span class="p">)</span>
+    <span class="p">?</span> <span class="p">[</span>
+        <span class="c1">// Cached unconditionally — the "When the user specifies..." phrasing</span>
+        <span class="c1">// makes it a no-op with no budget active. Was DANGEROUS_uncached</span>
+        <span class="c1">// (toggled on getCurrentTurnTokenBudget()), busting ~20K tokens per</span>
+        <span class="c1">// budget flip. Not moved to a tail attachment: first-response and</span>
+        <span class="c1">// budget-continuation paths don't see attachments (#21577).</span>
+        <span class="nf">systemPromptSection</span><span class="p">(</span>
+          <span class="dl">"</span><span class="s2">token_budget</span><span class="dl">"</span><span class="p">,</span>
+          <span class="p">()</span> <span class="o">=&gt;</span>
+            <span class="dl">'</span><span class="s1">When the user specifies a token target (e.g., "+500k", "spend 2M tokens", "use 1B tokens"), your output token count will be shown each turn. Keep working until you approach the target </span><span class="se">\</span><span class="s1">u2014 plan your work to fill it productively. The target is a hard minimum, not a suggestion. If you stop early, the system will automatically continue you.</span><span class="dl">'</span>
+        <span class="p">),</span>
+      <span class="p">]</span>
+    <span class="p">:</span> <span class="p">[]),</span>
+  <span class="p">...(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">"</span><span class="s2">KAIROS</span><span class="dl">"</span><span class="p">)</span> <span class="o">||</span> <span class="nf">feature</span><span class="p">(</span><span class="dl">"</span><span class="s2">KAIROS_BRIEF</span><span class="dl">"</span><span class="p">)</span> <span class="p">?</span> <span class="p">[</span><span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">"</span><span class="s2">brief</span><span class="dl">"</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getBriefSection</span><span class="p">())]</span> <span class="p">:</span> <span class="p">[]),</span>
+<span class="p">];</span>
 </code></pre></div></div> <p>这里看到有两种类型的prompt，一种是</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
  * Create a memoized system prompt section.
  * Computed once, cached until /clear or /compact.
  */</span>
-<span class="k">export</span> <span class="kd">function</span> <span class="nf">systemPromptSection</span><span class="p">(</span>
-  <span class="nx">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span>
-  <span class="nx">compute</span><span class="p">:</span> <span class="nx">ComputeFn</span><span class="p">,</span>
-<span class="p">):</span> <span class="nx">SystemPromptSection</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="p">{</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">compute</span><span class="p">,</span> <span class="na">cacheBreak</span><span class="p">:</span> <span class="kc">false</span> <span class="p">}</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">systemPromptSection</span><span class="p">(</span><span class="nx">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span> <span class="nx">compute</span><span class="p">:</span> <span class="nx">ComputeFn</span><span class="p">):</span> <span class="nx">SystemPromptSection</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">{</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">compute</span><span class="p">,</span> <span class="na">cacheBreak</span><span class="p">:</span> <span class="kc">false</span> <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div></div> <p>另一种是</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
  * Create a volatile system prompt section that recomputes every turn.
  * This WILL break the prompt cache when the value changes.
  * Requires a reason explaining why cache-breaking is necessary.
  */</span>
-<span class="k">export</span> <span class="kd">function</span> <span class="nf">DANGEROUS_uncachedSystemPromptSection</span><span class="p">(</span>
-  <span class="nx">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span>
-  <span class="nx">compute</span><span class="p">:</span> <span class="nx">ComputeFn</span><span class="p">,</span>
-  <span class="nx">_reason</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span>
-<span class="p">):</span> <span class="nx">SystemPromptSection</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="p">{</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">compute</span><span class="p">,</span> <span class="na">cacheBreak</span><span class="p">:</span> <span class="kc">true</span> <span class="p">}</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">DANGEROUS_uncachedSystemPromptSection</span><span class="p">(</span><span class="nx">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span> <span class="nx">compute</span><span class="p">:</span> <span class="nx">ComputeFn</span><span class="p">,</span> <span class="nx">_reason</span><span class="p">:</span> <span class="kr">string</span><span class="p">):</span> <span class="nx">SystemPromptSection</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">{</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">compute</span><span class="p">,</span> <span class="na">cacheBreak</span><span class="p">:</span> <span class="kc">true</span> <span class="p">};</span>
 <span class="p">}</span>
-</code></pre></div></div> <p>二者也可以从注释中看出二者的生命周期的区别，一个是除了/compact和/clear之外，其他任何时候都会被缓存，一个是每次都会被计算的 之后将运行等在这里进行执行</p> <h3 id="session_guidance">session_guidance</h3> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">resolveSystemPromptSections</span><span class="p">(</span>
-  <span class="nx">sections</span><span class="p">:</span> <span class="nx">SystemPromptSection</span><span class="p">[],</span>
-<span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">(</span><span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span><span class="p">)[]</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="kd">const</span> <span class="nx">cache</span> <span class="o">=</span> <span class="nf">getSystemPromptSectionCache</span><span class="p">()</span>
+</code></pre></div></div> <p>二者也可以从注释中看出二者的生命周期的区别，一个是除了/compact和/clear之外，其他任何时候都会被缓存，一个是每次都会被计算的 之后将运行等在这里进行执行</p> <h3 id="session_guidance">session_guidance</h3> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">resolveSystemPromptSections</span><span class="p">(</span><span class="nx">sections</span><span class="p">:</span> <span class="nx">SystemPromptSection</span><span class="p">[]):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">(</span><span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span><span class="p">)[]</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">cache</span> <span class="o">=</span> <span class="nf">getSystemPromptSectionCache</span><span class="p">();</span>
 
   <span class="k">return</span> <span class="nb">Promise</span><span class="p">.</span><span class="nf">all</span><span class="p">(</span>
-    <span class="nx">sections</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="k">async</span> <span class="nx">s</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">sections</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="k">async </span><span class="p">(</span><span class="nx">s</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
       <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">s</span><span class="p">.</span><span class="nx">cacheBreak</span> <span class="o">&amp;&amp;</span> <span class="nx">cache</span><span class="p">.</span><span class="nf">has</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">name</span><span class="p">))</span> <span class="p">{</span>
-        <span class="k">return</span> <span class="nx">cache</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="o">??</span> <span class="kc">null</span>
+        <span class="k">return</span> <span class="nx">cache</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="o">??</span> <span class="kc">null</span><span class="p">;</span>
       <span class="p">}</span>
-      <span class="kd">const</span> <span class="nx">value</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">s</span><span class="p">.</span><span class="nf">compute</span><span class="p">()</span>
-      <span class="nf">setSystemPromptSectionCacheEntry</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span>
-      <span class="k">return</span> <span class="nx">value</span>
-    <span class="p">}),</span>
-  <span class="p">)</span>
+      <span class="kd">const</span> <span class="nx">value</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">s</span><span class="p">.</span><span class="nf">compute</span><span class="p">();</span>
+      <span class="nf">setSystemPromptSectionCacheEntry</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="nx">value</span><span class="p">);</span>
+      <span class="k">return</span> <span class="nx">value</span><span class="p">;</span>
+    <span class="p">})</span>
+  <span class="p">);</span>
 <span class="p">}</span>
-</code></pre></div></div> <p>在组装动态prompt的时候，第一个组装的是类似与工具一类的prompt 主要逻辑是这个函数</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">getSessionSpecificGuidanceSection</span><span class="p">(</span>
-  <span class="nx">enabledTools</span><span class="p">:</span> <span class="nb">Set</span><span class="o">&lt;</span><span class="kr">string</span><span class="o">&gt;</span><span class="p">,</span>
-  <span class="nx">skillToolCommands</span><span class="p">:</span> <span class="nx">Command</span><span class="p">[],</span>
-<span class="p">):</span> <span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span> <span class="p">{</span>
-  <span class="kd">const</span> <span class="nx">hasAskUserQuestionTool</span> <span class="o">=</span> <span class="nx">enabledTools</span><span class="p">.</span><span class="nf">has</span><span class="p">(</span><span class="nx">ASK_USER_QUESTION_TOOL_NAME</span><span class="p">)</span>
-  <span class="kd">const</span> <span class="nx">hasSkills</span> <span class="o">=</span>
-    <span class="nx">skillToolCommands</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">enabledTools</span><span class="p">.</span><span class="nf">has</span><span class="p">(</span><span class="nx">SKILL_TOOL_NAME</span><span class="p">)</span>
-  <span class="kd">const</span> <span class="nx">hasAgentTool</span> <span class="o">=</span> <span class="nx">enabledTools</span><span class="p">.</span><span class="nf">has</span><span class="p">(</span><span class="nx">AGENT_TOOL_NAME</span><span class="p">)</span>
-  <span class="kd">const</span> <span class="nx">searchTools</span> <span class="o">=</span> <span class="nf">hasEmbeddedSearchTools</span><span class="p">()</span>
-    <span class="p">?</span> <span class="s2">`</span><span class="se">\`</span><span class="s2">find</span><span class="se">\`</span><span class="s2"> or </span><span class="se">\`</span><span class="s2">grep</span><span class="se">\`</span><span class="s2"> via the </span><span class="p">${</span><span class="nx">BASH_TOOL_NAME</span><span class="p">}</span><span class="s2"> tool`</span>
-    <span class="p">:</span> <span class="s2">`the </span><span class="p">${</span><span class="nx">GLOB_TOOL_NAME</span><span class="p">}</span><span class="s2"> or </span><span class="p">${</span><span class="nx">GREP_TOOL_NAME</span><span class="p">}</span><span class="s2">`</span>
+</code></pre></div></div> <p>在组装动态prompt的时候，第一个组装的是类似与工具一类的prompt 主要逻辑是这个函数</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">getSessionSpecificGuidanceSection</span><span class="p">(</span><span class="nx">enabledTools</span><span class="p">:</span> <span class="nb">Set</span><span class="o">&lt;</span><span class="kr">string</span><span class="o">&gt;</span><span class="p">,</span> <span class="nx">skillToolCommands</span><span class="p">:</span> <span class="nx">Command</span><span class="p">[]):</span> <span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">hasAskUserQuestionTool</span> <span class="o">=</span> <span class="nx">enabledTools</span><span class="p">.</span><span class="nf">has</span><span class="p">(</span><span class="nx">ASK_USER_QUESTION_TOOL_NAME</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="nx">hasSkills</span> <span class="o">=</span> <span class="nx">skillToolCommands</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">enabledTools</span><span class="p">.</span><span class="nf">has</span><span class="p">(</span><span class="nx">SKILL_TOOL_NAME</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="nx">hasAgentTool</span> <span class="o">=</span> <span class="nx">enabledTools</span><span class="p">.</span><span class="nf">has</span><span class="p">(</span><span class="nx">AGENT_TOOL_NAME</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="nx">searchTools</span> <span class="o">=</span> <span class="nf">hasEmbeddedSearchTools</span><span class="p">()</span> <span class="p">?</span> <span class="s2">`</span><span class="se">\`</span><span class="s2">find</span><span class="se">\`</span><span class="s2"> or </span><span class="se">\`</span><span class="s2">grep</span><span class="se">\`</span><span class="s2"> via the </span><span class="p">${</span><span class="nx">BASH_TOOL_NAME</span><span class="p">}</span><span class="s2"> tool`</span> <span class="p">:</span> <span class="s2">`the </span><span class="p">${</span><span class="nx">GLOB_TOOL_NAME</span><span class="p">}</span><span class="s2"> or </span><span class="p">${</span><span class="nx">GREP_TOOL_NAME</span><span class="p">}</span><span class="s2">`</span><span class="p">;</span>
 
   <span class="kd">const</span> <span class="nx">items</span> <span class="o">=</span> <span class="p">[</span>
     <span class="nx">hasAskUserQuestionTool</span>
@@ -129,9 +96,7 @@
     <span class="c1">// isForkSubagentEnabled() reads getIsNonInteractiveSession() — must be</span>
     <span class="c1">// post-boundary or it fragments the static prefix on session type.</span>
     <span class="nx">hasAgentTool</span> <span class="p">?</span> <span class="nf">getAgentToolSection</span><span class="p">()</span> <span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-    <span class="p">...(</span><span class="nx">hasAgentTool</span> <span class="o">&amp;&amp;</span>
-    <span class="nf">areExplorePlanAgentsEnabled</span><span class="p">()</span> <span class="o">&amp;&amp;</span>
-    <span class="o">!</span><span class="nf">isForkSubagentEnabled</span><span class="p">()</span>
+    <span class="p">...(</span><span class="nx">hasAgentTool</span> <span class="o">&amp;&amp;</span> <span class="nf">areExplorePlanAgentsEnabled</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nf">isForkSubagentEnabled</span><span class="p">()</span>
       <span class="p">?</span> <span class="p">[</span>
           <span class="s2">`For simple, directed codebase searches (e.g. for a specific file/class/function) use </span><span class="p">${</span><span class="nx">searchTools</span><span class="p">}</span><span class="s2"> directly.`</span><span class="p">,</span>
           <span class="s2">`For broader codebase exploration and deep research, use the </span><span class="p">${</span><span class="nx">AGENT_TOOL_NAME</span><span class="p">}</span><span class="s2"> tool with subagent_type=</span><span class="p">${</span><span class="nx">EXPLORE_AGENT</span><span class="p">.</span><span class="nx">agentType</span><span class="p">}</span><span class="s2">. This is slower than using </span><span class="p">${</span><span class="nx">searchTools</span><span class="p">}</span><span class="s2"> directly, so use this only when a simple, directed search proves to be insufficient or when your task will clearly require more than </span><span class="p">${</span><span class="nx">EXPLORE_AGENT_MIN_QUERIES</span><span class="p">}</span><span class="s2"> queries.`</span><span class="p">,</span>
@@ -140,28 +105,24 @@
     <span class="nx">hasSkills</span>
       <span class="p">?</span> <span class="s2">`/&lt;skill-name&gt; (e.g., /commit) is shorthand for users to invoke a user-invocable skill. When executed, the skill gets expanded to a full prompt. Use the </span><span class="p">${</span><span class="nx">SKILL_TOOL_NAME</span><span class="p">}</span><span class="s2"> tool to execute them. IMPORTANT: Only use </span><span class="p">${</span><span class="nx">SKILL_TOOL_NAME</span><span class="p">}</span><span class="s2"> for skills listed in its user-invocable skills section - do not guess or use built-in CLI commands.`</span>
       <span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-    <span class="nx">DISCOVER_SKILLS_TOOL_NAME</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">hasSkills</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">enabledTools</span><span class="p">.</span><span class="nf">has</span><span class="p">(</span><span class="nx">DISCOVER_SKILLS_TOOL_NAME</span><span class="p">)</span>
-      <span class="p">?</span> <span class="nf">getDiscoverSkillsGuidance</span><span class="p">()</span>
-      <span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nx">DISCOVER_SKILLS_TOOL_NAME</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="nx">hasSkills</span> <span class="o">&amp;&amp;</span> <span class="nx">enabledTools</span><span class="p">.</span><span class="nf">has</span><span class="p">(</span><span class="nx">DISCOVER_SKILLS_TOOL_NAME</span><span class="p">)</span> <span class="p">?</span> <span class="nf">getDiscoverSkillsGuidance</span><span class="p">()</span> <span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
     <span class="nx">hasAgentTool</span> <span class="o">&amp;&amp;</span>
-    <span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">VERIFICATION_AGENT</span><span class="dl">'</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+    <span class="nf">feature</span><span class="p">(</span><span class="dl">"</span><span class="s2">VERIFICATION_AGENT</span><span class="dl">"</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
     <span class="c1">// 3P default: false — verification agent is ant-only A/B</span>
-    <span class="nf">getFeatureValue_CACHED_MAY_BE_STALE</span><span class="p">(</span><span class="dl">'</span><span class="s1">tengu_hive_evidence</span><span class="dl">'</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+    <span class="nf">getFeatureValue_CACHED_MAY_BE_STALE</span><span class="p">(</span><span class="dl">"</span><span class="s2">tengu_hive_evidence</span><span class="dl">"</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
       <span class="p">?</span> <span class="s2">`The contract: when non-trivial implementation happens on your turn, independent adversarial verification must happen before you report completion \u2014 regardless of who did the implementing (you directly, a fork you spawned, or a subagent). You are the one reporting to the user; you own the gate. Non-trivial means: 3+ file edits, backend/API changes, or infrastructure changes. Spawn the </span><span class="p">${</span><span class="nx">AGENT_TOOL_NAME</span><span class="p">}</span><span class="s2"> tool with subagent_type="</span><span class="p">${</span><span class="nx">VERIFICATION_AGENT_TYPE</span><span class="p">}</span><span class="s2">". Your own checks, caveats, and a fork's self-checks do NOT substitute \u2014 only the verifier assigns a verdict; you cannot self-assign PARTIAL. Pass the original user request, all files changed (by anyone), the approach, and the plan file path if applicable. Flag concerns if you have them but do NOT share test results or claim things work. On FAIL: fix, resume the verifier with its findings plus your fix, repeat until PASS. On PASS: spot-check it \u2014 re-run 2-3 commands from its report, confirm every PASS has a Command run block with output that matches your re-run. If any PASS lacks a command block or diverges, resume the verifier with the specifics. On PARTIAL (from the verifier): report what passed and what could not be verified.`</span>
       <span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
-  <span class="p">].</span><span class="nf">filter</span><span class="p">(</span><span class="nx">item</span> <span class="o">=&gt;</span> <span class="nx">item</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span>
+  <span class="p">].</span><span class="nf">filter</span><span class="p">((</span><span class="nx">item</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">item</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">);</span>
 
-  <span class="k">if </span><span class="p">(</span><span class="nx">items</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="kc">null</span>
-  <span class="k">return</span> <span class="p">[</span><span class="dl">'</span><span class="s1"># Session-specific guidance</span><span class="dl">'</span><span class="p">,</span> <span class="p">...</span><span class="nf">prependBullets</span><span class="p">(</span><span class="nx">items</span><span class="p">)].</span><span class="nf">join</span><span class="p">(</span><span class="dl">'</span><span class="se">\n</span><span class="dl">'</span><span class="p">)</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">items</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="k">return</span> <span class="p">[</span><span class="dl">"</span><span class="s2"># Session-specific guidance</span><span class="dl">"</span><span class="p">,</span> <span class="p">...</span><span class="nf">prependBullets</span><span class="p">(</span><span class="nx">items</span><span class="p">)].</span><span class="nf">join</span><span class="p">(</span><span class="dl">"</span><span class="se">\n</span><span class="dl">"</span><span class="p">);</span>
 <span class="p">}</span>
-</code></pre></div></div> <p>这里主要处理了几个工具的关系 第一个就是<code class="language-plaintext highlighter-rouge">hasAskUserQuestionTool</code>，如果有的话模型可以主动向用户提问 prompt引导模型去这么做 第二个<code class="language-plaintext highlighter-rouge">getIsNonInteractiveSession()</code>，这个函数会判断当前是否是交互式会话，如果是的话，模型将不能进行交互式的操作，只能进行非交互式的操作，比如执行命令，或者调用工具 第三个<code class="language-plaintext highlighter-rouge">hasAgentTool</code>，这个主要是关于子agent fork的，会告诉模型怎么去fork一个subagent</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1">// isForkSubagentEnabled() reads getIsNonInteractiveSession() — must be</span>
-    <span class="c1">// post-boundary or it fragments the static prefix on session type.</span>
+</code></pre></div></div> <p>这里主要处理了几个工具的关系 第一个就是<code class="language-plaintext highlighter-rouge">hasAskUserQuestionTool</code>，如果有的话模型可以主动向用户提问 prompt引导模型去这么做 第二个<code class="language-plaintext highlighter-rouge">getIsNonInteractiveSession()</code>，这个函数会判断当前是否是交互式会话，如果是的话，模型将不能进行交互式的操作，只能进行非交互式的操作，比如执行命令，或者调用工具 第三个<code class="language-plaintext highlighter-rouge">hasAgentTool</code>，这个主要是关于子agent fork的，会告诉模型怎么去fork一个subagent</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// isForkSubagentEnabled() reads getIsNonInteractiveSession() — must be</span>
+<span class="c1">// post-boundary or it fragments the static prefix on session type.</span>
 <span class="kd">function</span> <span class="nf">getAgentToolSection</span><span class="p">():</span> <span class="kr">string</span> <span class="p">{</span>
   <span class="k">return</span> <span class="nf">isForkSubagentEnabled</span><span class="p">()</span>
     <span class="p">?</span> <span class="s2">`Calling </span><span class="p">${</span><span class="nx">AGENT_TOOL_NAME</span><span class="p">}</span><span class="s2"> without a subagent_type creates a fork, which runs in the background and keeps its tool output out of your context \u2014 so you can keep chatting with the user while it works. Reach for it when research or multi-step implementation work would otherwise fill your context with raw output you won't need again. **If you ARE the fork** \u2014 execute directly; do not re-delegate.`</span>
-    <span class="p">:</span> <span class="s2">`Use the </span><span class="p">${</span><span class="nx">AGENT_TOOL_NAME</span><span class="p">}</span><span class="s2"> tool with specialized agents when the task at hand matches the agent's description. Subagents are valuable for parallelizing independent queries or for protecting the main context window from excessive results, but they should not be used excessively when not needed. Importantly, avoid duplicating work that subagents are already doing - if you delegate research to a subagent, do not also perform the same searches yourself.`</span>
+    <span class="p">:</span> <span class="s2">`Use the </span><span class="p">${</span><span class="nx">AGENT_TOOL_NAME</span><span class="p">}</span><span class="s2"> tool with specialized agents when the task at hand matches the agent's description. Subagents are valuable for parallelizing independent queries or for protecting the main context window from excessive results, but they should not be used excessively when not needed. Importantly, avoid duplicating work that subagents are already doing - if you delegate research to a subagent, do not also perform the same searches yourself.`</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div> <p><code class="language-plaintext highlighter-rouge">areExplorePlanAgentsEnabled()</code>但没有subagent的时候，会引导在较为复杂的任务上使用这个ExplorePlanAgents <code class="language-plaintext highlighter-rouge">hasSkills</code>故名思意，就是有关于skill的相关配置，引导llm可以使用skill 总的来说，这里都是引导并且告诉llm什么工具可以用，怎么用的</p> <h3 id="memory">memory</h3> <p><code class="language-plaintext highlighter-rouge">systemPromptSection('memory', () =&gt; loadMemoryPrompt()),</code>这是 Claude Code 的记忆系统加载器，负责把用户的记忆文件注入到 system prompt 里</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
  * Load the unified memory prompt for inclusion in the system prompt.
@@ -174,38 +135,30 @@
  * Returns null when auto memory is disabled.
  */</span>
 <span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">loadMemoryPrompt</span><span class="p">():</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span><span class="o">&gt;</span> <span class="p">{</span>
-  <span class="kd">const</span> <span class="nx">autoEnabled</span> <span class="o">=</span> <span class="nf">isAutoMemoryEnabled</span><span class="p">()</span>
+  <span class="kd">const</span> <span class="nx">autoEnabled</span> <span class="o">=</span> <span class="nf">isAutoMemoryEnabled</span><span class="p">();</span>
 
-  <span class="kd">const</span> <span class="nx">skipIndex</span> <span class="o">=</span> <span class="nf">getFeatureValue_CACHED_MAY_BE_STALE</span><span class="p">(</span>
-    <span class="dl">'</span><span class="s1">tengu_moth_copse</span><span class="dl">'</span><span class="p">,</span>
-    <span class="kc">false</span><span class="p">,</span>
-  <span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">skipIndex</span> <span class="o">=</span> <span class="nf">getFeatureValue_CACHED_MAY_BE_STALE</span><span class="p">(</span><span class="dl">"</span><span class="s2">tengu_moth_copse</span><span class="dl">"</span><span class="p">,</span> <span class="kc">false</span><span class="p">);</span>
 
   <span class="c1">// KAIROS daily-log mode takes precedence over TEAMMEM: the append-only</span>
   <span class="c1">// log paradigm does not compose with team sync (which expects a shared</span>
   <span class="c1">// MEMORY.md that both sides read + write). Gating on `autoEnabled` here</span>
   <span class="c1">// means the !autoEnabled case falls through to the tengu_memdir_disabled</span>
   <span class="c1">// telemetry block below, matching the non-KAIROS path.</span>
-  <span class="k">if </span><span class="p">(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">KAIROS</span><span class="dl">'</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">autoEnabled</span> <span class="o">&amp;&amp;</span> <span class="nf">getKairosActive</span><span class="p">())</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">"</span><span class="s2">KAIROS</span><span class="dl">"</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">autoEnabled</span> <span class="o">&amp;&amp;</span> <span class="nf">getKairosActive</span><span class="p">())</span> <span class="p">{</span>
     <span class="nf">logMemoryDirCounts</span><span class="p">(</span><span class="nf">getAutoMemPath</span><span class="p">(),</span> <span class="p">{</span>
-      <span class="na">memory_type</span><span class="p">:</span>
-        <span class="dl">'</span><span class="s1">auto</span><span class="dl">'</span> <span class="kd">as </span><span class="nx">AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS</span><span class="p">,</span>
-    <span class="p">})</span>
-    <span class="k">return</span> <span class="nf">buildAssistantDailyLogPrompt</span><span class="p">(</span><span class="nx">skipIndex</span><span class="p">)</span>
+      <span class="na">memory_type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">auto</span><span class="dl">"</span> <span class="kd">as </span><span class="nx">AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS</span><span class="p">,</span>
+    <span class="p">});</span>
+    <span class="k">return</span> <span class="nf">buildAssistantDailyLogPrompt</span><span class="p">(</span><span class="nx">skipIndex</span><span class="p">);</span>
   <span class="p">}</span>
 
   <span class="c1">// Cowork injects memory-policy text via env var; thread into all builders.</span>
-  <span class="kd">const</span> <span class="nx">coworkExtraGuidelines</span> <span class="o">=</span>
-    <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CLAUDE_COWORK_MEMORY_EXTRA_GUIDELINES</span>
-  <span class="kd">const</span> <span class="nx">extraGuidelines</span> <span class="o">=</span>
-    <span class="nx">coworkExtraGuidelines</span> <span class="o">&amp;&amp;</span> <span class="nx">coworkExtraGuidelines</span><span class="p">.</span><span class="nf">trim</span><span class="p">().</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span>
-      <span class="p">?</span> <span class="p">[</span><span class="nx">coworkExtraGuidelines</span><span class="p">]</span>
-      <span class="p">:</span> <span class="kc">undefined</span>
+  <span class="kd">const</span> <span class="nx">coworkExtraGuidelines</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CLAUDE_COWORK_MEMORY_EXTRA_GUIDELINES</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">extraGuidelines</span> <span class="o">=</span> <span class="nx">coworkExtraGuidelines</span> <span class="o">&amp;&amp;</span> <span class="nx">coworkExtraGuidelines</span><span class="p">.</span><span class="nf">trim</span><span class="p">().</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">?</span> <span class="p">[</span><span class="nx">coworkExtraGuidelines</span><span class="p">]</span> <span class="p">:</span> <span class="kc">undefined</span><span class="p">;</span>
 
-  <span class="k">if </span><span class="p">(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">TEAMMEM</span><span class="dl">'</span><span class="p">))</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">"</span><span class="s2">TEAMMEM</span><span class="dl">"</span><span class="p">))</span> <span class="p">{</span>
     <span class="k">if </span><span class="p">(</span><span class="nx">teamMemPaths</span><span class="o">!</span><span class="p">.</span><span class="nf">isTeamMemoryEnabled</span><span class="p">())</span> <span class="p">{</span>
-      <span class="kd">const</span> <span class="nx">autoDir</span> <span class="o">=</span> <span class="nf">getAutoMemPath</span><span class="p">()</span>
-      <span class="kd">const</span> <span class="nx">teamDir</span> <span class="o">=</span> <span class="nx">teamMemPaths</span><span class="o">!</span><span class="p">.</span><span class="nf">getTeamMemPath</span><span class="p">()</span>
+      <span class="kd">const</span> <span class="nx">autoDir</span> <span class="o">=</span> <span class="nf">getAutoMemPath</span><span class="p">();</span>
+      <span class="kd">const</span> <span class="nx">teamDir</span> <span class="o">=</span> <span class="nx">teamMemPaths</span><span class="o">!</span><span class="p">.</span><span class="nf">getTeamMemPath</span><span class="p">();</span>
       <span class="c1">// Harness guarantees these directories exist so the model can write</span>
       <span class="c1">// without checking. The prompt text reflects this ("already exists").</span>
       <span class="c1">// Only creating teamDir is sufficient: getTeamMemPath() is defined as</span>
@@ -213,54 +166,39 @@
       <span class="c1">// creates the auto dir as a side effect. If the team dir ever moves</span>
       <span class="c1">// out from under the auto dir, add a second ensureMemoryDirExists call</span>
       <span class="c1">// for autoDir here.</span>
-      <span class="k">await</span> <span class="nf">ensureMemoryDirExists</span><span class="p">(</span><span class="nx">teamDir</span><span class="p">)</span>
+      <span class="k">await</span> <span class="nf">ensureMemoryDirExists</span><span class="p">(</span><span class="nx">teamDir</span><span class="p">);</span>
       <span class="nf">logMemoryDirCounts</span><span class="p">(</span><span class="nx">autoDir</span><span class="p">,</span> <span class="p">{</span>
-        <span class="na">memory_type</span><span class="p">:</span>
-          <span class="dl">'</span><span class="s1">auto</span><span class="dl">'</span> <span class="kd">as </span><span class="nx">AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS</span><span class="p">,</span>
-      <span class="p">})</span>
+        <span class="na">memory_type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">auto</span><span class="dl">"</span> <span class="kd">as </span><span class="nx">AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS</span><span class="p">,</span>
+      <span class="p">});</span>
       <span class="nf">logMemoryDirCounts</span><span class="p">(</span><span class="nx">teamDir</span><span class="p">,</span> <span class="p">{</span>
-        <span class="na">memory_type</span><span class="p">:</span>
-          <span class="dl">'</span><span class="s1">team</span><span class="dl">'</span> <span class="kd">as </span><span class="nx">AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS</span><span class="p">,</span>
-      <span class="p">})</span>
-      <span class="k">return</span> <span class="nx">teamMemPrompts</span><span class="o">!</span><span class="p">.</span><span class="nf">buildCombinedMemoryPrompt</span><span class="p">(</span>
-        <span class="nx">extraGuidelines</span><span class="p">,</span>
-        <span class="nx">skipIndex</span><span class="p">,</span>
-      <span class="p">)</span>
+        <span class="na">memory_type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">team</span><span class="dl">"</span> <span class="kd">as </span><span class="nx">AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS</span><span class="p">,</span>
+      <span class="p">});</span>
+      <span class="k">return</span> <span class="nx">teamMemPrompts</span><span class="o">!</span><span class="p">.</span><span class="nf">buildCombinedMemoryPrompt</span><span class="p">(</span><span class="nx">extraGuidelines</span><span class="p">,</span> <span class="nx">skipIndex</span><span class="p">);</span>
     <span class="p">}</span>
   <span class="p">}</span>
 
   <span class="k">if </span><span class="p">(</span><span class="nx">autoEnabled</span><span class="p">)</span> <span class="p">{</span>
-    <span class="kd">const</span> <span class="nx">autoDir</span> <span class="o">=</span> <span class="nf">getAutoMemPath</span><span class="p">()</span>
+    <span class="kd">const</span> <span class="nx">autoDir</span> <span class="o">=</span> <span class="nf">getAutoMemPath</span><span class="p">();</span>
     <span class="c1">// Harness guarantees the directory exists so the model can write without</span>
     <span class="c1">// checking. The prompt text reflects this ("already exists").</span>
-    <span class="k">await</span> <span class="nf">ensureMemoryDirExists</span><span class="p">(</span><span class="nx">autoDir</span><span class="p">)</span>
+    <span class="k">await</span> <span class="nf">ensureMemoryDirExists</span><span class="p">(</span><span class="nx">autoDir</span><span class="p">);</span>
     <span class="nf">logMemoryDirCounts</span><span class="p">(</span><span class="nx">autoDir</span><span class="p">,</span> <span class="p">{</span>
-      <span class="na">memory_type</span><span class="p">:</span>
-        <span class="dl">'</span><span class="s1">auto</span><span class="dl">'</span> <span class="kd">as </span><span class="nx">AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS</span><span class="p">,</span>
-    <span class="p">})</span>
-    <span class="k">return</span> <span class="nf">buildMemoryLines</span><span class="p">(</span>
-      <span class="dl">'</span><span class="s1">auto memory</span><span class="dl">'</span><span class="p">,</span>
-      <span class="nx">autoDir</span><span class="p">,</span>
-      <span class="nx">extraGuidelines</span><span class="p">,</span>
-      <span class="nx">skipIndex</span><span class="p">,</span>
-    <span class="p">).</span><span class="nf">join</span><span class="p">(</span><span class="dl">'</span><span class="se">\n</span><span class="dl">'</span><span class="p">)</span>
+      <span class="na">memory_type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">auto</span><span class="dl">"</span> <span class="kd">as </span><span class="nx">AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS</span><span class="p">,</span>
+    <span class="p">});</span>
+    <span class="k">return</span> <span class="nf">buildMemoryLines</span><span class="p">(</span><span class="dl">"</span><span class="s2">auto memory</span><span class="dl">"</span><span class="p">,</span> <span class="nx">autoDir</span><span class="p">,</span> <span class="nx">extraGuidelines</span><span class="p">,</span> <span class="nx">skipIndex</span><span class="p">).</span><span class="nf">join</span><span class="p">(</span><span class="dl">"</span><span class="se">\n</span><span class="dl">"</span><span class="p">);</span>
   <span class="p">}</span>
 
-  <span class="nf">logEvent</span><span class="p">(</span><span class="dl">'</span><span class="s1">tengu_memdir_disabled</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
-    <span class="na">disabled_by_env_var</span><span class="p">:</span> <span class="nf">isEnvTruthy</span><span class="p">(</span>
-      <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CLAUDE_CODE_DISABLE_AUTO_MEMORY</span><span class="p">,</span>
-    <span class="p">),</span>
-    <span class="na">disabled_by_setting</span><span class="p">:</span>
-      <span class="o">!</span><span class="nf">isEnvTruthy</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CLAUDE_CODE_DISABLE_AUTO_MEMORY</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
-      <span class="nf">getInitialSettings</span><span class="p">().</span><span class="nx">autoMemoryEnabled</span> <span class="o">===</span> <span class="kc">false</span><span class="p">,</span>
-  <span class="p">})</span>
+  <span class="nf">logEvent</span><span class="p">(</span><span class="dl">"</span><span class="s2">tengu_memdir_disabled</span><span class="dl">"</span><span class="p">,</span> <span class="p">{</span>
+    <span class="na">disabled_by_env_var</span><span class="p">:</span> <span class="nf">isEnvTruthy</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CLAUDE_CODE_DISABLE_AUTO_MEMORY</span><span class="p">),</span>
+    <span class="na">disabled_by_setting</span><span class="p">:</span> <span class="o">!</span><span class="nf">isEnvTruthy</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CLAUDE_CODE_DISABLE_AUTO_MEMORY</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nf">getInitialSettings</span><span class="p">().</span><span class="nx">autoMemoryEnabled</span> <span class="o">===</span> <span class="kc">false</span><span class="p">,</span>
+  <span class="p">});</span>
   <span class="c1">// Gate on the GB flag directly, not isTeamMemoryEnabled() — that function</span>
   <span class="c1">// checks isAutoMemoryEnabled() first, which is definitionally false in this</span>
   <span class="c1">// branch. We want "was this user in the team-memory cohort at all."</span>
-  <span class="k">if </span><span class="p">(</span><span class="nf">getFeatureValue_CACHED_MAY_BE_STALE</span><span class="p">(</span><span class="dl">'</span><span class="s1">tengu_herring_clock</span><span class="dl">'</span><span class="p">,</span> <span class="kc">false</span><span class="p">))</span> <span class="p">{</span>
-    <span class="nf">logEvent</span><span class="p">(</span><span class="dl">'</span><span class="s1">tengu_team_memdir_disabled</span><span class="dl">'</span><span class="p">,</span> <span class="p">{})</span>
+  <span class="k">if </span><span class="p">(</span><span class="nf">getFeatureValue_CACHED_MAY_BE_STALE</span><span class="p">(</span><span class="dl">"</span><span class="s2">tengu_herring_clock</span><span class="dl">"</span><span class="p">,</span> <span class="kc">false</span><span class="p">))</span> <span class="p">{</span>
+    <span class="nf">logEvent</span><span class="p">(</span><span class="dl">"</span><span class="s2">tengu_team_memdir_disabled</span><span class="dl">"</span><span class="p">,</span> <span class="p">{});</span>
   <span class="p">}</span>
-  <span class="k">return</span> <span class="kc">null</span>
+  <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div> <p>他有三种记忆模式，分别是<code class="language-plaintext highlighter-rouge">Auto Memory（标准个人模式）</code>、<code class="language-plaintext highlighter-rouge">Team Memory（团队模式）</code>和<code class="language-plaintext highlighter-rouge">Kairos Daily Log（Kairos 日志模式）</code></p> <h4 id="auto-memory">Auto memory</h4> <p>CLAUDE.md 更像“长期指令/规则” AutoMem / TeamMem 更像“长期知识库” 这里的设计可以参考一下b站这位up讲的视频</p> <iframe src="https://player.bilibili.com/player.html?bvid=BV1ZA93BtEKW&amp;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" width="100%" height="500"></iframe> <p>落盘（本地和持久化）、更新和维护 =&gt; 写入 总的来说这些md文件都有一个frontmatter，用来方便做渐进式披露 目录结构</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">~</span><span class="sr">/.claude/</span><span class="nx">projects</span><span class="o">/&lt;</span><span class="nx">sanitized</span><span class="o">-</span><span class="nx">git</span><span class="o">-</span><span class="nx">root</span><span class="o">&gt;</span><span class="sr">/memory/</span>
 <span class="err">├──</span> <span class="nx">MEMORY</span><span class="p">.</span><span class="nx">md</span>                  <span class="err">←</span> <span class="nx">索引文件</span><span class="err">（</span><span class="nx">每次对话都加载到上下文</span><span class="err">）</span>
@@ -359,85 +297,79 @@ If the user explicitly asks...           ← 用户说"记住这个" → 立即�
                                         ← 9. 搜索历史
 ## Searching past context               ← grep 记忆目录和会话记录
 </code></pre></div></div> <p>下面是拼装的代码</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">const</span> <span class="nx">MEMORY_FRONTMATTER_EXAMPLE</span><span class="p">:</span> <span class="k">readonly</span> <span class="kr">string</span><span class="p">[]</span> <span class="o">=</span> <span class="p">[</span>
-  <span class="dl">'</span><span class="s1">```markdown</span><span class="dl">'</span><span class="p">,</span>
-  <span class="dl">'</span><span class="s1">---</span><span class="dl">'</span><span class="p">,</span>
-  <span class="dl">'</span><span class="s1">name: </span><span class="dl">'</span><span class="p">,</span>
-  <span class="dl">'</span><span class="s1">description: </span><span class="dl">'</span><span class="p">,</span>
+  <span class="dl">"</span><span class="s2">```markdown</span><span class="dl">"</span><span class="p">,</span>
+  <span class="dl">"</span><span class="s2">---</span><span class="dl">"</span><span class="p">,</span>
+  <span class="dl">"</span><span class="s2">name: </span><span class="dl">"</span><span class="p">,</span>
+  <span class="dl">"</span><span class="s2">description: </span><span class="dl">"</span><span class="p">,</span>
   <span class="s2">`type: }`</span><span class="p">,</span>
-  <span class="dl">'</span><span class="s1">---</span><span class="dl">'</span><span class="p">,</span>
-  <span class="dl">''</span><span class="p">,</span>
-  <span class="dl">''</span><span class="p">,</span>
-  <span class="dl">'</span><span class="s1">```</span><span class="dl">'</span><span class="p">,</span>
-<span class="p">]</span>
+  <span class="dl">"</span><span class="s2">---</span><span class="dl">"</span><span class="p">,</span>
+  <span class="dl">""</span><span class="p">,</span>
+  <span class="dl">""</span><span class="p">,</span>
+  <span class="dl">"</span><span class="s2">```</span><span class="dl">"</span><span class="p">,</span>
+<span class="p">];</span>
 
-
-<span class="k">export</span> <span class="kd">function</span> <span class="nf">buildMemoryLines</span><span class="p">(</span>
-  <span class="nx">displayName</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span>
-  <span class="nx">memoryDir</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span>
-  <span class="nx">extraGuidelines</span><span class="p">?:</span> <span class="kr">string</span><span class="p">[],</span>
-  <span class="nx">skipIndex</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
-<span class="p">):</span> <span class="kr">string</span><span class="p">[]</span> <span class="p">{</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">buildMemoryLines</span><span class="p">(</span><span class="nx">displayName</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span> <span class="nx">memoryDir</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span> <span class="nx">extraGuidelines</span><span class="p">?:</span> <span class="kr">string</span><span class="p">[],</span> <span class="nx">skipIndex</span> <span class="o">=</span> <span class="kc">false</span><span class="p">):</span> <span class="kr">string</span><span class="p">[]</span> <span class="p">{</span>
   <span class="kd">const</span> <span class="nx">howToSave</span> <span class="o">=</span> <span class="nx">skipIndex</span>
     <span class="p">?</span> <span class="p">[</span>
-        <span class="dl">'</span><span class="s1">## How to save memories</span><span class="dl">'</span><span class="p">,</span>
-        <span class="dl">''</span><span class="p">,</span>
-        <span class="dl">'</span><span class="s1">Write each memory to its own file (e.g., `user_role.md`, `feedback_testing.md`) using this frontmatter format:</span><span class="dl">'</span><span class="p">,</span>
-        <span class="dl">''</span><span class="p">,</span>
+        <span class="dl">"</span><span class="s2">## How to save memories</span><span class="dl">"</span><span class="p">,</span>
+        <span class="dl">""</span><span class="p">,</span>
+        <span class="dl">"</span><span class="s2">Write each memory to its own file (e.g., `user_role.md`, `feedback_testing.md`) using this frontmatter format:</span><span class="dl">"</span><span class="p">,</span>
+        <span class="dl">""</span><span class="p">,</span>
         <span class="p">...</span><span class="nx">MEMORY_FRONTMATTER_EXAMPLE</span><span class="p">,</span>
-        <span class="dl">''</span><span class="p">,</span>
-        <span class="dl">'</span><span class="s1">- Keep the name, description, and type fields in memory files up-to-date with the content</span><span class="dl">'</span><span class="p">,</span>
-        <span class="dl">'</span><span class="s1">- Organize memory semantically by topic, not chronologically</span><span class="dl">'</span><span class="p">,</span>
-        <span class="dl">'</span><span class="s1">- Update or remove memories that turn out to be wrong or outdated</span><span class="dl">'</span><span class="p">,</span>
-        <span class="dl">'</span><span class="s1">- Do not write duplicate memories. First check if there is an existing memory you can update before writing a new one.</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">""</span><span class="p">,</span>
+        <span class="dl">"</span><span class="s2">- Keep the name, description, and type fields in memory files up-to-date with the content</span><span class="dl">"</span><span class="p">,</span>
+        <span class="dl">"</span><span class="s2">- Organize memory semantically by topic, not chronologically</span><span class="dl">"</span><span class="p">,</span>
+        <span class="dl">"</span><span class="s2">- Update or remove memories that turn out to be wrong or outdated</span><span class="dl">"</span><span class="p">,</span>
+        <span class="dl">"</span><span class="s2">- Do not write duplicate memories. First check if there is an existing memory you can update before writing a new one.</span><span class="dl">"</span><span class="p">,</span>
       <span class="p">]</span>
     <span class="p">:</span> <span class="p">[</span>
-        <span class="dl">'</span><span class="s1">## How to save memories</span><span class="dl">'</span><span class="p">,</span>
-        <span class="dl">''</span><span class="p">,</span>
-        <span class="dl">'</span><span class="s1">Saving a memory is a two-step process:</span><span class="dl">'</span><span class="p">,</span>
-        <span class="dl">''</span><span class="p">,</span>
-        <span class="dl">'</span><span class="s1">**Step 1** — write the memory to its own file (e.g., `user_role.md`, `feedback_testing.md`) using this frontmatter format:</span><span class="dl">'</span><span class="p">,</span>
-        <span class="dl">''</span><span class="p">,</span>
+        <span class="dl">"</span><span class="s2">## How to save memories</span><span class="dl">"</span><span class="p">,</span>
+        <span class="dl">""</span><span class="p">,</span>
+        <span class="dl">"</span><span class="s2">Saving a memory is a two-step process:</span><span class="dl">"</span><span class="p">,</span>
+        <span class="dl">""</span><span class="p">,</span>
+        <span class="dl">"</span><span class="s2">**Step 1** — write the memory to its own file (e.g., `user_role.md`, `feedback_testing.md`) using this frontmatter format:</span><span class="dl">"</span><span class="p">,</span>
+        <span class="dl">""</span><span class="p">,</span>
         <span class="p">...</span><span class="nx">MEMORY_FRONTMATTER_EXAMPLE</span><span class="p">,</span>
-        <span class="dl">''</span><span class="p">,</span>
+        <span class="dl">""</span><span class="p">,</span>
         <span class="s2">`**Step 2** — add a pointer to that file in </span><span class="se">\`</span><span class="p">${</span><span class="nx">ENTRYPOINT_NAME</span><span class="p">}</span><span class="se">\`</span><span class="s2">. </span><span class="se">\`</span><span class="p">${</span><span class="nx">ENTRYPOINT_NAME</span><span class="p">}</span><span class="se">\`</span><span class="s2"> is an index, not a memory — each entry should be one line, under ~150 characters: </span><span class="se">\`</span><span class="s2">- [Title](file.md) — one-line hook</span><span class="se">\`</span><span class="s2">. It has no frontmatter. Never write memory content directly into </span><span class="se">\`</span><span class="p">${</span><span class="nx">ENTRYPOINT_NAME</span><span class="p">}</span><span class="se">\`</span><span class="s2">.`</span><span class="p">,</span>
-        <span class="dl">''</span><span class="p">,</span>
+        <span class="dl">""</span><span class="p">,</span>
         <span class="s2">`- </span><span class="se">\`</span><span class="p">${</span><span class="nx">ENTRYPOINT_NAME</span><span class="p">}</span><span class="se">\`</span><span class="s2"> is always loaded into your conversation context — lines after </span><span class="p">${</span><span class="nx">MAX_ENTRYPOINT_LINES</span><span class="p">}</span><span class="s2"> will be truncated, so keep the index concise`</span><span class="p">,</span>
-        <span class="dl">'</span><span class="s1">- Keep the name, description, and type fields in memory files up-to-date with the content</span><span class="dl">'</span><span class="p">,</span>
-        <span class="dl">'</span><span class="s1">- Organize memory semantically by topic, not chronologically</span><span class="dl">'</span><span class="p">,</span>
-        <span class="dl">'</span><span class="s1">- Update or remove memories that turn out to be wrong or outdated</span><span class="dl">'</span><span class="p">,</span>
-        <span class="dl">'</span><span class="s1">- Do not write duplicate memories. First check if there is an existing memory you can update before writing a new one.</span><span class="dl">'</span><span class="p">,</span>
-      <span class="p">]</span>
+        <span class="dl">"</span><span class="s2">- Keep the name, description, and type fields in memory files up-to-date with the content</span><span class="dl">"</span><span class="p">,</span>
+        <span class="dl">"</span><span class="s2">- Organize memory semantically by topic, not chronologically</span><span class="dl">"</span><span class="p">,</span>
+        <span class="dl">"</span><span class="s2">- Update or remove memories that turn out to be wrong or outdated</span><span class="dl">"</span><span class="p">,</span>
+        <span class="dl">"</span><span class="s2">- Do not write duplicate memories. First check if there is an existing memory you can update before writing a new one.</span><span class="dl">"</span><span class="p">,</span>
+      <span class="p">];</span>
 
   <span class="kd">const</span> <span class="nx">lines</span><span class="p">:</span> <span class="kr">string</span><span class="p">[]</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">`# </span><span class="p">${</span><span class="nx">displayName</span><span class="p">}</span><span class="s2">`</span><span class="p">,</span>
-    <span class="dl">''</span><span class="p">,</span>
+    <span class="dl">""</span><span class="p">,</span>
     <span class="s2">`You have a persistent, file-based memory system at </span><span class="se">\`</span><span class="p">${</span><span class="nx">memoryDir</span><span class="p">}</span><span class="se">\`</span><span class="s2">. </span><span class="p">${</span><span class="nx">DIR_EXISTS_GUIDANCE</span><span class="p">}</span><span class="s2">`</span><span class="p">,</span>
-    <span class="dl">''</span><span class="p">,</span>
+    <span class="dl">""</span><span class="p">,</span>
     <span class="dl">"</span><span class="s2">You should build up this memory system over time so that future conversations can have a complete picture of who the user is, how they'd like to collaborate with you, what behaviors to avoid or repeat, and the context behind the work the user gives you.</span><span class="dl">"</span><span class="p">,</span>
-    <span class="dl">''</span><span class="p">,</span>
-    <span class="dl">'</span><span class="s1">If the user explicitly asks you to remember something, save it immediately as whichever type fits best. If they ask you to forget something, find and remove the relevant entry.</span><span class="dl">'</span><span class="p">,</span>
-    <span class="dl">''</span><span class="p">,</span>
+    <span class="dl">""</span><span class="p">,</span>
+    <span class="dl">"</span><span class="s2">If the user explicitly asks you to remember something, save it immediately as whichever type fits best. If they ask you to forget something, find and remove the relevant entry.</span><span class="dl">"</span><span class="p">,</span>
+    <span class="dl">""</span><span class="p">,</span>
     <span class="p">...</span><span class="nx">TYPES_SECTION_INDIVIDUAL</span><span class="p">,</span>
     <span class="p">...</span><span class="nx">WHAT_NOT_TO_SAVE_SECTION</span><span class="p">,</span>
-    <span class="dl">''</span><span class="p">,</span>
+    <span class="dl">""</span><span class="p">,</span>
     <span class="p">...</span><span class="nx">howToSave</span><span class="p">,</span>
-    <span class="dl">''</span><span class="p">,</span>
+    <span class="dl">""</span><span class="p">,</span>
     <span class="p">...</span><span class="nx">WHEN_TO_ACCESS_SECTION</span><span class="p">,</span>
-    <span class="dl">''</span><span class="p">,</span>
+    <span class="dl">""</span><span class="p">,</span>
     <span class="p">...</span><span class="nx">TRUSTING_RECALL_SECTION</span><span class="p">,</span>
-    <span class="dl">''</span><span class="p">,</span>
-    <span class="dl">'</span><span class="s1">## Memory and other forms of persistence</span><span class="dl">'</span><span class="p">,</span>
-    <span class="dl">'</span><span class="s1">Memory is one of several persistence mechanisms available to you as you assist the user in a given conversation. The distinction is often that memory can be recalled in future conversations and should not be used for persisting information that is only useful within the scope of the current conversation.</span><span class="dl">'</span><span class="p">,</span>
-    <span class="dl">'</span><span class="s1">- When to use or update a plan instead of memory: If you are about to start a non-trivial implementation task and would like to reach alignment with the user on your approach you should use a Plan rather than saving this information to memory. Similarly, if you already have a plan within the conversation and you have changed your approach persist that change by updating the plan rather than saving a memory.</span><span class="dl">'</span><span class="p">,</span>
-    <span class="dl">'</span><span class="s1">- When to use or update tasks instead of memory: When you need to break your work in current conversation into discrete steps or keep track of your progress use tasks instead of saving to memory. Tasks are great for persisting information about the work that needs to be done in the current conversation, but memory should be reserved for information that will be useful in future conversations.</span><span class="dl">'</span><span class="p">,</span>
-    <span class="dl">''</span><span class="p">,</span>
+    <span class="dl">""</span><span class="p">,</span>
+    <span class="dl">"</span><span class="s2">## Memory and other forms of persistence</span><span class="dl">"</span><span class="p">,</span>
+    <span class="dl">"</span><span class="s2">Memory is one of several persistence mechanisms available to you as you assist the user in a given conversation. The distinction is often that memory can be recalled in future conversations and should not be used for persisting information that is only useful within the scope of the current conversation.</span><span class="dl">"</span><span class="p">,</span>
+    <span class="dl">"</span><span class="s2">- When to use or update a plan instead of memory: If you are about to start a non-trivial implementation task and would like to reach alignment with the user on your approach you should use a Plan rather than saving this information to memory. Similarly, if you already have a plan within the conversation and you have changed your approach persist that change by updating the plan rather than saving a memory.</span><span class="dl">"</span><span class="p">,</span>
+    <span class="dl">"</span><span class="s2">- When to use or update tasks instead of memory: When you need to break your work in current conversation into discrete steps or keep track of your progress use tasks instead of saving to memory. Tasks are great for persisting information about the work that needs to be done in the current conversation, but memory should be reserved for information that will be useful in future conversations.</span><span class="dl">"</span><span class="p">,</span>
+    <span class="dl">""</span><span class="p">,</span>
     <span class="p">...(</span><span class="nx">extraGuidelines</span> <span class="o">??</span> <span class="p">[]),</span>
-    <span class="dl">''</span><span class="p">,</span>
-  <span class="p">]</span>
+    <span class="dl">""</span><span class="p">,</span>
+  <span class="p">];</span>
 
-  <span class="nx">lines</span><span class="p">.</span><span class="nf">push</span><span class="p">(...</span><span class="nf">buildSearchingPastContextSection</span><span class="p">(</span><span class="nx">memoryDir</span><span class="p">))</span>
+  <span class="nx">lines</span><span class="p">.</span><span class="nf">push</span><span class="p">(...</span><span class="nf">buildSearchingPastContextSection</span><span class="p">(</span><span class="nx">memoryDir</span><span class="p">));</span>
 
-  <span class="k">return</span> <span class="nx">lines</span>
+  <span class="k">return</span> <span class="nx">lines</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div> <p>buildMemoryLines 本质上是一份精心编排的 system prompt，每个 section 都经过 eval 验证（注释里多次提到 eval case 编号）。它不是一次性写好的——是通过 A/B 测试逐步迭代出来的：</p> <ul> <li>H1（验证函数/文件引用）：0/2 → 3/3</li> <li>H5（读取端噪声拒绝）：0/2 → 3/3</li> <li>H6（忽略指令污染）：1/3 → 解决</li> <li>位置敏感：同一个指令放在不同 section 效果不同（H1 放在”When to access”里 0/3，独立成 section 3/3）</li> </ul> <ol> <li>WHAT_NOT_TO_SAVE_SECTION —— 不写什么</li> </ol> <p>文件：memoryTypes.ts:183-195</p> <p>硬排除列表，即使用户明确要求也保存：</p> <p>❌ 代码模式、架构、文件路径、项目结构 → 能从代码推导 ❌ Git 历史、最近改动 → git log 是权威来源 ❌ 调试方案、修复方法 → 修复在代码里，上下文在 commit 里 ❌ CLAUDE.md 已有的内容 → 重复 ❌ 临时任务状态 → 会话结束就失效</p> <p>最后一句是关键防线：</p> <p>▎ ‘These exclusions apply even when the user explicitly asks you to save. ▎ If they ask you to save a PR list or activity summary, ask what was ▎ surprising or non-obvious about it — that is the part worth keeping.’</p> <p>用户说”保存这周的 PR 列表” → Claude 不应该照做，而是问”其中有什么出乎意料或非显而易见的部分”——那才是值得保存的。</p> <hr> <ol> <li>howToSave —— 怎么写</li> </ol> <p>由 buildMemoryLines 根据 skipIndex 动态生成两种版本：</p> <p>标准模式（两步）： Step 1: 写记忆文件（带 frontmatter: name/description/type） Step 2: 在 MEMORY.md 添加一行索引指针 格式: <code class="language-plaintext highlighter-rouge">- [Title](file.md) — one-line hook</code>（&lt;150 字符）</p> <p>简化模式（skipIndex = true，跳过索引）： 直接写记忆文件，不维护 MEMORY.md</p> <p>两种模式共有的规则：</p> <ul> <li>name/description/type 保持与内容一致</li> <li>按主题组织，不按时间</li> <li>过时的记忆更新或删除</li> <li>写之前先检查是否已有可更新的记忆（防重复）</li> </ul> <hr> <ol> <li>WHEN_TO_ACCESS_SECTION —— 何时读</li> </ol> <p>文件：memoryTypes.ts:216-222</p> <p>’- When memories seem relevant, or the user references prior-conversation work.’, ‘- You MUST access memory when the user explicitly asks you to check, recall, or remember.’, ‘- If the user says to <em>ignore</em> or <em>not use</em> memory: proceed as if MEMORY.md were empty. Do not apply remembered facts, cite, compare against, or mention memory content.’, MEMORY_DRIFT_CAVEAT,</p> <p>三条规则对应三种场景：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──────────────────────┬─────────────────────────────────┐
 │       用户行为       │           Claude 响应           │
@@ -495,7 +427,14 @@ ninja.data = [{
     handler: () => {
       window.location.href = "/";
     },
-  },{id: "nav-blog",
+  },{id: "nav-cv",
+          title: "CV",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/cv/";
+          },
+        },{id: "nav-blog",
           title: "blog",
           description: "",
           section: "Navigation",

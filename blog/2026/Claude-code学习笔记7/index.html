@@ -4,62 +4,52 @@
   }
 </style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://mr-coldskin7.github.io/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B07/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
     initTheme();
-  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Claude code学习7 权限模式</h1> <p class="post-meta"> Created on June 17, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/agent"> <i class="fa-solid fa-hashtag fa-sm"></i> agent</a>   <a href="/blog/tag/claude-code"> <i class="fa-solid fa-hashtag fa-sm"></i> claude-code</a>   <a href="/blog/tag/permissions"> <i class="fa-solid fa-hashtag fa-sm"></i> permissions</a>   ·   <a href="/blog/category/agent"> <i class="fa-solid fa-tag fa-sm"></i> agent</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h2 id="权限模式">权限模式</h2> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Apply DeepImmutable to the imported type</span>
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Claude code学习7 权限模式</h1> <p class="post-meta"> Created on June 17, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/agent"> <i class="fa-solid fa-hashtag fa-sm"></i> agent</a>   <a href="/blog/tag/claude-code"> <i class="fa-solid fa-hashtag fa-sm"></i> claude-code</a>   <a href="/blog/tag/permissions"> <i class="fa-solid fa-hashtag fa-sm"></i> permissions</a>   ·   <a href="/blog/category/agent"> <i class="fa-solid fa-tag fa-sm"></i> agent</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h2 id="权限模式">权限模式</h2> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Apply DeepImmutable to the imported type</span>
 <span class="k">export</span> <span class="kd">type</span> <span class="nx">ToolPermissionContext</span> <span class="o">=</span> <span class="nx">DeepImmutable</span><span class="o">&lt;</span><span class="p">{</span>
-  <span class="na">mode</span><span class="p">:</span> <span class="nx">PermissionMode</span>
-  <span class="na">additionalWorkingDirectories</span><span class="p">:</span> <span class="nb">Map</span><span class="o">&lt;</span><span class="kr">string</span><span class="p">,</span> <span class="nx">AdditionalWorkingDirectory</span><span class="o">&gt;</span>
-  <span class="na">alwaysAllowRules</span><span class="p">:</span> <span class="nx">ToolPermissionRulesBySource</span>
-  <span class="na">alwaysDenyRules</span><span class="p">:</span> <span class="nx">ToolPermissionRulesBySource</span>
-  <span class="na">alwaysAskRules</span><span class="p">:</span> <span class="nx">ToolPermissionRulesBySource</span>
-  <span class="na">isBypassPermissionsModeAvailable</span><span class="p">:</span> <span class="nx">boolean</span>
-  <span class="nx">isAutoModeAvailable</span><span class="p">?:</span> <span class="nx">boolean</span>
-  <span class="nx">strippedDangerousRules</span><span class="p">?:</span> <span class="nx">ToolPermissionRulesBySource</span>
+  <span class="na">mode</span><span class="p">:</span> <span class="nx">PermissionMode</span><span class="p">;</span>
+  <span class="nl">additionalWorkingDirectories</span><span class="p">:</span> <span class="nb">Map</span><span class="o">&lt;</span><span class="kr">string</span><span class="p">,</span> <span class="nx">AdditionalWorkingDirectory</span><span class="o">&gt;</span><span class="p">;</span>
+  <span class="nl">alwaysAllowRules</span><span class="p">:</span> <span class="nx">ToolPermissionRulesBySource</span><span class="p">;</span>
+  <span class="nl">alwaysDenyRules</span><span class="p">:</span> <span class="nx">ToolPermissionRulesBySource</span><span class="p">;</span>
+  <span class="nl">alwaysAskRules</span><span class="p">:</span> <span class="nx">ToolPermissionRulesBySource</span><span class="p">;</span>
+  <span class="nl">isBypassPermissionsModeAvailable</span><span class="p">:</span> <span class="nx">boolean</span><span class="p">;</span>
+  <span class="nl">isAutoModeAvailable</span><span class="p">?:</span> <span class="nx">boolean</span><span class="p">;</span>
+  <span class="nl">strippedDangerousRules</span><span class="p">?:</span> <span class="nx">ToolPermissionRulesBySource</span><span class="p">;</span>
   <span class="cm">/** When true, permission prompts are auto-denied (e.g., background agents that can't show UI) */</span>
-  <span class="nx">shouldAvoidPermissionPrompts</span><span class="p">?:</span> <span class="nx">boolean</span>
+  <span class="nl">shouldAvoidPermissionPrompts</span><span class="p">?:</span> <span class="nx">boolean</span><span class="p">;</span>
   <span class="cm">/** When true, automated checks (classifier, hooks) are awaited before showing the permission dialog (coordinator workers) */</span>
-  <span class="nx">awaitAutomatedChecksBeforeDialog</span><span class="p">?:</span> <span class="nx">boolean</span>
+  <span class="nl">awaitAutomatedChecksBeforeDialog</span><span class="p">?:</span> <span class="nx">boolean</span><span class="p">;</span>
   <span class="cm">/** Stores the permission mode before model-initiated plan mode entry, so it can be restored on exit */</span>
-  <span class="nx">prePlanMode</span><span class="p">?:</span> <span class="nx">PermissionMode</span>
-<span class="p">}</span><span class="o">&gt;</span>
-</code></pre></div></div> <h3 id="权限模式的类型层次">权限模式的类型层次</h3> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">const</span> <span class="nx">EXTERNAL_PERMISSION_MODES</span> <span class="o">=</span> <span class="p">[</span>
-  <span class="dl">'</span><span class="s1">acceptEdits</span><span class="dl">'</span><span class="p">,</span>
-  <span class="dl">'</span><span class="s1">bypassPermissions</span><span class="dl">'</span><span class="p">,</span>
-  <span class="dl">'</span><span class="s1">default</span><span class="dl">'</span><span class="p">,</span>
-  <span class="dl">'</span><span class="s1">dontAsk</span><span class="dl">'</span><span class="p">,</span>
-  <span class="dl">'</span><span class="s1">plan</span><span class="dl">'</span><span class="p">,</span>
-<span class="p">]</span> <span class="kd">as const</span>
+  <span class="nl">prePlanMode</span><span class="p">?:</span> <span class="nx">PermissionMode</span><span class="p">;</span>
+<span class="p">}</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div></div> <h3 id="权限模式的类型层次">权限模式的类型层次</h3> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">const</span> <span class="nx">EXTERNAL_PERMISSION_MODES</span> <span class="o">=</span> <span class="p">[</span><span class="dl">"</span><span class="s2">acceptEdits</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">bypassPermissions</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">default</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">dontAsk</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">plan</span><span class="dl">"</span><span class="p">]</span> <span class="kd">as const</span><span class="p">;</span>
 
-<span class="k">export</span> <span class="kd">type</span> <span class="nx">ExternalPermissionMode</span> <span class="o">=</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">EXTERNAL_PERMISSION_MODES</span><span class="p">)[</span><span class="kr">number</span><span class="p">]</span>
+<span class="k">export</span> <span class="kd">type</span> <span class="nx">ExternalPermissionMode</span> <span class="o">=</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">EXTERNAL_PERMISSION_MODES</span><span class="p">)[</span><span class="kr">number</span><span class="p">];</span>
 
-<span class="k">export</span> <span class="kd">type</span> <span class="nx">InternalPermissionMode</span> <span class="o">=</span> <span class="nx">ExternalPermissionMode</span> <span class="o">|</span> <span class="dl">'</span><span class="s1">auto</span><span class="dl">'</span> <span class="o">|</span> <span class="dl">'</span><span class="s1">bubble</span><span class="dl">'</span>
-<span class="k">export</span> <span class="kd">type</span> <span class="nx">PermissionMode</span> <span class="o">=</span> <span class="nx">InternalPermissionMode</span>
-</code></pre></div></div> <p>分层设计：</p> <ul> <li> <strong>ExternalPermissionMode</strong>（5 种）：用户可通过设置或命令行指定</li> <li> <strong>InternalPermissionMode</strong>（+2 种）：系统运行时自动切换，用户不能直接设置 <ul> <li> <code class="language-plaintext highlighter-rouge">auto</code>：自动模式（AFK/无人值守），仅在 <code class="language-plaintext highlighter-rouge">TRANSCRIPT_CLASSIFIER</code> feature flag 启用时存在</li> <li> <code class="language-plaintext highlighter-rouge">bubble</code>：冒泡模式，子 agent 把权限请求冒泡给父 agent 决策</li> </ul> </li> </ul> <h3 id="七种权限模式详解">七种权限模式详解</h3> <h4 id="default--默认模式">default —— 默认模式</h4> <p>默认模式就是不做啥特殊处理 这里从这个函数可以看出default模式具体做啥的</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">async</span> <span class="kd">function</span> <span class="nf">hasPermissionsToUseToolInner</span><span class="p">(</span>
-  <span class="nx">tool</span><span class="p">:</span> <span class="nx">Tool</span><span class="p">,</span>
-  <span class="nx">input</span><span class="p">:</span> <span class="p">{</span> <span class="p">[</span><span class="nx">key</span><span class="p">:</span> <span class="kr">string</span><span class="p">]:</span> <span class="nx">unknown</span> <span class="p">},</span>
-  <span class="nx">context</span><span class="p">:</span> <span class="nx">ToolUseContext</span><span class="p">,</span>
-<span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">PermissionDecision</span><span class="o">&gt;</span> <span class="p">{</span>
+<span class="k">export</span> <span class="kd">type</span> <span class="nx">InternalPermissionMode</span> <span class="o">=</span> <span class="nx">ExternalPermissionMode</span> <span class="o">|</span> <span class="dl">"</span><span class="s2">auto</span><span class="dl">"</span> <span class="o">|</span> <span class="dl">"</span><span class="s2">bubble</span><span class="dl">"</span><span class="p">;</span>
+<span class="k">export</span> <span class="kd">type</span> <span class="nx">PermissionMode</span> <span class="o">=</span> <span class="nx">InternalPermissionMode</span><span class="p">;</span>
+</code></pre></div></div> <p>分层设计：</p> <ul> <li> <strong>ExternalPermissionMode</strong>（5 种）：用户可通过设置或命令行指定</li> <li> <strong>InternalPermissionMode</strong>（+2 种）：系统运行时自动切换，用户不能直接设置 <ul> <li> <code class="language-plaintext highlighter-rouge">auto</code>：自动模式（AFK/无人值守），仅在 <code class="language-plaintext highlighter-rouge">TRANSCRIPT_CLASSIFIER</code> feature flag 启用时存在</li> <li> <code class="language-plaintext highlighter-rouge">bubble</code>：冒泡模式，子 agent 把权限请求冒泡给父 agent 决策</li> </ul> </li> </ul> <h3 id="七种权限模式详解">七种权限模式详解</h3> <h4 id="default--默认模式">default —— 默认模式</h4> <p>默认模式就是不做啥特殊处理 这里从这个函数可以看出default模式具体做啥的</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">async</span> <span class="kd">function</span> <span class="nf">hasPermissionsToUseToolInner</span><span class="p">(</span><span class="nx">tool</span><span class="p">:</span> <span class="nx">Tool</span><span class="p">,</span> <span class="nx">input</span><span class="p">:</span> <span class="p">{</span> <span class="p">[</span><span class="nx">key</span><span class="p">:</span> <span class="kr">string</span><span class="p">]:</span> <span class="nx">unknown</span> <span class="p">},</span> <span class="nx">context</span><span class="p">:</span> <span class="nx">ToolUseContext</span><span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">PermissionDecision</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="k">if </span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">abortController</span><span class="p">.</span><span class="nx">signal</span><span class="p">.</span><span class="nx">aborted</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">throw</span> <span class="k">new</span> <span class="nc">AbortError</span><span class="p">()</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nc">AbortError</span><span class="p">();</span>
   <span class="p">}</span>
 
-  <span class="kd">let</span> <span class="nx">appState</span> <span class="o">=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">getAppState</span><span class="p">()</span>
+  <span class="kd">let</span> <span class="nx">appState</span> <span class="o">=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">getAppState</span><span class="p">();</span>
 
   <span class="c1">// 1. Check if the tool is denied</span>
   <span class="c1">// 1a. Entire tool is denied</span>
-  <span class="kd">const</span> <span class="nx">denyRule</span> <span class="o">=</span> <span class="nf">getDenyRuleForTool</span><span class="p">(</span><span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">,</span> <span class="nx">tool</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">denyRule</span> <span class="o">=</span> <span class="nf">getDenyRuleForTool</span><span class="p">(</span><span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">,</span> <span class="nx">tool</span><span class="p">);</span>
   <span class="k">if </span><span class="p">(</span><span class="nx">denyRule</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="p">{</span>
-      <span class="na">behavior</span><span class="p">:</span> <span class="dl">'</span><span class="s1">deny</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">behavior</span><span class="p">:</span> <span class="dl">"</span><span class="s2">deny</span><span class="dl">"</span><span class="p">,</span>
       <span class="na">decisionReason</span><span class="p">:</span> <span class="p">{</span>
-        <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">rule</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">rule</span><span class="dl">"</span><span class="p">,</span>
         <span class="na">rule</span><span class="p">:</span> <span class="nx">denyRule</span><span class="p">,</span>
       <span class="p">},</span>
       <span class="na">message</span><span class="p">:</span> <span class="s2">`Permission to use </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2"> has been denied.`</span><span class="p">,</span>
-    <span class="p">}</span>
+    <span class="p">};</span>
   <span class="p">}</span>
 
   <span class="c1">// 1b. Check if the entire tool should always ask for permission</span>
-  <span class="kd">const</span> <span class="nx">askRule</span> <span class="o">=</span> <span class="nf">getAskRuleForTool</span><span class="p">(</span><span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">,</span> <span class="nx">tool</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">askRule</span> <span class="o">=</span> <span class="nf">getAskRuleForTool</span><span class="p">(</span><span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">,</span> <span class="nx">tool</span><span class="p">);</span>
   <span class="k">if </span><span class="p">(</span><span class="nx">askRule</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// When autoAllowBashIfSandboxed is on, sandboxed commands skip the ask rule and</span>
     <span class="c1">// auto-allow via Bash's checkPermissions. Commands that won't be sandboxed (excluded</span>
@@ -68,17 +58,17 @@
       <span class="nx">tool</span><span class="p">.</span><span class="nx">name</span> <span class="o">===</span> <span class="nx">BASH_TOOL_NAME</span> <span class="o">&amp;&amp;</span>
       <span class="nx">SandboxManager</span><span class="p">.</span><span class="nf">isSandboxingEnabled</span><span class="p">()</span> <span class="o">&amp;&amp;</span>
       <span class="nx">SandboxManager</span><span class="p">.</span><span class="nf">isAutoAllowBashIfSandboxedEnabled</span><span class="p">()</span> <span class="o">&amp;&amp;</span>
-      <span class="nf">shouldUseSandbox</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span>
+      <span class="nf">shouldUseSandbox</span><span class="p">(</span><span class="nx">input</span><span class="p">);</span>
 
     <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">canSandboxAutoAllow</span><span class="p">)</span> <span class="p">{</span>
       <span class="k">return</span> <span class="p">{</span>
-        <span class="na">behavior</span><span class="p">:</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">behavior</span><span class="p">:</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span><span class="p">,</span>
         <span class="na">decisionReason</span><span class="p">:</span> <span class="p">{</span>
-          <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">rule</span><span class="dl">'</span><span class="p">,</span>
+          <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">rule</span><span class="dl">"</span><span class="p">,</span>
           <span class="na">rule</span><span class="p">:</span> <span class="nx">askRule</span><span class="p">,</span>
         <span class="p">},</span>
         <span class="na">message</span><span class="p">:</span> <span class="nf">createPermissionRequestMessage</span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">),</span>
-      <span class="p">}</span>
+      <span class="p">};</span>
     <span class="p">}</span>
     <span class="c1">// Fall through to let Bash's checkPermissions handle command-specific rules</span>
   <span class="p">}</span>
@@ -86,31 +76,28 @@
   <span class="c1">// 1c. Ask the tool implementation for a permission result</span>
   <span class="c1">// Overridden unless tool input schema is not valid</span>
   <span class="kd">let</span> <span class="na">toolPermissionResult</span><span class="p">:</span> <span class="nx">PermissionResult</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="na">behavior</span><span class="p">:</span> <span class="dl">'</span><span class="s1">passthrough</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">behavior</span><span class="p">:</span> <span class="dl">"</span><span class="s2">passthrough</span><span class="dl">"</span><span class="p">,</span>
     <span class="na">message</span><span class="p">:</span> <span class="nf">createPermissionRequestMessage</span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">),</span>
-  <span class="p">}</span>
+  <span class="p">};</span>
   <span class="k">try</span> <span class="p">{</span>
-    <span class="kd">const</span> <span class="nx">parsedInput</span> <span class="o">=</span> <span class="nx">tool</span><span class="p">.</span><span class="nx">inputSchema</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span>
-    <span class="nx">toolPermissionResult</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">tool</span><span class="p">.</span><span class="nf">checkPermissions</span><span class="p">(</span><span class="nx">parsedInput</span><span class="p">,</span> <span class="nx">context</span><span class="p">)</span>
+    <span class="kd">const</span> <span class="nx">parsedInput</span> <span class="o">=</span> <span class="nx">tool</span><span class="p">.</span><span class="nx">inputSchema</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="nx">input</span><span class="p">);</span>
+    <span class="nx">toolPermissionResult</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">tool</span><span class="p">.</span><span class="nf">checkPermissions</span><span class="p">(</span><span class="nx">parsedInput</span><span class="p">,</span> <span class="nx">context</span><span class="p">);</span>
   <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// Rethrow abort errors so they propagate properly</span>
     <span class="k">if </span><span class="p">(</span><span class="nx">e</span> <span class="k">instanceof</span> <span class="nx">AbortError</span> <span class="o">||</span> <span class="nx">e</span> <span class="k">instanceof</span> <span class="nx">APIUserAbortError</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">throw</span> <span class="nx">e</span>
+      <span class="k">throw</span> <span class="nx">e</span><span class="p">;</span>
     <span class="p">}</span>
-    <span class="nf">logError</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span>
+    <span class="nf">logError</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
   <span class="p">}</span>
 
   <span class="c1">// 1d. Tool implementation denied permission</span>
-  <span class="k">if </span><span class="p">(</span><span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">deny</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">toolPermissionResult</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">deny</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">toolPermissionResult</span><span class="p">;</span>
   <span class="p">}</span>
 
   <span class="c1">// 1e. Tool requires user interaction even in bypass mode</span>
-  <span class="k">if </span><span class="p">(</span>
-    <span class="nx">tool</span><span class="p">.</span><span class="nx">requiresUserInteraction</span><span class="p">?.()</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span>
-  <span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">toolPermissionResult</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">requiresUserInteraction</span><span class="p">?.()</span> <span class="o">&amp;&amp;</span> <span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">toolPermissionResult</span><span class="p">;</span>
   <span class="p">}</span>
 
   <span class="c1">// 1f. Content-specific ask rules from tool.checkPermissions take precedence</span>
@@ -120,80 +107,68 @@
   <span class="c1">// rule:{ruleBehavior:'ask'}}}. This must be respected even in bypass mode,</span>
   <span class="c1">// just as deny rules are respected at step 1d.</span>
   <span class="k">if </span><span class="p">(</span>
-    <span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">?.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">rule</span><span class="dl">'</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">.</span><span class="nx">rule</span><span class="p">.</span><span class="nx">ruleBehavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span>
+    <span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span> <span class="o">&amp;&amp;</span>
+    <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">?.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">rule</span><span class="dl">"</span> <span class="o">&amp;&amp;</span>
+    <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">.</span><span class="nx">rule</span><span class="p">.</span><span class="nx">ruleBehavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span>
   <span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">toolPermissionResult</span>
+    <span class="k">return</span> <span class="nx">toolPermissionResult</span><span class="p">;</span>
   <span class="p">}</span>
 
   <span class="c1">// 1g. Safety checks (e.g. .git/, .claude/, .vscode/, shell configs) are</span>
   <span class="c1">// bypass-immune — they must prompt even in bypassPermissions mode.</span>
   <span class="c1">// checkPathSafetyForAutoEdit returns {type:'safetyCheck'} for these paths.</span>
-  <span class="k">if </span><span class="p">(</span>
-    <span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">?.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">safetyCheck</span><span class="dl">'</span>
-  <span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">toolPermissionResult</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span> <span class="o">&amp;&amp;</span> <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">?.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">safetyCheck</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">toolPermissionResult</span><span class="p">;</span>
   <span class="p">}</span>
 
   <span class="c1">// 2a. Check if mode allows the tool to run</span>
   <span class="c1">// IMPORTANT: Call getAppState() to get the latest value</span>
-  <span class="nx">appState</span> <span class="o">=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">getAppState</span><span class="p">()</span>
+  <span class="nx">appState</span> <span class="o">=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">getAppState</span><span class="p">();</span>
   <span class="c1">// Check if permissions should be bypassed:</span>
   <span class="c1">// - Direct bypassPermissions mode</span>
   <span class="c1">// - Plan mode when the user originally started with bypass mode (isBypassPermissionsModeAvailable)</span>
   <span class="kd">const</span> <span class="nx">shouldBypassPermissions</span> <span class="o">=</span>
-    <span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">mode</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">bypassPermissions</span><span class="dl">'</span> <span class="o">||</span>
-    <span class="p">(</span><span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">mode</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">plan</span><span class="dl">'</span> <span class="o">&amp;&amp;</span>
-      <span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">isBypassPermissionsModeAvailable</span><span class="p">)</span>
+    <span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">mode</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">bypassPermissions</span><span class="dl">"</span> <span class="o">||</span>
+    <span class="p">(</span><span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">mode</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">plan</span><span class="dl">"</span> <span class="o">&amp;&amp;</span> <span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">isBypassPermissionsModeAvailable</span><span class="p">);</span>
   <span class="k">if </span><span class="p">(</span><span class="nx">shouldBypassPermissions</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="p">{</span>
-      <span class="na">behavior</span><span class="p">:</span> <span class="dl">'</span><span class="s1">allow</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">behavior</span><span class="p">:</span> <span class="dl">"</span><span class="s2">allow</span><span class="dl">"</span><span class="p">,</span>
       <span class="na">updatedInput</span><span class="p">:</span> <span class="nf">getUpdatedInputOrFallback</span><span class="p">(</span><span class="nx">toolPermissionResult</span><span class="p">,</span> <span class="nx">input</span><span class="p">),</span>
       <span class="na">decisionReason</span><span class="p">:</span> <span class="p">{</span>
-        <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">mode</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">mode</span><span class="dl">"</span><span class="p">,</span>
         <span class="na">mode</span><span class="p">:</span> <span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">mode</span><span class="p">,</span>
       <span class="p">},</span>
-    <span class="p">}</span>
+    <span class="p">};</span>
   <span class="p">}</span>
 
   <span class="c1">// 2b. Entire tool is allowed</span>
-  <span class="kd">const</span> <span class="nx">alwaysAllowedRule</span> <span class="o">=</span> <span class="nf">toolAlwaysAllowedRule</span><span class="p">(</span>
-    <span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">,</span>
-    <span class="nx">tool</span><span class="p">,</span>
-  <span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">alwaysAllowedRule</span> <span class="o">=</span> <span class="nf">toolAlwaysAllowedRule</span><span class="p">(</span><span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">,</span> <span class="nx">tool</span><span class="p">);</span>
   <span class="k">if </span><span class="p">(</span><span class="nx">alwaysAllowedRule</span><span class="p">)</span> <span class="p">{</span>
     <span class="k">return</span> <span class="p">{</span>
-      <span class="na">behavior</span><span class="p">:</span> <span class="dl">'</span><span class="s1">allow</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">behavior</span><span class="p">:</span> <span class="dl">"</span><span class="s2">allow</span><span class="dl">"</span><span class="p">,</span>
       <span class="na">updatedInput</span><span class="p">:</span> <span class="nf">getUpdatedInputOrFallback</span><span class="p">(</span><span class="nx">toolPermissionResult</span><span class="p">,</span> <span class="nx">input</span><span class="p">),</span>
       <span class="na">decisionReason</span><span class="p">:</span> <span class="p">{</span>
-        <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">rule</span><span class="dl">'</span><span class="p">,</span>
+        <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">rule</span><span class="dl">"</span><span class="p">,</span>
         <span class="na">rule</span><span class="p">:</span> <span class="nx">alwaysAllowedRule</span><span class="p">,</span>
       <span class="p">},</span>
-    <span class="p">}</span>
+    <span class="p">};</span>
   <span class="p">}</span>
 
   <span class="c1">// 3. Convert "passthrough" to "ask"</span>
   <span class="kd">const</span> <span class="na">result</span><span class="p">:</span> <span class="nx">PermissionDecision</span> <span class="o">=</span>
-    <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">passthrough</span><span class="dl">'</span>
+    <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">passthrough</span><span class="dl">"</span>
       <span class="p">?</span> <span class="p">{</span>
           <span class="p">...</span><span class="nx">toolPermissionResult</span><span class="p">,</span>
-          <span class="na">behavior</span><span class="p">:</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span> <span class="kd">as const</span><span class="p">,</span>
-          <span class="na">message</span><span class="p">:</span> <span class="nf">createPermissionRequestMessage</span><span class="p">(</span>
-            <span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span>
-            <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">,</span>
-          <span class="p">),</span>
+          <span class="na">behavior</span><span class="p">:</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span> <span class="kd">as const</span><span class="p">,</span>
+          <span class="na">message</span><span class="p">:</span> <span class="nf">createPermissionRequestMessage</span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">),</span>
         <span class="p">}</span>
-      <span class="p">:</span> <span class="nx">toolPermissionResult</span>
+      <span class="p">:</span> <span class="nx">toolPermissionResult</span><span class="p">;</span>
 
-  <span class="k">if </span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span> <span class="o">&amp;&amp;</span> <span class="nx">result</span><span class="p">.</span><span class="nx">suggestions</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nf">logForDebugging</span><span class="p">(</span>
-      <span class="s2">`Permission suggestions for </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2">: </span><span class="p">${</span><span class="nf">jsonStringify</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">suggestions</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="mi">2</span><span class="p">)}</span><span class="s2">`</span><span class="p">,</span>
-    <span class="p">)</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span> <span class="o">&amp;&amp;</span> <span class="nx">result</span><span class="p">.</span><span class="nx">suggestions</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">logForDebugging</span><span class="p">(</span><span class="s2">`Permission suggestions for </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2">: </span><span class="p">${</span><span class="nf">jsonStringify</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">suggestions</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="mi">2</span><span class="p">)}</span><span class="s2">`</span><span class="p">);</span>
   <span class="p">}</span>
 
-  <span class="k">return</span> <span class="nx">result</span>
+  <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div> <p>主要他做的事情就是查看规则,对应规则有不同处理模式</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>const PERMISSION_RULE_SOURCES = [
   // 设置文件来源（5 种）
@@ -216,45 +191,45 @@
       <span class="p">},</span>
       <span class="nx">message</span><span class="p">:</span> <span class="s2">`Permission to use </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2"> has been denied.`</span><span class="p">,</span>
     <span class="p">}</span>
-</code></pre></div></div> <p>如果是被禁止的工具就会返回被禁止，如果是在沙盒环境下没啥风险的情况下会自动放行，在不是沙盒模式的情况下进行询问 1b. Check if the entire tool should always ask for permission</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">askRule</span> <span class="o">=</span> <span class="nf">getAskRuleForTool</span><span class="p">(</span><span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">,</span> <span class="nx">tool</span><span class="p">)</span>
-  <span class="k">if </span><span class="p">(</span><span class="nx">askRule</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// When autoAllowBashIfSandboxed is on, sandboxed commands skip the ask rule and</span>
-    <span class="c1">// auto-allow via Bash's checkPermissions. Commands that won't be sandboxed (excluded</span>
-    <span class="c1">// commands, dangerouslyDisableSandbox) still need to respect the ask rule.</span>
-    <span class="kd">const</span> <span class="nx">canSandboxAutoAllow</span> <span class="o">=</span>
-      <span class="nx">tool</span><span class="p">.</span><span class="nx">name</span> <span class="o">===</span> <span class="nx">BASH_TOOL_NAME</span> <span class="o">&amp;&amp;</span>
-      <span class="nx">SandboxManager</span><span class="p">.</span><span class="nf">isSandboxingEnabled</span><span class="p">()</span> <span class="o">&amp;&amp;</span>
-      <span class="nx">SandboxManager</span><span class="p">.</span><span class="nf">isAutoAllowBashIfSandboxedEnabled</span><span class="p">()</span> <span class="o">&amp;&amp;</span>
-      <span class="nf">shouldUseSandbox</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span>
+</code></pre></div></div> <p>如果是被禁止的工具就会返回被禁止，如果是在沙盒环境下没啥风险的情况下会自动放行，在不是沙盒模式的情况下进行询问 1b. Check if the entire tool should always ask for permission</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">askRule</span> <span class="o">=</span> <span class="nf">getAskRuleForTool</span><span class="p">(</span><span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">,</span> <span class="nx">tool</span><span class="p">);</span>
+<span class="k">if </span><span class="p">(</span><span class="nx">askRule</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// When autoAllowBashIfSandboxed is on, sandboxed commands skip the ask rule and</span>
+  <span class="c1">// auto-allow via Bash's checkPermissions. Commands that won't be sandboxed (excluded</span>
+  <span class="c1">// commands, dangerouslyDisableSandbox) still need to respect the ask rule.</span>
+  <span class="kd">const</span> <span class="nx">canSandboxAutoAllow</span> <span class="o">=</span>
+    <span class="nx">tool</span><span class="p">.</span><span class="nx">name</span> <span class="o">===</span> <span class="nx">BASH_TOOL_NAME</span> <span class="o">&amp;&amp;</span>
+    <span class="nx">SandboxManager</span><span class="p">.</span><span class="nf">isSandboxingEnabled</span><span class="p">()</span> <span class="o">&amp;&amp;</span>
+    <span class="nx">SandboxManager</span><span class="p">.</span><span class="nf">isAutoAllowBashIfSandboxedEnabled</span><span class="p">()</span> <span class="o">&amp;&amp;</span>
+    <span class="nf">shouldUseSandbox</span><span class="p">(</span><span class="nx">input</span><span class="p">);</span>
 
-    <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">canSandboxAutoAllow</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">return</span> <span class="p">{</span>
-        <span class="na">behavior</span><span class="p">:</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span><span class="p">,</span>
-        <span class="na">decisionReason</span><span class="p">:</span> <span class="p">{</span>
-          <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">rule</span><span class="dl">'</span><span class="p">,</span>
-          <span class="na">rule</span><span class="p">:</span> <span class="nx">askRule</span><span class="p">,</span>
-        <span class="p">},</span>
-        <span class="na">message</span><span class="p">:</span> <span class="nf">createPermissionRequestMessage</span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">),</span>
-      <span class="p">}</span>
-    <span class="p">}</span>
-    <span class="c1">// Fall through to let Bash's checkPermissions handle command-specific rules</span>
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">canSandboxAutoAllow</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">{</span>
+      <span class="na">behavior</span><span class="p">:</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">decisionReason</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">rule</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">rule</span><span class="p">:</span> <span class="nx">askRule</span><span class="p">,</span>
+      <span class="p">},</span>
+      <span class="na">message</span><span class="p">:</span> <span class="nf">createPermissionRequestMessage</span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">),</span>
+    <span class="p">};</span>
   <span class="p">}</span>
+  <span class="c1">// Fall through to let Bash's checkPermissions handle command-specific rules</span>
+<span class="p">}</span>
 </code></pre></div></div> <p>1c. Ask the tool implementation for a permission result Overridden unless tool input schema is not valid 如果这个工具是否执行有异议，那就交给工具自己判断是否可以执行</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 1c. Ask the tool implementation for a permission result</span>
-  <span class="c1">// Overridden unless tool input schema is not valid</span>
-  <span class="kd">let</span> <span class="nx">toolPermissionResult</span><span class="p">:</span> <span class="nx">PermissionResult</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="na">behavior</span><span class="p">:</span> <span class="dl">'</span><span class="s1">passthrough</span><span class="dl">'</span><span class="p">,</span>
-    <span class="na">message</span><span class="p">:</span> <span class="nf">createPermissionRequestMessage</span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">),</span>
+<span class="c1">// Overridden unless tool input schema is not valid</span>
+<span class="kd">let</span> <span class="nx">toolPermissionResult</span><span class="p">:</span> <span class="nx">PermissionResult</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">behavior</span><span class="p">:</span> <span class="dl">"</span><span class="s2">passthrough</span><span class="dl">"</span><span class="p">,</span>
+  <span class="na">message</span><span class="p">:</span> <span class="nf">createPermissionRequestMessage</span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">),</span>
+<span class="p">};</span>
+<span class="k">try</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">parsedInput</span> <span class="o">=</span> <span class="nx">tool</span><span class="p">.</span><span class="nx">inputSchema</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="nx">input</span><span class="p">);</span>
+  <span class="nx">toolPermissionResult</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">tool</span><span class="p">.</span><span class="nf">checkPermissions</span><span class="p">(</span><span class="nx">parsedInput</span><span class="p">,</span> <span class="nx">context</span><span class="p">);</span>
+<span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Rethrow abort errors so they propagate properly</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">e</span> <span class="k">instanceof</span> <span class="nx">AbortError</span> <span class="o">||</span> <span class="nx">e</span> <span class="k">instanceof</span> <span class="nx">APIUserAbortError</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="nx">e</span><span class="p">;</span>
   <span class="p">}</span>
-  <span class="k">try</span> <span class="p">{</span>
-    <span class="kd">const</span> <span class="nx">parsedInput</span> <span class="o">=</span> <span class="nx">tool</span><span class="p">.</span><span class="nx">inputSchema</span><span class="p">.</span><span class="nf">parse</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span>
-    <span class="nx">toolPermissionResult</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">tool</span><span class="p">.</span><span class="nf">checkPermissions</span><span class="p">(</span><span class="nx">parsedInput</span><span class="p">,</span> <span class="nx">context</span><span class="p">)</span>
-  <span class="p">}</span> <span class="k">catch </span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
-    <span class="c1">// Rethrow abort errors so they propagate properly</span>
-    <span class="k">if </span><span class="p">(</span><span class="nx">e</span> <span class="k">instanceof</span> <span class="nx">AbortError</span> <span class="o">||</span> <span class="nx">e</span> <span class="k">instanceof</span> <span class="nx">APIUserAbortError</span><span class="p">)</span> <span class="p">{</span>
-      <span class="k">throw</span> <span class="nx">e</span>
-    <span class="p">}</span>
-    <span class="nf">logError</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span>
-  <span class="p">}</span>
+  <span class="nf">logError</span><span class="p">(</span><span class="nx">e</span><span class="p">);</span>
+<span class="p">}</span>
 </code></pre></div></div> <p>这里以读文件来举例，这是读文件的tool里面关于权限的函数</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">async</span> <span class="nf">checkPermissions</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">context</span><span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">PermissionDecision</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="kd">const</span> <span class="nx">appState</span> <span class="o">=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">getAppState</span><span class="p">()</span>
   <span class="k">return</span> <span class="nf">checkReadPermissionForTool</span><span class="p">(</span>
@@ -266,83 +241,68 @@
 </code></pre></div></div> <p>可以看到它返回了checkReadPermissionForTool</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">function</span> <span class="nf">checkReadPermissionForTool</span><span class="p">(</span>
   <span class="nx">tool</span><span class="p">:</span> <span class="nx">Tool</span><span class="p">,</span>
   <span class="nx">input</span><span class="p">:</span> <span class="p">{</span> <span class="p">[</span><span class="nx">key</span><span class="p">:</span> <span class="kr">string</span><span class="p">]:</span> <span class="nx">unknown</span> <span class="p">},</span>
-  <span class="nx">toolPermissionContext</span><span class="p">:</span> <span class="nx">ToolPermissionContext</span><span class="p">,</span>
-<span class="p">):</span> <span class="nx">PermissionDecision</span>
-</code></pre></div></div> <p>他会返回对应的权限结果 在Claude code中可以看得tool加了许多许多的权限以及约束，并不像我们平时写的那么简单 在工具的执行方面，居然还有关于工具本身来判断段读写的逻辑 1d. Tool implementation denied permission 如果工具返回了被拒绝的权限，直接返回</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span><span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">deny</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">toolPermissionResult</span>
-  <span class="p">}</span>
-</code></pre></div></div> <p>1e. Tool requires user interaction even in bypass mode 如果工具返回需要用户交互即使是by pass模式，也要返回</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span>
-    <span class="nx">tool</span><span class="p">.</span><span class="nx">requiresUserInteraction</span><span class="p">?.()</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span>
-  <span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">toolPermissionResult</span>
-  <span class="p">}</span>
-</code></pre></div></div> <p>1f. Content-specific ask rules from tool.checkPermissions take precedence over bypassPermissions mode. When a user explicitly configures a content-specific ask rule (e.g. Bash(npm publish:*)), the tool’s checkPermissions returns {behavior:’ask’, decisionReason:{type:’rule’, rule:{ruleBehavior:’ask’}}}. This must be respected even in bypass mode, just as deny rules are respected at step 1d. 如果一个命令用户都说需要询问了，那这就是最高级别的指示，即使是bypass模式也需要问</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">if </span><span class="p">(</span>
-    <span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">?.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">rule</span><span class="dl">'</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">.</span><span class="nx">rule</span><span class="p">.</span><span class="nx">ruleBehavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span>
-  <span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">toolPermissionResult</span>
-  <span class="p">}</span>
-</code></pre></div></div> <p>1g. Safety checks (e.g. .git/, .claude/, .vscode/, shell configs) are bypass-immune — they must prompt even in bypassPermissions mode. checkPathSafetyForAutoEdit returns {type:’safetyCheck’} for these paths.</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span>
-    <span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">?.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">safetyCheck</span><span class="dl">'</span>
-  <span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="nx">toolPermissionResult</span>
-  <span class="p">}</span>
+  <span class="nx">toolPermissionContext</span><span class="p">:</span> <span class="nx">ToolPermissionContext</span>
+<span class="p">):</span> <span class="nx">PermissionDecision</span><span class="p">;</span>
+</code></pre></div></div> <p>他会返回对应的权限结果 在Claude code中可以看得tool加了许多许多的权限以及约束，并不像我们平时写的那么简单 在工具的执行方面，居然还有关于工具本身来判断段读写的逻辑 1d. Tool implementation denied permission 如果工具返回了被拒绝的权限，直接返回</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span><span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">deny</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">toolPermissionResult</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>1e. Tool requires user interaction even in bypass mode 如果工具返回需要用户交互即使是by pass模式，也要返回</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">requiresUserInteraction</span><span class="p">?.()</span> <span class="o">&amp;&amp;</span> <span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">toolPermissionResult</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>1f. Content-specific ask rules from tool.checkPermissions take precedence over bypassPermissions mode. When a user explicitly configures a content-specific ask rule (e.g. Bash(npm publish:*)), the tool’s checkPermissions returns {behavior:’ask’, decisionReason:{type:’rule’, rule:{ruleBehavior:’ask’}}}. This must be respected even in bypass mode, just as deny rules are respected at step 1d. 如果一个命令用户都说需要询问了，那这就是最高级别的指示，即使是bypass模式也需要问</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span>
+  <span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span> <span class="o">&amp;&amp;</span>
+  <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">?.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">rule</span><span class="dl">"</span> <span class="o">&amp;&amp;</span>
+  <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">.</span><span class="nx">rule</span><span class="p">.</span><span class="nx">ruleBehavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span>
+<span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">toolPermissionResult</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>1g. Safety checks (e.g. .git/, .claude/, .vscode/, shell configs) are bypass-immune — they must prompt even in bypassPermissions mode. checkPathSafetyForAutoEdit returns {type:’safetyCheck’} for these paths.</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if </span><span class="p">(</span><span class="nx">toolPermissionResult</span><span class="p">?.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span> <span class="o">&amp;&amp;</span> <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">?.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">safetyCheck</span><span class="dl">"</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">toolPermissionResult</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre></div></div> <p>2a. Check if mode allows the tool to run IMPORTANT: Call getAppState() to get the latest value</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 2a. Check if mode allows the tool to run</span>
 <span class="c1">// IMPORTANT: Call getAppState() to get the latest value</span>
-<span class="nx">appState</span> <span class="o">=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">getAppState</span><span class="p">()</span>
+<span class="nx">appState</span> <span class="o">=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">getAppState</span><span class="p">();</span>
 <span class="c1">// Check if permissions should be bypassed:</span>
 <span class="c1">// - Direct bypassPermissions mode</span>
 <span class="c1">// - Plan mode when the user originally started with bypass mode (isBypassPermissionsModeAvailable)</span>
 <span class="kd">const</span> <span class="nx">shouldBypassPermissions</span> <span class="o">=</span>
-  <span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">mode</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">bypassPermissions</span><span class="dl">'</span> <span class="o">||</span>
-  <span class="p">(</span><span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">mode</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">plan</span><span class="dl">'</span> <span class="o">&amp;&amp;</span>
-    <span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">isBypassPermissionsModeAvailable</span><span class="p">)</span>
+  <span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">mode</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">bypassPermissions</span><span class="dl">"</span> <span class="o">||</span>
+  <span class="p">(</span><span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">mode</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">plan</span><span class="dl">"</span> <span class="o">&amp;&amp;</span> <span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">isBypassPermissionsModeAvailable</span><span class="p">);</span>
 <span class="k">if </span><span class="p">(</span><span class="nx">shouldBypassPermissions</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">return</span> <span class="p">{</span>
-    <span class="na">behavior</span><span class="p">:</span> <span class="dl">'</span><span class="s1">allow</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">behavior</span><span class="p">:</span> <span class="dl">"</span><span class="s2">allow</span><span class="dl">"</span><span class="p">,</span>
     <span class="na">updatedInput</span><span class="p">:</span> <span class="nf">getUpdatedInputOrFallback</span><span class="p">(</span><span class="nx">toolPermissionResult</span><span class="p">,</span> <span class="nx">input</span><span class="p">),</span>
     <span class="na">decisionReason</span><span class="p">:</span> <span class="p">{</span>
-      <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">mode</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">mode</span><span class="dl">"</span><span class="p">,</span>
       <span class="na">mode</span><span class="p">:</span> <span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">.</span><span class="nx">mode</span><span class="p">,</span>
     <span class="p">},</span>
-  <span class="p">}</span>
+  <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div></div> <p>2b. Entire tool is allowed 如果工具匹配了 allow 规则 → 直接放行。</p> <p>和 1b（ask 规则）的关系：1b 在前面已经检查过 deny 和 ask 规则了，能走到 2b 说明没有被 deny 或 ask 规则拦截。</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 2b. Entire tool is allowed</span>
-  <span class="kd">const</span> <span class="nx">alwaysAllowedRule</span> <span class="o">=</span> <span class="nf">toolAlwaysAllowedRule</span><span class="p">(</span>
-    <span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">,</span>
-    <span class="nx">tool</span><span class="p">,</span>
-  <span class="p">)</span>
-  <span class="k">if </span><span class="p">(</span><span class="nx">alwaysAllowedRule</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">return</span> <span class="p">{</span>
-      <span class="na">behavior</span><span class="p">:</span> <span class="dl">'</span><span class="s1">allow</span><span class="dl">'</span><span class="p">,</span>
-      <span class="na">updatedInput</span><span class="p">:</span> <span class="nf">getUpdatedInputOrFallback</span><span class="p">(</span><span class="nx">toolPermissionResult</span><span class="p">,</span> <span class="nx">input</span><span class="p">),</span>
-      <span class="na">decisionReason</span><span class="p">:</span> <span class="p">{</span>
-        <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">rule</span><span class="dl">'</span><span class="p">,</span>
-        <span class="na">rule</span><span class="p">:</span> <span class="nx">alwaysAllowedRule</span><span class="p">,</span>
-      <span class="p">},</span>
-    <span class="p">}</span>
-  <span class="p">}</span>
-</code></pre></div></div> <p>3 Convert “passthrough” to “ask” 询问是否应该通过</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// 3. Convert "passthrough" to "ask"</span>
-  <span class="kd">const</span> <span class="nx">result</span><span class="p">:</span> <span class="nx">PermissionDecision</span> <span class="o">=</span>
-    <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">passthrough</span><span class="dl">'</span>
-      <span class="p">?</span> <span class="p">{</span>
-          <span class="p">...</span><span class="nx">toolPermissionResult</span><span class="p">,</span>
-          <span class="na">behavior</span><span class="p">:</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span> <span class="kd">as const</span><span class="p">,</span>
-          <span class="na">message</span><span class="p">:</span> <span class="nf">createPermissionRequestMessage</span><span class="p">(</span>
-            <span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span>
-            <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">,</span>
-          <span class="p">),</span>
-        <span class="p">}</span>
-      <span class="p">:</span> <span class="nx">toolPermissionResult</span>
+<span class="kd">const</span> <span class="nx">alwaysAllowedRule</span> <span class="o">=</span> <span class="nf">toolAlwaysAllowedRule</span><span class="p">(</span><span class="nx">appState</span><span class="p">.</span><span class="nx">toolPermissionContext</span><span class="p">,</span> <span class="nx">tool</span><span class="p">);</span>
+<span class="k">if </span><span class="p">(</span><span class="nx">alwaysAllowedRule</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">behavior</span><span class="p">:</span> <span class="dl">"</span><span class="s2">allow</span><span class="dl">"</span><span class="p">,</span>
+    <span class="na">updatedInput</span><span class="p">:</span> <span class="nf">getUpdatedInputOrFallback</span><span class="p">(</span><span class="nx">toolPermissionResult</span><span class="p">,</span> <span class="nx">input</span><span class="p">),</span>
+    <span class="na">decisionReason</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">type</span><span class="p">:</span> <span class="dl">"</span><span class="s2">rule</span><span class="dl">"</span><span class="p">,</span>
+      <span class="na">rule</span><span class="p">:</span> <span class="nx">alwaysAllowedRule</span><span class="p">,</span>
+    <span class="p">},</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>3 Convert “passthrough” to “ask” 询问是否应该通过</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 3. Convert "passthrough" to "ask"</span>
+<span class="kd">const</span> <span class="nx">result</span><span class="p">:</span> <span class="nx">PermissionDecision</span> <span class="o">=</span>
+  <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">passthrough</span><span class="dl">"</span>
+    <span class="p">?</span> <span class="p">{</span>
+        <span class="p">...</span><span class="nx">toolPermissionResult</span><span class="p">,</span>
+        <span class="na">behavior</span><span class="p">:</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span> <span class="kd">as const</span><span class="p">,</span>
+        <span class="na">message</span><span class="p">:</span> <span class="nf">createPermissionRequestMessage</span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="nx">toolPermissionResult</span><span class="p">.</span><span class="nx">decisionReason</span><span class="p">),</span>
+      <span class="p">}</span>
+    <span class="p">:</span> <span class="nx">toolPermissionResult</span><span class="p">;</span>
 
-  <span class="k">if </span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ask</span><span class="dl">'</span> <span class="o">&amp;&amp;</span> <span class="nx">result</span><span class="p">.</span><span class="nx">suggestions</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nf">logForDebugging</span><span class="p">(</span>
-      <span class="s2">`Permission suggestions for </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2">: </span><span class="p">${</span><span class="nf">jsonStringify</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">suggestions</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="mi">2</span><span class="p">)}</span><span class="s2">`</span><span class="p">,</span>
-    <span class="p">)</span>
-  <span class="p">}</span>
+<span class="k">if </span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">behavior</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ask</span><span class="dl">"</span> <span class="o">&amp;&amp;</span> <span class="nx">result</span><span class="p">.</span><span class="nx">suggestions</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nf">logForDebugging</span><span class="p">(</span><span class="s2">`Permission suggestions for </span><span class="p">${</span><span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2">: </span><span class="p">${</span><span class="nf">jsonStringify</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">suggestions</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="mi">2</span><span class="p">)}</span><span class="s2">`</span><span class="p">);</span>
+<span class="p">}</span>
 </code></pre></div></div> <p>1a. deny 规则 → 拒绝（无视模式） 1b. ask 规则 → 询问（无视模式） 1c. tool.checkPermissions() → 工具自己判断 1d. 工具 deny → 拒绝（无视模式） 1e. 需要交互 → 询问（无视模式） 1f. 用户 ask 规则 → 询问（无视模式） 1g. 敏感路径 → 询问（无视模式） ─── 以上是硬性规则，bypass 也绕不过 ─── 2a. bypass 模式 → 放行 2b. allow 规则 → 放行 ─── 以下是兜底 ─── passthrough → ask（弹确认框）</p> <h3 id="basictool">basictool</h3> <p>内置工具 A-Z 固定排序：Bash、FileRead、FileEdit、Grep 等内置工具形成稳定工具前缀。顺序不随会话、项目或用户偏好波动。 为什么要进行A-Z的排序呢，当然也是照顾当kv cache，需要形成稳定的前缀，才能避免缓存的频繁更改</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
  * Get the complete exhaustive list of all tools that could be available
  * in the current environment (respecting process.env flags).
@@ -372,13 +332,11 @@
     <span class="nx">AskUserQuestionTool</span><span class="p">,</span>
     <span class="nx">SkillTool</span><span class="p">,</span>
     <span class="nx">EnterPlanModeTool</span><span class="p">,</span>
-    <span class="p">...(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ant</span><span class="dl">'</span> <span class="p">?</span> <span class="p">[</span><span class="nx">ConfigTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
-    <span class="p">...(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ant</span><span class="dl">'</span> <span class="p">?</span> <span class="p">[</span><span class="nx">TungstenTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
+    <span class="p">...(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ant</span><span class="dl">"</span> <span class="p">?</span> <span class="p">[</span><span class="nx">ConfigTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
+    <span class="p">...(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ant</span><span class="dl">"</span> <span class="p">?</span> <span class="p">[</span><span class="nx">TungstenTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
     <span class="p">...(</span><span class="nx">SuggestBackgroundPRTool</span> <span class="p">?</span> <span class="p">[</span><span class="nx">SuggestBackgroundPRTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
     <span class="p">...(</span><span class="nx">WebBrowserTool</span> <span class="p">?</span> <span class="p">[</span><span class="nx">WebBrowserTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
-    <span class="p">...(</span><span class="nf">isTodoV2Enabled</span><span class="p">()</span>
-      <span class="p">?</span> <span class="p">[</span><span class="nx">TaskCreateTool</span><span class="p">,</span> <span class="nx">TaskGetTool</span><span class="p">,</span> <span class="nx">TaskUpdateTool</span><span class="p">,</span> <span class="nx">TaskListTool</span><span class="p">]</span>
-      <span class="p">:</span> <span class="p">[]),</span>
+    <span class="p">...(</span><span class="nf">isTodoV2Enabled</span><span class="p">()</span> <span class="p">?</span> <span class="p">[</span><span class="nx">TaskCreateTool</span><span class="p">,</span> <span class="nx">TaskGetTool</span><span class="p">,</span> <span class="nx">TaskUpdateTool</span><span class="p">,</span> <span class="nx">TaskListTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
     <span class="p">...(</span><span class="nx">OverflowTestTool</span> <span class="p">?</span> <span class="p">[</span><span class="nx">OverflowTestTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
     <span class="p">...(</span><span class="nx">CtxInspectTool</span> <span class="p">?</span> <span class="p">[</span><span class="nx">CtxInspectTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
     <span class="p">...(</span><span class="nx">TerminalCaptureTool</span> <span class="p">?</span> <span class="p">[</span><span class="nx">TerminalCaptureTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
@@ -386,11 +344,9 @@
     <span class="p">...(</span><span class="nf">isWorktreeModeEnabled</span><span class="p">()</span> <span class="p">?</span> <span class="p">[</span><span class="nx">EnterWorktreeTool</span><span class="p">,</span> <span class="nx">ExitWorktreeTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
     <span class="nf">getSendMessageTool</span><span class="p">(),</span>
     <span class="p">...(</span><span class="nx">ListPeersTool</span> <span class="p">?</span> <span class="p">[</span><span class="nx">ListPeersTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
-    <span class="p">...(</span><span class="nf">isAgentSwarmsEnabled</span><span class="p">()</span>
-      <span class="p">?</span> <span class="p">[</span><span class="nf">getTeamCreateTool</span><span class="p">(),</span> <span class="nf">getTeamDeleteTool</span><span class="p">()]</span>
-      <span class="p">:</span> <span class="p">[]),</span>
+    <span class="p">...(</span><span class="nf">isAgentSwarmsEnabled</span><span class="p">()</span> <span class="p">?</span> <span class="p">[</span><span class="nf">getTeamCreateTool</span><span class="p">(),</span> <span class="nf">getTeamDeleteTool</span><span class="p">()]</span> <span class="p">:</span> <span class="p">[]),</span>
     <span class="p">...(</span><span class="nx">VerifyPlanExecutionTool</span> <span class="p">?</span> <span class="p">[</span><span class="nx">VerifyPlanExecutionTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
-    <span class="p">...(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ant</span><span class="dl">'</span> <span class="o">&amp;&amp;</span> <span class="nx">REPLTool</span> <span class="p">?</span> <span class="p">[</span><span class="nx">REPLTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
+    <span class="p">...(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">ant</span><span class="dl">"</span> <span class="o">&amp;&amp;</span> <span class="nx">REPLTool</span> <span class="p">?</span> <span class="p">[</span><span class="nx">REPLTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
     <span class="p">...(</span><span class="nx">WorkflowTool</span> <span class="p">?</span> <span class="p">[</span><span class="nx">WorkflowTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
     <span class="p">...(</span><span class="nx">SleepTool</span> <span class="p">?</span> <span class="p">[</span><span class="nx">SleepTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
     <span class="p">...</span><span class="nx">cronTools</span><span class="p">,</span>
@@ -402,13 +358,13 @@
     <span class="p">...(</span><span class="nx">SubscribePRTool</span> <span class="p">?</span> <span class="p">[</span><span class="nx">SubscribePRTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
     <span class="p">...(</span><span class="nf">getPowerShellTool</span><span class="p">()</span> <span class="p">?</span> <span class="p">[</span><span class="nf">getPowerShellTool</span><span class="p">()]</span> <span class="p">:</span> <span class="p">[]),</span>
     <span class="p">...(</span><span class="nx">SnipTool</span> <span class="p">?</span> <span class="p">[</span><span class="nx">SnipTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
-    <span class="p">...(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">NODE_ENV</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">test</span><span class="dl">'</span> <span class="p">?</span> <span class="p">[</span><span class="nx">TestingPermissionTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
+    <span class="p">...(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">NODE_ENV</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">test</span><span class="dl">"</span> <span class="p">?</span> <span class="p">[</span><span class="nx">TestingPermissionTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
     <span class="nx">ListMcpResourcesTool</span><span class="p">,</span>
     <span class="nx">ReadMcpResourceTool</span><span class="p">,</span>
     <span class="c1">// Include ToolSearchTool when tool search might be enabled (optimistic check)</span>
     <span class="c1">// The actual decision to defer tools happens at request time in claude.ts</span>
     <span class="p">...(</span><span class="nf">isToolSearchEnabledOptimistic</span><span class="p">()</span> <span class="p">?</span> <span class="p">[</span><span class="nx">ToolSearchTool</span><span class="p">]</span> <span class="p">:</span> <span class="p">[]),</span>
-  <span class="p">]</span>
+  <span class="p">];</span>
 <span class="p">}</span>
 </code></pre></div></div> <p>内置工具按 A-Z 排序： Agent → AskUserQuestion → Bash → Brief → CronCreate → CronDelete → CronList → Edit → EnterPlanMode → EnterWorktree → ExitPlanMode → ExitWorktree → Glob → Grep → LSP → ListMcpResources → Monitor → NotebookEdit → PowerShell → PushNotification → Read → ReadMcpResource → SendMessage → Skill → Sleep → TaskCreate → TaskGet → TaskList → TaskOutput → TaskStop → TaskUpdate → TodoWrite → WebFetch → WebSearch → Write → …</p> <p>MCP 工具按 A-Z 排序（追加在后）： mcp__db__query → mcp__db__write → mcp__slack__msg → …</p> <p>注释里的关键解释</p> <p>// Sort each partition for prompt-cache stability, keeping built-ins as a // contiguous prefix. The server’s claude_code_system_cache_policy places a // global cache breakpoint after the last prefix-matched built-in tool; a flat // sort would interleave MCP tools into built-ins and invalidate all downstream // cache keys whenever an MCP tool sorts between existing built-ins.</p> <p>翻译：</p> <p>▎ 每个分区独立排序以保持 prompt cache 稳定性，内置工具保持为连续前缀。 ▎ 服务器的缓存策略在最后一个前缀匹配的内置工具之后放置全局缓存断点； ▎ 如果平铺排序，MCP 工具会穿插在内置工具之间，每当一个 MCP 工具排在 ▎ 现有内置工具之间时，所有下游的 cache key 都会失效。 也印证了刚刚我说的</p> <p>为什么 localeCompare 而不是硬编码顺序</p> <p>const byName = (a: Tool, b: Tool) =&gt; a.name.localeCompare(b.name)</p> <p>localeCompare 是确定性的——同样的工具名永远产生同样的顺序。不需要维护一个硬编码的顺序列表，新增工具时只要名字确定了，排序就自动确定。</p> <p>而且 localeCompare 在不同平台上结果一致（对 ASCII 字符来说就是简单的字母顺序），保证了 cache key 的稳定性。</p> <h3 id="tool接口">Tool接口</h3> <h4 id="1-身份标识">1. 身份标识</h4> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">name</span><span class="p">:</span> <span class="kr">string</span>                    <span class="c1">// 唯一标识符，如 "Read", "Bash", "Edit"</span>
 <span class="nx">aliases</span><span class="p">?:</span> <span class="kr">string</span><span class="p">[]</span>              <span class="c1">// 重命名后的旧名字（向后兼容）</span>
@@ -416,14 +372,20 @@
 <span class="nx">isMcp</span><span class="p">?:</span> <span class="nx">boolean</span>                 <span class="c1">// 是否来自 MCP 服务器</span>
 <span class="nx">isLsp</span><span class="p">?:</span> <span class="nx">boolean</span>                 <span class="c1">// 是否 LSP 工具</span>
 <span class="nx">mcpInfo</span><span class="p">?:</span> <span class="p">{</span> <span class="nx">serverName</span><span class="p">,</span> <span class="nx">toolName</span> <span class="p">}</span>  <span class="c1">// MCP 工具的来源信息</span>
-</code></pre></div></div> <p>searchHint 的例子：NotebookEdit 工具的名字里没有 “jupyter”，所以 searchHint: ‘jupyter notebook cell’，让模型能通过关键词找到它，因为你的工具名字不一定跟用户描述的一样或者相似，如果直接用description我觉得不是不行，但是如果有searchHint，那么llm就可以通过关键词搜索到它，肯定是更方便的</p> <hr> <ol> <li>Schema 定义 ```ts inputSchema: Input // Zod schema，定义输入参数的类型和约束 inputJSONSchema?: ToolInputJSONSchema // MCP 工具的原生 JSON Schema（不经过 Zod 转换） outputSchema?: z.ZodType // 输出 schema（可选，目前大部分工具没用）</li> </ol> <p>inputSchema 是用 Zod 定义的： // FileReadTool 的 inputSchema 例子 const fileReadSchema = z.object({ file_path: z.string().describe(“The absolute path to the file to read”), offset: z.number().optional().describe(“Line number to start reading from”), limit: z.number().optional().describe(“Number of lines to read”), })</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>这个 schema 会被 toolToAPISchema() 转换成 JSON Schema 格式发送给 API。
+</code></pre></div></div> <p>searchHint 的例子：NotebookEdit 工具的名字里没有 “jupyter”，所以 searchHint: ‘jupyter notebook cell’，让模型能通过关键词找到它，因为你的工具名字不一定跟用户描述的一样或者相似，如果直接用description我觉得不是不行，但是如果有searchHint，那么llm就可以通过关键词搜索到它，肯定是更方便的</p> <hr> <ol> <li>Schema 定义</li> </ol> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">inputSchema</span><span class="p">:</span> <span class="nx">Input</span>              <span class="c1">// Zod schema，定义输入参数的类型和约束</span>
+<span class="nx">inputJSONSchema</span><span class="p">?:</span> <span class="nx">ToolInputJSONSchema</span>  <span class="c1">// MCP 工具的原生 JSON Schema（不经过 Zod 转换）</span>
+<span class="nx">outputSchema</span><span class="p">?:</span> <span class="nx">z</span><span class="p">.</span><span class="nx">ZodType</span>        <span class="c1">// 输出 schema（可选，目前大部分工具没用）</span>
 
----
-3. 执行
-```ts
-call(args, context, canUseTool, parentMessage, onProgress)
-  → Promise&lt;ToolResult&lt;Output&gt;&gt;
-</code></pre></div></div> <p>一个异步的执行，毕竟绝大部分的工具可能都不是一瞬间完成的</p> <hr> <ol> <li>权限与安全 <div class="language-ts highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="nf">isReadOnly</span><span class="p">(</span><span class="nx">input</span><span class="p">):</span> <span class="nx">boolean</span>          <span class="c1">// 是否只读操作</span>
+<span class="nx">inputSchema</span> <span class="nx">是用</span> <span class="nx">Zod</span> <span class="nx">定义的</span><span class="err">：</span>
+<span class="c1">// FileReadTool 的 inputSchema 例子</span>
+<span class="kd">const</span> <span class="nx">fileReadSchema</span> <span class="o">=</span> <span class="nx">z</span><span class="p">.</span><span class="nf">object</span><span class="p">({</span>
+  <span class="na">file_path</span><span class="p">:</span> <span class="nx">z</span><span class="p">.</span><span class="nf">string</span><span class="p">().</span><span class="nf">describe</span><span class="p">(</span><span class="dl">"</span><span class="s2">The absolute path to the file to read</span><span class="dl">"</span><span class="p">),</span>
+  <span class="na">offset</span><span class="p">:</span> <span class="nx">z</span><span class="p">.</span><span class="nf">number</span><span class="p">().</span><span class="nf">optional</span><span class="p">().</span><span class="nf">describe</span><span class="p">(</span><span class="dl">"</span><span class="s2">Line number to start reading from</span><span class="dl">"</span><span class="p">),</span>
+  <span class="na">limit</span><span class="p">:</span> <span class="nx">z</span><span class="p">.</span><span class="nf">number</span><span class="p">().</span><span class="nf">optional</span><span class="p">().</span><span class="nf">describe</span><span class="p">(</span><span class="dl">"</span><span class="s2">Number of lines to read</span><span class="dl">"</span><span class="p">),</span>
+<span class="p">})</span>
+</code></pre></div></div> <p>这个 schema 会被 toolToAPISchema() 转换成 JSON Schema 格式发送给 API。</p> <hr> <ol> <li>执行</li> </ol> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">call</span><span class="p">(</span><span class="nx">args</span><span class="p">,</span> <span class="nx">context</span><span class="p">,</span> <span class="nx">canUseTool</span><span class="p">,</span> <span class="nx">parentMessage</span><span class="p">,</span> <span class="nx">onProgress</span><span class="p">)</span>
+  <span class="err">→</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ToolResult</span><span class="o">&lt;</span><span class="nx">Output</span><span class="o">&gt;&gt;</span>
+</code></pre></div></div> <p>一个异步的执行，毕竟绝大部分的工具可能都不是一瞬间完成的</p> <hr> <ol> <li>权限与安全</li> </ol> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">isReadOnly</span><span class="p">(</span><span class="nx">input</span><span class="p">):</span> <span class="nx">boolean</span>          <span class="c1">// 是否只读操作</span>
 <span class="nx">isDestructive</span><span class="p">?(</span><span class="nx">input</span><span class="p">):</span> <span class="nx">boolean</span>      <span class="c1">// 是否不可逆（delete/overwrite/send）</span>
 <span class="nf">checkPermissions</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">context</span><span class="p">)</span>    <span class="c1">// 工具特定的权限检查</span>
   <span class="err">→</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">PermissionResult</span><span class="o">&gt;</span>
@@ -433,30 +395,47 @@ call(args, context, canUseTool, parentMessage, onProgress)
 <span class="nx">getPath</span><span class="p">?(</span><span class="nx">input</span><span class="p">):</span> <span class="kr">string</span>             <span class="c1">// 获取文件路径（用于路径安全检查）</span>
 <span class="nx">preparePermissionMatcher</span><span class="p">?(</span><span class="nx">input</span><span class="p">)</span>    <span class="c1">// 准备 hook 规则匹配器</span>
   <span class="err">→</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">(</span><span class="nx">pattern</span><span class="p">:</span> <span class="kr">string</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">boolean</span><span class="o">&gt;</span>
-</code></pre></div> </div> <p>isDestructive是值得学习的一个点，对于像是提交之类的操作，会产生可能不可逆后果的函数，确实是需要对应提醒的 执行顺序：validateInput → checkPermissions → call</p> </li> </ol> <hr> <ol> <li>并发与中断 <div class="language-ts highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="nf">isConcurrencySafe</span><span class="p">(</span><span class="nx">input</span><span class="p">):</span> <span class="nx">boolean</span>   <span class="c1">// 是否可以和其他工具并行执行</span>
+</code></pre></div></div> <p>isDestructive是值得学习的一个点，对于像是提交之类的操作，会产生可能不可逆后果的函数，确实是需要对应提醒的 执行顺序：validateInput → checkPermissions → call</p> <hr> <ol> <li>并发与中断</li> </ol> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">isConcurrencySafe</span><span class="p">(</span><span class="nx">input</span><span class="p">):</span> <span class="nx">boolean</span>   <span class="c1">// 是否可以和其他工具并行执行</span>
 <span class="nx">interruptBehavior</span><span class="p">?():</span> <span class="dl">'</span><span class="s1">cancel</span><span class="dl">'</span> <span class="o">|</span> <span class="dl">'</span><span class="s1">block</span><span class="dl">'</span>  <span class="c1">// 用户发新消息时怎么办</span>
-</code></pre></div> </div> <p>isConcurrencySafe = true → 多个实例可以同时跑 isConcurrencySafe = false → 必须串行执行（默认）</p> </li> </ol> <p>interruptBehavior = ‘cancel’ → 停止工具，丢弃结果 interruptBehavior = ‘block’ → 继续跑，新消息排队等待（默认）</p> <hr> <ol> <li>搜索与展示分类 <div class="language-ts highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="nx">isSearchOrReadCommand</span><span class="p">?(</span><span class="nx">input</span><span class="p">):</span> <span class="p">{</span> <span class="nx">isSearch</span><span class="p">,</span> <span class="nx">isRead</span><span class="p">,</span> <span class="nx">isList</span><span class="p">?</span> <span class="p">}</span>
+</code></pre></div></div> <p>isConcurrencySafe = true → 多个实例可以同时跑 isConcurrencySafe = false → 必须串行执行（默认）</p> <p>interruptBehavior = ‘cancel’ → 停止工具，丢弃结果 interruptBehavior = ‘block’ → 继续跑，新消息排队等待（默认）</p> <hr> <ol> <li>搜索与展示分类</li> </ol> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">isSearchOrReadCommand</span><span class="p">?(</span><span class="nx">input</span><span class="p">):</span> <span class="p">{</span> <span class="nx">isSearch</span><span class="p">,</span> <span class="nx">isRead</span><span class="p">,</span> <span class="nx">isList</span><span class="p">?</span> <span class="p">}</span>
 <span class="nx">isOpenWorld</span><span class="p">?(</span><span class="nx">input</span><span class="p">):</span> <span class="nx">boolean</span>
-</code></pre></div> </div> <p>用于 UI 折叠——搜索/读取操作在非 verbose 模式下会被折叠显示：</p> </li> </ol> <p>isSearch: true → Grep, Glob, find（搜索操作） isRead: true → Read, cat, head（读取操作） isList: true → ls, tree（目录列表）</p> <hr> <ol> <li>缓存与加载控制 <div class="language-ts highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="nx">strict</span><span class="p">?:</span> <span class="nx">boolean</span>       <span class="c1">// API 严格模式（更严格遵循 schema）</span>
+</code></pre></div></div> <p>用于 UI 折叠——搜索/读取操作在非 verbose 模式下会被折叠显示：</p> <p>isSearch: true → Grep, Glob, find（搜索操作） isRead: true → Read, cat, head（读取操作） isList: true → ls, tree（目录列表）</p> <hr> <ol> <li>缓存与加载控制</li> </ol> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">readonly</span> <span class="nx">strict</span><span class="p">?:</span> <span class="nx">boolean</span>       <span class="c1">// API 严格模式（更严格遵循 schema）</span>
 <span class="k">readonly</span> <span class="nx">shouldDefer</span><span class="p">?:</span> <span class="nx">boolean</span>  <span class="c1">// 延迟加载（需要 ToolSearch 才能用）</span>
 <span class="k">readonly</span> <span class="nx">alwaysLoad</span><span class="p">?:</span> <span class="nx">boolean</span>   <span class="c1">// 始终加载（不被 defer）</span>
-</code></pre></div> </div> <p>shouldDefer = true → 工具定义不发给 API，模型用 ToolSearch 才能发现 alwaysLoad = true → 即使 ToolSearch 启用，也始终出现在 API 请求中</p> </li> </ol> <hr> <ol> <li>UI 渲染（React 组件） ```ts // 输入侧渲染 renderToolUseMessage(input, options) → ReactNode // 工具调用的显示 renderToolUseTag?(input) → ReactNode // 调用后的标签（超时、模型等） renderToolUseQueuedMessage?() → ReactNode // 排队中的显示</li> </ol> <p>// 进度渲染 ontent, progress, options) → ReactNode // 结果的显示 renderToolUseRejectedMessage?(input, options) → ReactNode // 被拒绝时的显示 renderToolUseErrorMessage?(result, options) → ReactNode // 出错时的显示</p> <p>// 分组渲染 renderGroupedToolUse?(toolUses, options) → ReactNode | null // 多个并行调用的分组显示</p> <p>// 辅助 userFacingName(input): string // 显示给用户的名字 userFacingNameBackgroundColor?(input) // 名字的背景色 getToolUseSummary?(input): string | null // 紧凑视图的摘要 getActivityDescription?(input): string | null // spinner 的描述文字 isResultTruncated?(output): boolean // 结果是否被截断（点击展开） isTransparentWrapper?(): boolean // 是否透明包装器（如 REPL）</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>---
-9. 序列化与索引
-```ts
-// 模型侧序列化
-mapToolResultToToolResultBlockParam(content, toolUseID)
-  → ToolResultBlockParam  // 结果 → API 格式
+</code></pre></div></div> <p>shouldDefer = true → 工具定义不发给 API，模型用 ToolSearch 才能发现 alwaysLoad = true → 即使 ToolSearch 启用，也始终出现在 API 请求中</p> <hr> <ol> <li>UI 渲染（React 组件）</li> </ol> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 输入侧渲染</span>
+<span class="nf">renderToolUseMessage</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span>        <span class="err">→</span> <span class="nx">ReactNode</span>  <span class="c1">// 工具调用的显示</span>
+<span class="nx">renderToolUseTag</span><span class="p">?(</span><span class="nx">input</span><span class="p">)</span>                    <span class="err">→</span> <span class="nx">ReactNode</span>  <span class="c1">// 调用后的标签（超时、模型等）</span>
+<span class="nx">renderToolUseQueuedMessage</span><span class="p">?()</span>               <span class="err">→</span> <span class="nx">ReactNode</span>  <span class="c1">// 排队中的显示</span>
 
-tput): string  // 提取纯文本用于转录搜索
+<span class="c1">// 进度渲染</span>
+<span class="nx">ontent</span><span class="p">,</span> <span class="nx">progress</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="err">→</span> <span class="nx">ReactNode</span>  <span class="c1">// 结果的显示</span>
+<span class="nx">renderToolUseRejectedMessage</span><span class="p">?(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="err">→</span> <span class="nx">ReactNode</span>  <span class="c1">// 被拒绝时的显示</span>
+<span class="nx">renderToolUseErrorMessage</span><span class="p">?(</span><span class="nx">result</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span>   <span class="err">→</span> <span class="nx">ReactNode</span>  <span class="c1">// 出错时的显示</span>
 
-// 输入处理
-backfillObservableInput?(input): void    // 在 observer 看到之前填充派生字段
-inputsEquivalent?(a, b): boolean         // 两个输入是否等价（用于去重）
+<span class="c1">// 分组渲染</span>
+<span class="nx">renderGroupedToolUse</span><span class="p">?(</span><span class="nx">toolUses</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span>      <span class="err">→</span> <span class="nx">ReactNode</span> <span class="o">|</span> <span class="kc">null</span>  <span class="c1">// 多个并行调用的分组显示</span>
 
-// Classifier
-toAutoClassifierInput(input): unknown    // auto 模式 classifier 的输入
-</code></pre></div></div> <hr> <ol> <li>动态描述 <div class="language-ts highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="nf">description</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">options</span><span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="kr">string</span><span class="o">&gt;</span>
-</code></pre></div> </div> <p>工具描述可以是动态的——根据输入、权限上下文、可用工具列表生成不同的描述。 这里对的动态主要是指的mcp以及agenttool一类的工具，因为他们的状态变化大，所以每次都需要作重新的计算 但是对于像读写这类静态的工具而言，一般是直接进缓存的 这里的description跟在md文件里面看到对于工具描述的description不是一个东西，对于传入api的描述而言</p> <div class="language-ts highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="nx">base</span> <span class="o">=</span> <span class="p">{</span>
+<span class="c1">// 辅助</span>
+<span class="nf">userFacingName</span><span class="p">(</span><span class="nx">input</span><span class="p">):</span> <span class="kr">string</span>                <span class="c1">// 显示给用户的名字</span>
+<span class="nx">userFacingNameBackgroundColor</span><span class="p">?(</span><span class="nx">input</span><span class="p">)</span>        <span class="c1">// 名字的背景色</span>
+<span class="nx">getToolUseSummary</span><span class="p">?(</span><span class="nx">input</span><span class="p">):</span> <span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span>     <span class="c1">// 紧凑视图的摘要</span>
+<span class="nx">getActivityDescription</span><span class="p">?(</span><span class="nx">input</span><span class="p">):</span> <span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span> <span class="c1">// spinner 的描述文字</span>
+<span class="nx">isResultTruncated</span><span class="p">?(</span><span class="nx">output</span><span class="p">):</span> <span class="nx">boolean</span>          <span class="c1">// 结果是否被截断（点击展开）</span>
+<span class="nx">isTransparentWrapper</span><span class="p">?():</span> <span class="nx">boolean</span>             <span class="c1">// 是否透明包装器（如 REPL）</span>
+</code></pre></div></div> <hr> <ol> <li>序列化与索引</li> </ol> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 模型侧序列化</span>
+<span class="nf">mapToolResultToToolResultBlockParam</span><span class="p">(</span><span class="nx">content</span><span class="p">,</span> <span class="nx">toolUseID</span><span class="p">)</span>
+  <span class="err">→</span> <span class="nx">ToolResultBlockParam</span>  <span class="c1">// 结果 → API 格式</span>
+
+<span class="nx">tput</span><span class="p">):</span> <span class="kr">string</span>  <span class="c1">// 提取纯文本用于转录搜索</span>
+
+<span class="c1">// 输入处理</span>
+<span class="nx">backfillObservableInput</span><span class="p">?(</span><span class="nx">input</span><span class="p">):</span> <span class="k">void</span>    <span class="c1">// 在 observer 看到之前填充派生字段</span>
+<span class="nx">inputsEquivalent</span><span class="p">?(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">):</span> <span class="nx">boolean</span>         <span class="c1">// 两个输入是否等价（用于去重）</span>
+
+<span class="c1">// Classifier</span>
+<span class="nf">toAutoClassifierInput</span><span class="p">(</span><span class="nx">input</span><span class="p">):</span> <span class="nx">unknown</span>    <span class="c1">// auto 模式 classifier 的输入</span>
+</code></pre></div></div> <hr> <ol> <li>动态描述</li> </ol> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">description</span><span class="p">(</span><span class="nx">input</span><span class="p">,</span> <span class="nx">options</span><span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="kr">string</span><span class="o">&gt;</span>
+</code></pre></div></div> <p>工具描述可以是动态的——根据输入、权限上下文、可用工具列表生成不同的描述。 这里对的动态主要是指的mcp以及agenttool一类的工具，因为他们的状态变化大，所以每次都需要作重新的计算 但是对于像读写这类静态的工具而言，一般是直接进缓存的 这里的description跟在md文件里面看到对于工具描述的description不是一个东西，对于传入api的描述而言</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">base</span> <span class="o">=</span> <span class="p">{</span>
   <span class="na">name</span><span class="p">:</span> <span class="nx">tool</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span>
   <span class="na">description</span><span class="p">:</span> <span class="k">await</span> <span class="nx">tool</span><span class="p">.</span><span class="nf">prompt</span><span class="p">({</span>
     <span class="na">getToolPermissionContext</span><span class="p">:</span> <span class="nx">options</span><span class="p">.</span><span class="nx">getToolPermissionContext</span><span class="p">,</span>
@@ -465,19 +444,19 @@ toAutoClassifierInput(input): unknown    // auto 模式 classifier 的输入
     <span class="na">allowedAgentTypes</span><span class="p">:</span> <span class="nx">options</span><span class="p">.</span><span class="nx">allowedAgentTypes</span><span class="p">,</span>
   <span class="p">}),</span>
   <span class="nx">input_schema</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div> </div> <p>可以看到传入的是工具的prompt，这里的description主要是面对的是用户，给人看的 —</p> </li> <li>Prompt 生成 <div class="language-ts highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>  <span class="nf">prompt</span><span class="p">(</span><span class="nx">options</span><span class="p">:</span> <span class="p">{</span>
+<span class="p">};</span>
+</code></pre></div></div> <h2 id="可以看到传入的是工具的prompt这里的description主要是面对的是用户给人看的">可以看到传入的是工具的prompt，这里的description主要是面对的是用户，给人看的</h2> <ol> <li>Prompt 生成</li> </ol> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nf">prompt</span><span class="p">(</span><span class="nx">options</span><span class="p">:</span> <span class="p">{</span>
     <span class="nl">getToolPermissionContext</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">ToolPermissionContext</span><span class="o">&gt;</span>
     <span class="nx">tools</span><span class="p">:</span> <span class="nx">Tools</span>
     <span class="nx">agents</span><span class="p">:</span> <span class="nx">AgentDefinition</span><span class="p">[]</span>
     <span class="nx">allowedAgentTypes</span><span class="p">?:</span> <span class="kr">string</span><span class="p">[]</span>
   <span class="p">}):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="kr">string</span><span class="o">&gt;</span>
-</code></pre></div> </div> <p>生成工具的指令文本——注入到系统提示中，告诉模型怎么使用这个工具。比如 BashTool 的 prompt 会说明 shell 语法、超时设置等。</p> </li> </ol> <hr> <p>buildTool() 如何组装</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">function</span> <span class="nf">buildTool</span><span class="o">&lt;</span><span class="nx">D</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">def</span><span class="p">:</span> <span class="nx">D</span><span class="p">):</span> <span class="nx">BuiltTool</span><span class="o">&lt;</span><span class="nx">D</span><span class="o">&gt;</span> <span class="p">{</span>
+</code></pre></div></div> <p>生成工具的指令文本——注入到系统提示中，告诉模型怎么使用这个工具。比如 BashTool 的 prompt 会说明 shell 语法、超时设置等。</p> <hr> <p>buildTool() 如何组装</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">function</span> <span class="nf">buildTool</span><span class="o">&lt;</span><span class="nx">D</span><span class="o">&gt;</span><span class="p">(</span><span class="nx">def</span><span class="p">:</span> <span class="nx">D</span><span class="p">):</span> <span class="nx">BuiltTool</span><span class="o">&lt;</span><span class="nx">D</span><span class="o">&gt;</span> <span class="p">{</span>
   <span class="k">return</span> <span class="p">{</span>
-    <span class="p">...</span><span class="nx">TOOL_DEFAULTS</span><span class="p">,</span>              <span class="c1">// 安全默认值</span>
+    <span class="p">...</span><span class="nx">TOOL_DEFAULTS</span><span class="p">,</span> <span class="c1">// 安全默认值</span>
     <span class="na">userFacingName</span><span class="p">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">def</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="c1">// 默认用 name</span>
-    <span class="p">...</span><span class="nx">def</span><span class="p">,</span>                        <span class="c1">// 工具自己的定义覆盖默认值</span>
-  <span class="p">}</span>
+    <span class="p">...</span><span class="nx">def</span><span class="p">,</span> <span class="c1">// 工具自己的定义覆盖默认值</span>
+  <span class="p">};</span>
 <span class="p">}</span>
 </code></pre></div></div> <p>工具只需要实现自己关心的方法，其他的用默认值：</p> <ul> <li>不实现 isReadOnly → 默认 false（假设会写）</li> <li>不实现 isConcurrencySafe → 默认 false（假设不能并行）</li> <li>不实现 checkPermissions → 默认 allow（交给通用权限系统）</li> </ul> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/colpali-multimodal-rag-qa/">掌握 ColPali 多模态 RAG 需要回答的 8 个问题</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/proposition-chunking-summary/">Proposition Chunking 命题化切分总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/query-transformations-summary/">Query Transformations 查询转换技术总结</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
   window.alFolio = {
@@ -497,7 +476,14 @@ ninja.data = [{
     handler: () => {
       window.location.href = "/";
     },
-  },{id: "nav-blog",
+  },{id: "nav-cv",
+          title: "CV",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/cv/";
+          },
+        },{id: "nav-blog",
           title: "blog",
           description: "",
           section: "Navigation",
