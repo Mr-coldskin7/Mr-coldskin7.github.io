@@ -70,7 +70,7 @@ def VGG16(pretrained, in_channels, **kwargs):
     if pretrained:
         state_dict = load_state_dict_from_url("https://download.pytorch.org/models/vgg16-397923af.pth", model_dir="./model_data")
         model.load_state_dict(state_dict)
-
+    
     del model.avgpool
     del model.classifier
     return model
@@ -125,7 +125,7 @@ class Unet(nn.Module):
         up1 = self.up_concat1(feat1, up2)
 
         final = self.final(up1)
-
+        
         return final
 
     def _initialize_weights(self, *stages):
@@ -188,7 +188,7 @@ class Unet(nn.Module):
         up1 = self.up_concat1(feat1, up2)
 
         final = self.final(up1)
-
+        
         return final
 
     def _initialize_weights(self, *stages):
