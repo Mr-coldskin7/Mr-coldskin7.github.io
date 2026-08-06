@@ -22,6 +22,5 @@ latest_posts:
   limit: 3 # leave blank to include all the blog posts
 ---
 
-我是 LeeSanYee。这里是我的个人技术博客，主要记录我在机器学习 / NLP、C++、Linux 等方向学习的笔记与思考。
+我是 LeeSanYee。这里是我的个人技术博客，主要记录我在Agent、C++、Linux 等方向学习的笔记与思考。
 
-如果你也想写点什么，可以直接在 `_posts/` 下新建 markdown 文章，推送到仓库后 GitHub Pages 会自动构建上线。
