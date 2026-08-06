@@ -1,0 +1,933 @@
+<!DOCTYPE html> <html lang="zh"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Claude code学习8 system-reminder，动态信息是如何入prompt的 | leesanyee </title> <meta name="author" content="Lee SanYee"> <meta name="description" content="LeeSanYee 的技术博客，记录 ML/NLP、C++、Linux 等方向的学习笔记与思考。 "> <meta name="keywords" content="blog, ml, nlp, cpp, linux"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://mr-coldskin7.github.io/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B08/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Claude code学习8 system-reminder，动态信息是如何入prompt的</h1> <p class="post-meta"> Created on June 23, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/agent"> <i class="fa-solid fa-hashtag fa-sm"></i> agent</a>   <a href="/blog/tag/claude-code"> <i class="fa-solid fa-hashtag fa-sm"></i> claude-code</a>   <a href="/blog/tag/system-reminder"> <i class="fa-solid fa-hashtag fa-sm"></i> system-reminder</a>   ·   <a href="/blog/category/agent"> <i class="fa-solid fa-tag fa-sm"></i> agent</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h3 id="system-reminder">system-reminder</h3> <p>在之前讲到了需要关于静态prompt以及缓存的内容，既然每一轮会变得东西要保存缓存要往后放，那例如今天日期，git分支、。Claude Code 的解法是把高频变化事实从 System Prompt 拿出来，用 <system-reminder> 包装后放进消息流。CLAUDE.md、Memory 召回、文件读取警告和工具引用说明一类容易变化的</system-reminder></p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">function</span> <span class="nf">prependUserContext</span><span class="p">(</span>
+  <span class="nx">messages</span><span class="p">:</span> <span class="nx">Message</span><span class="p">[],</span>
+  <span class="nx">context</span><span class="p">:</span> <span class="p">{</span> <span class="p">[</span><span class="nx">k</span><span class="p">:</span> <span class="kr">string</span><span class="p">]:</span> <span class="kr">string</span> <span class="p">},</span>
+<span class="p">):</span> <span class="nx">Message</span><span class="p">[]</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">NODE_ENV</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">test</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">messages</span>
+  <span class="p">}</span>
+
+  <span class="k">if </span><span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nf">entries</span><span class="p">(</span><span class="nx">context</span><span class="p">).</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">messages</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="p">[</span>
+    <span class="nf">createUserMessage</span><span class="p">({</span>
+      <span class="na">content</span><span class="p">:</span> <span class="s2">`&lt;system-reminder&gt;\nAs you answer the user's questions, you can use the following context:\n</span><span class="p">${</span><span class="nb">Object</span><span class="p">.</span><span class="nf">entries</span><span class="p">(</span>
+        <span class="nx">context</span><span class="p">,</span>
+      <span class="p">)</span>
+        <span class="p">.</span><span class="nf">map</span><span class="p">(([</span><span class="nx">key</span><span class="p">,</span> <span class="nx">value</span><span class="p">])</span> <span class="o">=&gt;</span> <span class="s2">`# </span><span class="p">${</span><span class="nx">key</span><span class="p">}</span><span class="s2">\n</span><span class="p">${</span><span class="nx">value</span><span class="p">}</span><span class="s2">`</span><span class="p">)</span>
+        <span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="dl">'</span><span class="se">\n</span><span class="dl">'</span><span class="p">)}</span><span class="s2">
+
+      IMPORTANT: this context may or may not be relevant to your tasks. You should not respond to this context unless it is highly relevant to your task.\n&lt;/system-reminder&gt;\n`</span><span class="p">,</span>
+      <span class="na">isMeta</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="p">}),</span>
+    <span class="p">...</span><span class="nx">messages</span><span class="p">,</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>它把 context 字典（如 claudeMd、currentDate）格式化成 Markdown 标题，再包进 <system-reminder>，作为一条 meta user message 插入到所有消息前面。isMeta: true 表示它不是用户真正输入的内容。 像是这里的context获取有两种context，一种是类似claude.md和memory一类user的context</system-reminder></p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">const</span> <span class="nx">getUserContext</span> <span class="o">=</span> <span class="nf">memoize</span><span class="p">(</span>
+  <span class="k">async </span><span class="p">():</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">{</span>
+    <span class="p">[</span><span class="na">k</span><span class="p">:</span> <span class="kr">string</span><span class="p">]:</span> <span class="kr">string</span>
+  <span class="p">}</span><span class="o">&gt;</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">startTime</span> <span class="o">=</span> <span class="nb">Date</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span>
+    <span class="nf">logForDiagnosticsNoPII</span><span class="p">(</span><span class="dl">'</span><span class="s1">info</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">user_context_started</span><span class="dl">'</span><span class="p">)</span>
+
+    <span class="c1">// CLAUDE_CODE_DISABLE_CLAUDE_MDS: hard off, always.</span>
+    <span class="c1">// --bare: skip auto-discovery (cwd walk), BUT honor explicit --add-dir.</span>
+    <span class="c1">// --bare means "skip what I didn't ask for", not "ignore what I asked for".</span>
+    <span class="kd">const</span> <span class="nx">shouldDisableClaudeMd</span> <span class="o">=</span>
+      <span class="nf">isEnvTruthy</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CLAUDE_CODE_DISABLE_CLAUDE_MDS</span><span class="p">)</span> <span class="o">||</span>
+      <span class="p">(</span><span class="nf">isBareMode</span><span class="p">()</span> <span class="o">&amp;&amp;</span> <span class="nf">getAdditionalDirectoriesForClaudeMd</span><span class="p">().</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c1">// Await the async I/O (readFile/readdir directory walk) so the event</span>
+    <span class="c1">// loop yields naturally at the first fs.readFile.</span>
+    <span class="kd">const</span> <span class="nx">claudeMd</span> <span class="o">=</span> <span class="nx">shouldDisableClaudeMd</span>
+      <span class="p">?</span> <span class="kc">null</span>
+      <span class="p">:</span> <span class="nf">getClaudeMds</span><span class="p">(</span><span class="nf">filterInjectedMemoryFiles</span><span class="p">(</span><span class="k">await</span> <span class="nf">getMemoryFiles</span><span class="p">()))</span>
+    <span class="c1">// Cache for the auto-mode classifier (yoloClassifier.ts reads this</span>
+    <span class="c1">// instead of importing claudemd.ts directly, which would create a</span>
+    <span class="c1">// cycle through permissions/filesystem → permissions → yoloClassifier).</span>
+    <span class="nf">setCachedClaudeMdContent</span><span class="p">(</span><span class="nx">claudeMd</span> <span class="o">||</span> <span class="kc">null</span><span class="p">)</span>
+
+    <span class="nf">logForDiagnosticsNoPII</span><span class="p">(</span><span class="dl">'</span><span class="s1">info</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">user_context_completed</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+      <span class="na">duration_ms</span><span class="p">:</span> <span class="nb">Date</span><span class="p">.</span><span class="nf">now</span><span class="p">()</span> <span class="o">-</span> <span class="nx">startTime</span><span class="p">,</span>
+      <span class="na">claudemd_length</span><span class="p">:</span> <span class="nx">claudeMd</span><span class="p">?.</span><span class="nx">length</span> <span class="o">??</span> <span class="mi">0</span><span class="p">,</span>
+      <span class="na">claudemd_disabled</span><span class="p">:</span> <span class="nc">Boolean</span><span class="p">(</span><span class="nx">shouldDisableClaudeMd</span><span class="p">),</span>
+    <span class="p">})</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+      <span class="p">...(</span><span class="nx">claudeMd</span> <span class="o">&amp;&amp;</span> <span class="p">{</span> <span class="nx">claudeMd</span> <span class="p">}),</span>
+      <span class="na">currentDate</span><span class="p">:</span> <span class="s2">`Today's date is </span><span class="p">${</span><span class="nf">getLocalISODate</span><span class="p">()}</span><span class="s2">.`</span><span class="p">,</span>
+    <span class="p">}</span>
+  <span class="p">},</span>
+<span class="p">)</span>
+</code></pre></div></div> <blockquote> <p>为什么 CLAUDE.md 和 Memory 不应该常驻静态 Global Cache？请同时回答缓存和隐私两个角度。 因为 CLAUDE.md 和 Memory 既不是静态的，也不是全局通用的。把它们放进“常驻静态 Global Cache”会导致缓存失效和隐私隔离双重问题。 CLAUDE.md和/ Memory有的时候是项目级别的，如果作为全局cache的话经常会失效，并且作为项目的缓存，放在全局可能会有泄露的风险 并且这两个文件的更改频率较多 src/utils/claudemd.ts 里明确把它们当成磁盘文件来发现：</p> </blockquote> <p>// Managed memory (eg. /etc/claude-code/CLAUDE.md) - Global instructions for all users // User memory (~/.claude/CLAUDE.md) - Private global instructions for all projects // Project memory (CLAUDE.md, .claude/CLAUDE.md, …) // Local memory (CLAUDE.local.md in project roots) - Private project-specific instructions</p> <p>用户随时可能：</p> <ul> <li>直接编辑 CLAUDE.md 或 .claude/memory/*.md</li> <li>用 /remember 写入新记忆</li> <li>用 /compact 压缩或清理记忆</li> <li>用 /clear caches 重置上下文</li> </ul> <p>如果这些东西被塞进一个不会失效的静态 Global Cache，模型就会一直读到旧版本。</p> <ol> <li>当前实现就是“有生命周期的缓存 + 显式失效”</li> </ol> <p>src/context.ts:155-189</p> <p>export const getUserContext = memoize(async () =&gt; { const claudeMd = shouldDisableClaudeMd ? null : getClaudeMds(filterInjectedMemoryFiles(await getMemoryFiles()))</p> <p>return { …(claudeMd &amp;&amp; { claudeMd }), currentDate: <code class="language-plaintext highlighter-rouge">Today's date is ${getLocalISODate()}.</code>, } })</p> <p>它用了 lodash-es/memoize，只会在当前进程内缓存，并且源码中有很多显式失效点：</p> <ul> <li>src/context.ts:29-34：system prompt injection 改变时立即 getUserContext.cache.clear()</li> <li>src/commands/clear/caches.ts:52-53：/clear caches 时清空</li> <li>src/commands/compact/compact.ts:63,117,203：压缩记忆后清空</li> </ul> <p>export function setSystemPromptInjection(value: string | null): void { systemPromptInjection = value getUserContext.cache.clear?.() getSystemContext.cache.clear?.() }</p> <p>这说明设计者的假设是：CLAUDE.md / Memory 可以缓存，但必须是可失效的、进程级的，而不是静态 Global 的。</p> <ol> <li>还有时间敏感内容</li> </ol> <p>currentDate 每天都会变，src/memdir/memoryAge.ts:49-52 还会根据文件修改时间生成 freshness note：</p> <p>export function memoryFreshnessNote(mtimeMs: number): string { const text = memoryFreshnessText(mtimeMs) if (!text) return ‘’ return <code class="language-plaintext highlighter-rouge">&lt;system-reminder&gt;${text}&lt;/system-reminder&gt;\n</code> }</p> <p>静态 Global Cache 会让昨天的日期、旧文件的 freshness 一直留在上下文里。</p> <hr> <p>隐私角度：不同项目/用户/隐私级别的记忆必须隔离</p> <ol> <li>Memory 本身就有明确的隐私分层</li> </ol> <p>src/utils/claudemd.ts:1168-1177</p> <p>const description = file.type === ‘Project’ ? ‘ (project instructions, checked into the codebase)’ : file.type === ‘Local’ ? “ (user’s private project instructions, not checked in)” : feature(‘TEAMMEM’) &amp;&amp; file.type === ‘TeamMem’ ? ‘ (shared team memory, synced across the organization)’ : file.type === ‘AutoMem’ ? “ (user’s auto-memory, persists across conversations)” : “ (user’s private global instructions for all projects)”</p> <p>这五类记忆（Managed / User / Project / Local / Team / AutoMem）隐私边界完全不同：</p> <ul> <li>Local 是不提交到仓库的私有项目指令</li> <li>TeamMem 是组织内共享</li> <li>User 是跨项目的个人全局指令</li> </ul> <p>如果把这些放进一个跨项目共享的静态 Global Cache，就相当于把 A 项目的 CLAUDE.local.md 内容也喂给 B 项目，直接破坏隐私隔离。</p> <ol> <li>发现路径是 cwd / git root 相关的，不是全局的</li> </ol> <p>src/utils/claudemd.ts:12-16 说明发现规则：</p> <p>// Project and Local files are discovered by traversing from the current directory up to root // Files closer to the current directory have higher priority</p> <p>CLAUDE.md 的内容取决于当前工作目录。你在 project-a/ 和 project-b/ 下启动 Claude Code，读到的记忆完全不同。静态 Global Cache 没有按 cwd 做 key，就会跨项目串味。</p> <ol> <li>当前实现为什么相对安全</li> </ol> <p>getUserContext 被 memoize 时没有参数，意味着它的隐式 key 就是“当前进程 + 当前 cwd 状态”。这虽然不是最严格的隔离，但至少：</p> <ul> <li>进程结束，缓存消失</li> <li>切换目录或项目时，通常伴随新进程或显式 clear</li> <li>不会把 A 用户的 ~/.claude/CLAUDE.md 泄漏给 B 用户</li> </ul> <p>而真正的“静态 Global Cache”（比如模块级 const globalClaudeMdCache = …）会彻底打破这些边界。</p> <hr> <p>★ Insight ─────────────────────────────────────</p> <ol> <li>缓存问题本质是“失效”问题：CLAUDE.md 和 Memory 是活的文件，不是编译期常量。静态 Global Cache 没有失效机制，会导致模型读到过期指令、旧日期、错误记忆。源码通过 memoize + 多处 cache.clear() 来平衡性能与新鲜度。</li> <li>隐私问题本质是“作用域”问题：Memory 按 Managed → User → Project → Local → Team 分层，且发现路径依赖 cwd。静态 Global Cache 默认跨项目/跨用户共享，会直接把一个项目的私有指令泄漏到另一个项目。</li> <li>“Global” 不等于 “Process-wide”：当前 getUserContext 的缓存是进程级的、可失效的、隐式绑定当前 cwd 的；而一个“常驻静态 Global Cache”通常意味着跨进程、不可失效、无作用域 key，这正是源码刻意避免的 接下来的问题就是system reminder是怎么进到消息里面的 这里面经历了什么？ <div class="language-ts highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * Ensure all text content in attachment-origin messages carries the
+ * &lt;system-reminder&gt; wrapper. This makes the prefix a reliable discriminator
+ * for the post-pass smoosh (smooshSystemReminderSiblings) — no need for every
+ * normalizeAttachmentForAPI case to remember to wrap.
+ *
+ * Idempotent: already-wrapped text is unchanged.
+ */</span>
+<span class="kd">function</span> <span class="nf">ensureSystemReminderWrap</span><span class="p">(</span><span class="nx">msg</span><span class="p">:</span> <span class="nx">UserMessage</span><span class="p">):</span> <span class="nx">UserMessage</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">content</span> <span class="o">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">content</span>
+  <span class="k">if </span><span class="p">(</span><span class="k">typeof</span> <span class="nx">content</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">string</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+ <span class="k">if </span><span class="p">(</span><span class="nx">content</span><span class="p">.</span><span class="nf">startsWith</span><span class="p">(</span><span class="dl">'</span><span class="s1">&lt;system-reminder&gt;</span><span class="dl">'</span><span class="p">))</span> <span class="k">return</span> <span class="nx">msg</span>
+ <span class="k">return</span> <span class="p">{</span>
+   <span class="p">...</span><span class="nx">msg</span><span class="p">,</span>
+   <span class="na">message</span><span class="p">:</span> <span class="p">{</span> <span class="p">...</span><span class="nx">msg</span><span class="p">.</span><span class="nx">message</span><span class="p">,</span> <span class="na">content</span><span class="p">:</span> <span class="nf">wrapInSystemReminder</span><span class="p">(</span><span class="nx">content</span><span class="p">)</span> <span class="p">},</span>
+ <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="kd">let</span> <span class="nx">changed</span> <span class="o">=</span> <span class="kc">false</span>
+  <span class="kd">const</span> <span class="nx">newContent</span> <span class="o">=</span> <span class="nx">content</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="nx">b</span> <span class="o">=&gt;</span> <span class="p">{</span>
+ <span class="k">if </span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">text</span><span class="dl">'</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">b</span><span class="p">.</span><span class="nx">text</span><span class="p">.</span><span class="nf">startsWith</span><span class="p">(</span><span class="dl">'</span><span class="s1">&lt;system-reminder&gt;</span><span class="dl">'</span><span class="p">))</span> <span class="p">{</span>
+   <span class="nx">changed</span> <span class="o">=</span> <span class="kc">true</span>
+   <span class="k">return</span> <span class="p">{</span> <span class="p">...</span><span class="nx">b</span><span class="p">,</span> <span class="na">text</span><span class="p">:</span> <span class="nf">wrapInSystemReminder</span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="nx">text</span><span class="p">)</span> <span class="p">}</span>
+ <span class="p">}</span>
+ <span class="k">return</span> <span class="nx">b</span>
+  <span class="p">})</span>
+  <span class="k">return</span> <span class="nx">changed</span>
+ <span class="p">?</span> <span class="p">{</span> <span class="p">...</span><span class="nx">msg</span><span class="p">,</span> <span class="na">message</span><span class="p">:</span> <span class="p">{</span> <span class="p">...</span><span class="nx">msg</span><span class="p">.</span><span class="nx">message</span><span class="p">,</span> <span class="na">content</span><span class="p">:</span> <span class="nx">newContent</span> <span class="p">}</span> <span class="p">}</span>
+ <span class="p">:</span> <span class="nx">msg</span>
+<span class="p">}</span>
+</code></pre></div> </div> <p>注释说明得很清楚：</p> </li> </ol> <p>▎ Ensure all text content in attachment-origin messages carries the <system-reminder> wrapper. This makes the prefix a reliable discriminator for the post-pass smoosh.</system-reminder></p> <p>它的作用是统一前缀，这样下游的 smooshSystemReminderSiblings 只要看到 startsWith(‘<system-reminder>') 就知道这是系统提醒内容，可以安全折叠。</system-reminder></p> <p>这段逻辑在 normalizeMessagesForAPI 处理 attachment case 时调用（src/utils/messages.ts:2273-2276），受 feature gate tengu_chair_sermon 控制。</p> <p>合并后产生 siblings</p> <p>在 normalizeMessagesForAPI 里，连续的 user message 会被合并：</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">lastMessage</span> <span class="o">=</span> <span class="nf">last</span><span class="p">(</span><span class="nx">result</span><span class="p">)</span>
+<span class="k">if </span><span class="p">(</span><span class="nx">lastMessage</span><span class="p">?.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">user</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">result</span><span class="p">[</span><span class="nx">result</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nf">mergeUserMessages</span><span class="p">(</span><span class="nx">lastMessage</span><span class="p">,</span> <span class="nx">normalizedMessage</span><span class="p">)</span>
+  <span class="k">return</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>附件消息本身也是 user message。合并后，原本独立的 system-reminder 文本块会变成同一条 user 消息里的多个 text sibling。</p> <p>最终整理：把 system-reminder siblings 折叠进 tool_result</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">src</span><span class="o">/</span><span class="nx">utils</span><span class="o">/</span><span class="nx">messages</span><span class="p">.</span><span class="nx">ts</span><span class="p">:</span><span class="mi">1835</span><span class="o">-</span><span class="mi">1873</span>
+
+<span class="kd">function</span> <span class="nf">smooshSystemReminderSiblings</span><span class="p">(</span>
+  <span class="nx">messages</span><span class="p">:</span> <span class="p">(</span><span class="nx">UserMessage</span> <span class="o">|</span> <span class="nx">AssistantMessage</span><span class="p">)[],</span>
+<span class="p">):</span> <span class="p">(</span><span class="nx">UserMessage</span> <span class="o">|</span> <span class="nx">AssistantMessage</span><span class="p">)[]</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nx">messages</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="nx">msg</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">msg</span><span class="p">.</span><span class="kd">type</span> <span class="o">!==</span> <span class="dl">'</span><span class="s1">user</span><span class="dl">'</span><span class="p">)</span> <span class="k">return</span> <span class="nx">msg</span>
+    <span class="kd">const</span> <span class="nx">content</span> <span class="o">=</span> <span class="nx">msg</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">content</span>
+    <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nb">Array</span><span class="p">.</span><span class="nf">isArray</span><span class="p">(</span><span class="nx">content</span><span class="p">))</span> <span class="k">return</span> <span class="nx">msg</span>
+
+    <span class="kd">const</span> <span class="nx">hasToolResult</span> <span class="o">=</span> <span class="nx">content</span><span class="p">.</span><span class="nf">some</span><span class="p">(</span><span class="nx">b</span> <span class="o">=&gt;</span> <span class="nx">b</span><span class="p">.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">tool_result</span><span class="dl">'</span><span class="p">)</span>
+    <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">hasToolResult</span><span class="p">)</span> <span class="k">return</span> <span class="nx">msg</span>
+
+    <span class="kd">const</span> <span class="na">srText</span><span class="p">:</span> <span class="nx">TextBlockParam</span><span class="p">[]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="kd">const</span> <span class="na">kept</span><span class="p">:</span> <span class="nx">ContentBlockParam</span><span class="p">[]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">b</span> <span class="k">of</span> <span class="nx">content</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if </span><span class="p">(</span><span class="nx">b</span><span class="p">.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">text</span><span class="dl">'</span> <span class="o">&amp;&amp;</span> <span class="nx">b</span><span class="p">.</span><span class="nx">text</span><span class="p">.</span><span class="nf">startsWith</span><span class="p">(</span><span class="dl">'</span><span class="s1">&lt;system-reminder&gt;</span><span class="dl">'</span><span class="p">))</span> <span class="p">{</span>
+        <span class="nx">srText</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">kept</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">srText</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="nx">msg</span>
+
+    <span class="c1">// Smoosh into the LAST tool_result</span>
+    <span class="kd">const</span> <span class="nx">lastTrIdx</span> <span class="o">=</span> <span class="nx">kept</span><span class="p">.</span><span class="nf">findLastIndex</span><span class="p">(</span><span class="nx">b</span> <span class="o">=&gt;</span> <span class="nx">b</span><span class="p">.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">tool_result</span><span class="dl">'</span><span class="p">)</span>
+    <span class="kd">const</span> <span class="nx">lastTr</span> <span class="o">=</span> <span class="nx">kept</span><span class="p">[</span><span class="nx">lastTrIdx</span><span class="p">]</span> <span class="kd">as </span><span class="nx">ToolResultBlockParam</span>
+    <span class="kd">const</span> <span class="nx">smooshed</span> <span class="o">=</span> <span class="nf">smooshIntoToolResult</span><span class="p">(</span><span class="nx">lastTr</span><span class="p">,</span> <span class="nx">srText</span><span class="p">)</span>
+    <span class="p">...</span>
+  <span class="p">})</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>这是最关键的一步：把所有 <system-reminder> 开头的 text block 折叠进同一条 user 消息里的最后一个 tool_result。</system-reminder></p> <p>为什么要这么做？</p> <ul> <li>如果 system-reminder 文本作为独立 text sibling 留在 user turn 里，模型可能把它当成“用户的补充输入”。</li> <li>把它塞进 tool_result 的 content 里，它就明确归属为“工具结果的上下文/补充说明”，符合 <system-reminder> 的语义。</system-reminder> </li> <li>这还能处理一些边界情况，比如 PreToolUse hook additionalContext、relocateToolReferenceSiblings 产生的漏网之鱼。</li> </ul> <p>这段在 normalizeMessagesForAPI 的最后阶段执行（src/utils/messages.ts:2334-2338），同样受 tengu_chair_sermon 控制。</p> <p>UI 层：给用户看的时候再剥掉</p> <p>模型看到的是带 <system-reminder> 标签的消息，但用户界面不需要显示这些标签。src/components/messageActions.tsx:399-408：</system-reminder></p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">function</span> <span class="nf">stripSystemReminders</span><span class="p">(</span><span class="nx">text</span><span class="p">:</span> <span class="kr">string</span><span class="p">):</span> <span class="kr">string</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">CLOSE</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">&lt;/system-reminder&gt;</span><span class="dl">'</span><span class="p">;</span>
+  <span class="kd">let</span> <span class="nx">t</span> <span class="o">=</span> <span class="nx">text</span><span class="p">.</span><span class="nf">trimStart</span><span class="p">();</span>
+  <span class="k">while </span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nf">startsWith</span><span class="p">(</span><span class="dl">'</span><span class="s1">&lt;system-reminder&gt;</span><span class="dl">'</span><span class="p">))</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">end</span> <span class="o">=</span> <span class="nx">t</span><span class="p">.</span><span class="nf">indexOf</span><span class="p">(</span><span class="nx">CLOSE</span><span class="p">);</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">end</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>
+    <span class="nx">t</span> <span class="o">=</span> <span class="nx">t</span><span class="p">.</span><span class="nf">slice</span><span class="p">(</span><span class="nx">end</span> <span class="o">+</span> <span class="nx">CLOSE</span><span class="p">.</span><span class="nx">length</span><span class="p">).</span><span class="nf">trimStart</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">t</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>VirtualMessageList.tsx:157 渲染消息列表时调用它，所以在 REPL 里看不到 <system-reminder> 标签。 ★ Insight ─────────────────────────────────────</system-reminder></p> <ol> <li> <system-reminder> 不是纯粹的文本标记，而是一种消息结构调度器：它先在生成阶段被包上，再在 API 准备阶段被识别、合并、折叠进 tool_result，最后在 UI 层被剥离。三个阶段各自关心不同的事。 </system-reminder> </li> <li>smoosh 解决的是“位置语义”问题：system-reminder 内容如果作为独立 user text 存在，模型会误以为这是人类输入；塞进 tool_result 后，它回归为“工具结果附带的系统提示”。</li> <li>feature gate tengu_chair_sermon 控制整条新路径：ensureSystemReminderWrap 和 smooshSystemReminderSiblings 是同一个 gate，说明“统一包标签 + 折叠进 tool_result”是一起上线的一套整理策略。</li> </ol> <h3 id="消息规范化">消息规范化</h3> <p>normalizeMessagesForAPI的作用是把 Claude Code 内部丰富的消息类型（包含 attachment、virtual message、progress、system command、tool reference、synthetic error 等）清洗成 Anthropic API 能接受的 user | assistant 消息序列。</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">function</span> <span class="nf">normalizeMessagesForAPI</span><span class="p">(</span><span class="nx">messages</span><span class="p">,</span> <span class="nx">tools</span> <span class="o">=</span> <span class="p">[])</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">availableToolNames</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Set</span><span class="p">(</span><span class="nx">tools</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="nx">t</span> <span class="o">=&gt;</span> <span class="nx">t</span><span class="p">.</span><span class="nx">name</span><span class="p">))</span>
+  <span class="kd">const</span> <span class="nx">reorderedMessages</span> <span class="o">=</span> <span class="nf">reorderAttachmentsForAPI</span><span class="p">(</span><span class="nx">messages</span><span class="p">)</span>
+    <span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="nx">m</span> <span class="o">=&gt;</span> <span class="o">!</span><span class="nx">m</span><span class="p">.</span><span class="nx">isVirtual</span><span class="p">)</span>
+
+  <span class="kd">const</span> <span class="nx">errorToBlockTypes</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">[</span><span class="nf">getImageTooLargeErrorMessage</span><span class="p">()]:</span> <span class="k">new</span> <span class="nc">Set</span><span class="p">([</span><span class="dl">'</span><span class="s1">image</span><span class="dl">'</span><span class="p">]),</span>
+    <span class="p">[</span><span class="nf">getRequestTooLargeErrorMessage</span><span class="p">()]:</span> <span class="k">new</span> <span class="nc">Set</span><span class="p">([</span><span class="dl">'</span><span class="s1">document</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">image</span><span class="dl">'</span><span class="p">])</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 遇到大图、大 PDF 等错误后，只剥离对应块，而不是粗暴丢历史</span>
+<span class="p">}</span>
+</code></pre></div></div> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/colpali-multimodal-rag-qa/">掌握 ColPali 多模态 RAG 需要回答的 8 个问题</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/proposition-chunking-summary/">Proposition Chunking 命题化切分总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/query-transformations-summary/">Query Transformations 查询转换技术总结</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "about",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "nav-repositories",
+          title: "repositories",
+          description: "Edit the `_data/repositories.yml` and change the `github_users` and `github_repos` lists to include your own GitHub profile and repositories.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/repositories/";
+          },
+        },{id: "post-二叉树刷题总结",
+        
+          title: "二叉树刷题总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/";
+          
+        },
+      },{id: "post-rag-技术体系化分类-从-pipeline-阶段到失败模式",
+        
+          title: "RAG 技术体系化分类——从 Pipeline 阶段到失败模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/RAG-techniques-pipeline-categorization/";
+          
+        },
+      },{id: "post-memorag-记忆增强型-rag-总结",
+        
+          title: "MemoRAG 记忆增强型 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/memorag-summary/";
+          
+        },
+      },{id: "post-microsoft-graphrag-基于知识图谱的-rag-总结",
+        
+          title: "Microsoft GraphRAG 基于知识图谱的 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/microsoft-graphrag-summary/";
+          
+        },
+      },{id: "post-multimodal-rag-with-captioning-图像描述型多模态-rag-总结",
+        
+          title: "Multimodal RAG with Captioning 图像描述型多模态 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/multimodal-rag-with-captioning-summary/";
+          
+        },
+      },{id: "post-掌握-colpali-多模态-rag-需要回答的-8-个问题",
+        
+          title: "掌握 ColPali 多模态 RAG 需要回答的 8 个问题",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/colpali-multimodal-rag-qa/";
+          
+        },
+      },{id: "post-proposition-chunking-命题化切分总结",
+        
+          title: "Proposition Chunking 命题化切分总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/proposition-chunking-summary/";
+          
+        },
+      },{id: "post-query-transformations-查询转换技术总结",
+        
+          title: "Query Transformations 查询转换技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/query-transformations-summary/";
+          
+        },
+      },{id: "post-raptor-技术总结",
+        
+          title: "RAPTOR 技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/raptor-summary/";
+          
+        },
+      },{id: "post-relevant-segment-extraction-rse-学习笔记-从片段到段落",
+        
+          title: "Relevant Segment Extraction (RSE) 学习笔记 —— 从片段到段落",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/relevant-segment-extraction/";
+          
+        },
+      },{id: "post-reranking-with-llamaindex-学习笔记-llm-与-cross-encoder-重排",
+        
+          title: "Reranking with LlamaIndex 学习笔记 —— LLM 与 Cross-Encoder 重排",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/reranking-with-llamaindex/";
+          
+        },
+      },{id: "post-rag-with-feedback-loop-学习笔记-从机制到隐患",
+        
+          title: "RAG with Feedback Loop 学习笔记 —— 从机制到隐患",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rag-feedback-loop/";
+          
+        },
+      },{id: "post-self-rag-学习笔记-从论文思想到代码实现",
+        
+          title: "Self-RAG 学习笔记 —— 从论文思想到代码实现",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/self-rag/";
+          
+        },
+      },{id: "post-claude-code学习13-memory",
+        
+          title: "Claude code学习13 Memory",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B013/";
+          
+        },
+      },{id: "post-claude-code学习12-fileedittool",
+        
+          title: "Claude code学习12 FileEditTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B012/";
+          
+        },
+      },{id: "post-claude-code学习11-bashtool",
+        
+          title: "Claude code学习11 BashTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B011/";
+          
+        },
+      },{id: "post-claude-code学习10-permission-与-hooks-系统",
+        
+          title: "Claude code学习10 Permission 与 Hooks 系统",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B010/";
+          
+        },
+      },{id: "post-claude-code学习9-agent-loop",
+        
+          title: "Claude code学习9 Agent loop",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B09/";
+          
+        },
+      },{id: "post-claude-code学习8-system-reminder-动态信息是如何入prompt的",
+        
+          title: "Claude code学习8 system-reminder，动态信息是如何入prompt的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B08/";
+          
+        },
+      },{id: "post-claude-code学习7-权限模式",
+        
+          title: "Claude code学习7 权限模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B07/";
+          
+        },
+      },{id: "post-claude-code学习6-动态prompt的组装2",
+        
+          title: "Claude code学习6 动态prompt的组装2",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B06/";
+          
+        },
+      },{id: "post-claude-code学习5-动态prompt的组装1",
+        
+          title: "Claude code学习5 动态prompt的组装1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B05/";
+          
+        },
+      },{id: "post-claude-code学习4-静态prompt里面有什么以及claude-code启动时做了些什么",
+        
+          title: "Claude code学习4 静态prompt里面有什么以及Claude code启动时做了些什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B04/";
+          
+        },
+      },{id: "post-claude-code学习3-为什么claude-code工程化设计是这样的",
+        
+          title: "Claude code学习3 为什么Claude code工程化设计是这样的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/";
+          
+        },
+      },{id: "post-claude-code学习2-claude-code的上下文管理",
+        
+          title: "Claude code学习2 Claude code的上下文管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02/";
+          
+        },
+      },{id: "post-claude-code学习1-我们要从这个项目里学到什么",
+        
+          title: "Claude code学习1 我们要从这个项目里学到什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B01/";
+          
+        },
+      },{id: "post-learn-claude-code项目学习",
+        
+          title: "learn claude code项目学习",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/learn-claude-code%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/";
+          
+        },
+      },{id: "post-如何理解transformer",
+        
+          title: "如何理解transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformer-a/";
+          
+        },
+      },{id: "post-旋转矩阵的理解",
+        
+          title: "旋转矩阵的理解",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformation/";
+          
+        },
+      },{id: "post-cs231a-相机模型笔记",
+        
+          title: "CS231A 相机模型笔记",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cs231a-1/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv2/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv1/";
+          
+        },
+      },{id: "post-linux权限",
+        
+          title: "Linux权限",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP3/";
+          
+        },
+      },{id: "post-linux命令格式",
+        
+          title: "Linux命令格式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP2/";
+          
+        },
+      },{id: "post-excel常用操作",
+        
+          title: "Excel常用操作",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/excel/";
+          
+        },
+      },{id: "post-linux文件路径",
+        
+          title: "Linux文件路径",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP1/";
+          
+        },
+      },{id: "post-常见linux命令和shell脚本",
+        
+          title: "常见Linux命令和shell脚本",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/shellLinux/";
+          
+        },
+      },{id: "post-micropytorch",
+        
+          title: "microPytorch",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/.microPYtorch/";
+          
+        },
+      },{id: "post-c-vector",
+        
+          title: "C++ Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-c-template",
+        
+          title: "C++ Template",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppTemplate/";
+          
+        },
+      },{id: "post-pandas库的基本使用",
+        
+          title: "pandas库的基本使用",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/pandas1/";
+          
+        },
+      },{id: "post-c-中的static和const-1",
+        
+          title: "C++中的static和const 1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppStaticandConst/";
+          
+        },
+      },{id: "post-c-的内外部连接",
+        
+          title: "C++的内外部连接",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppLink/";
+          
+        },
+      },{id: "post-用c-实现内存池1",
+        
+          title: "用C++实现内存池1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo_pool/";
+          
+        },
+      },{id: "post-c-的内存管理",
+        
+          title: "C++的内存管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo/";
+          
+        },
+      },{id: "post-每日一题2296-设计一个文本编辑器",
+        
+          title: "每日一题2296. 设计一个文本编辑器",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LC/";
+          
+        },
+      },{id: "post-c-中的vector",
+        
+          title: "C++中的Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-transformer",
+        
+          title: "Transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transfomer/";
+          
+        },
+      },{id: "post-深度学习和机器学习中的重要概念",
+        
+          title: "深度学习和机器学习中的重要概念",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/MLfun/";
+          
+        },
+      },{id: "post-attention注意力机制-修正补充版",
+        
+          title: "Attention注意力机制（修正补充版）",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention2/";
+          
+        },
+      },{id: "post-attention注意力机制",
+        
+          title: "Attention注意力机制",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention/";
+          
+        },
+      },{id: "post-unet网络",
+        
+          title: "Unet网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Unet/";
+          
+        },
+      },{id: "post-seq2seq的模型-构建以及损失函数",
+        
+          title: "Seq2Seq的模型，构建以及损失函数",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Seq2Seq-1/";
+          
+        },
+      },{id: "post-text-generation",
+        
+          title: "Text Generation",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Text-Generation/";
+          
+        },
+      },{id: "post-rnn的优化",
+        
+          title: "RNN的优化",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/RNN%E7%9A%84%E4%BC%98%E5%8C%96/";
+          
+        },
+      },{id: "post-lstm长短记忆网络",
+        
+          title: "LSTM长短记忆网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LSTM%E9%95%BF%E7%9F%AD%E8%AE%B0%E5%BF%86%E7%BD%91%E7%BB%9C/";
+          
+        },
+      },{id: "post-simple-rnn",
+        
+          title: "Simple RNN",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Simple-RNN/";
+          
+        },
+      },{id: "post-linux内核全注释阅读-linux内核体系结构1",
+        
+          title: "Linux内核全注释阅读 Linux内核体系结构1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Linux%E5%86%85%E6%A0%B8%E5%85%A8%E6%B3%A8%E9%87%8A%E9%98%85%E8%AF%BB-Linux%E5%86%85%E6%A0%B8%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%841/";
+          
+        },
+      },{id: "post-nlp的数据处理-文本处理以及词嵌套",
+        
+          title: "NLP的数据处理 文本处理以及词嵌套",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/NLP%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86-%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%BB%A5%E5%8F%8A%E8%AF%8D%E5%B5%8C%E5%A5%97/";
+          
+        },
+      },{id: "post-deepseek-r1论文解读",
+        
+          title: "DeepSeek R1论文解读",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/DeepSeek-R1%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/";
+          
+        },
+      },{id: "post-deepseek蒸馏模型的本地部署",
+        
+          title: "Deepseek蒸馏模型的本地部署",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Deepseek%E8%92%B8%E9%A6%8F%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/";
+          
+        },
+      },{id: "post-测试博客",
+        
+          title: "测试博客",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Test/";
+          
+        },
+      },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
+        
+          title: 'Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "We’re sharing updates across our Gemini family of models and a glimpse of Project Astra, our vision for the future of AI assistants.",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/", "_blank");
+          
+        },
+      },{id: "post-displaying-external-posts-on-your-al-folio-blog",
+        
+          title: 'Displaying External Posts on Your al-folio Blog <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2", "_blank");
+          
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/Mr-coldskin7", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/feed.xml", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>

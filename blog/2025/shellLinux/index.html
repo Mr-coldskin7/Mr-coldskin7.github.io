@@ -1,0 +1,833 @@
+<!DOCTYPE html> <html lang="zh"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> 常见Linux命令和shell脚本 | leesanyee </title> <meta name="author" content="Lee SanYee"> <meta name="description" content="LeeSanYee 的技术博客，记录 ML/NLP、C++、Linux 等方向的学习笔记与思考。 "> <meta name="keywords" content="blog, ml, nlp, cpp, linux"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://mr-coldskin7.github.io/blog/2025/shellLinux/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">常见Linux命令和shell脚本</h1> <p class="post-meta"> Created on May 18, 2025 </p> <p class="post-tags"> <a href="/blog/2025"> <i class="fa-solid fa-calendar fa-sm"></i> 2025 </a>   ·   <a href="/blog/tag/linux"> <i class="fa-solid fa-hashtag fa-sm"></i> linux</a>   <a href="/blog/tag/shell"> <i class="fa-solid fa-hashtag fa-sm"></i> shell</a>   <a href="/blog/tag/command-line"> <i class="fa-solid fa-hashtag fa-sm"></i> command-line</a>   ·   <a href="/blog/category/linux"> <i class="fa-solid fa-tag fa-sm"></i> Linux</a>   <a href="/blog/category/shell"> <i class="fa-solid fa-tag fa-sm"></i> shell</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h1 id="linux常见命令">Linux常见命令</h1> <h2 id="ls">ls</h2> <p>list，用于显示当前目录所有的文件和目录 ls-l 列出所有文件的相关属性</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>drwxr-xr-x 4 coldskin7 coldskin7 4096 Jan 15 06:52 Desktop
+drwxr-xr-x 2 coldskin7 coldskin7 4096 Dec 17  2023 Documents
+drwxr-xr-x 2 coldskin7 coldskin7 4096 Jan 15 18:24 Downloads
+<span class="nt">-rw-r--r--</span> 1 coldskin7 coldskin7 8980 Dec 17  2023 examples.desktop
+drwxr-xr-x 2 coldskin7 coldskin7 4096 Mar 30  2024 Music
+drwxr-xr-x 2 coldskin7 coldskin7 4096 Dec 17  2023 Pictures
+drwxr-xr-x 2 coldskin7 coldskin7 4096 Dec 17  2023 Public
+drwxr-xr-x 2 coldskin7 coldskin7 4096 Dec 17  2023 Templates
+drwxr-xr-x 2 coldskin7 coldskin7 4096 Dec 17  2023 Videos
+</code></pre></div></div> <p>第一位</p> <ul> <li> <code class="language-plaintext highlighter-rouge">d</code> 表示这是一个 ​<strong>​目录​</strong>​（directory）</li> <li> <code class="language-plaintext highlighter-rouge">-</code>：普通文件（如文本、脚本）</li> <li> <code class="language-plaintext highlighter-rouge">l</code>：符号链接（快捷方式）</li> <li> <code class="language-plaintext highlighter-rouge">b</code>/<code class="language-plaintext highlighter-rouge">c</code>：块设备或字符设备（如硬盘、键盘） 后三位代表的是<strong>所有者权限</strong> </li> <li>​<strong>​读（r）​</strong>​：查看目录内容（如用 <code class="language-plaintext highlighter-rouge">ls</code> 列出文件）</li> <li>​<strong>​写（w）​</strong>​：添加、删除或重命名目录内文件</li> <li>​<strong>​执行（x）​</strong>​：进入目录（如 <code class="language-plaintext highlighter-rouge">cd</code> 命令） ​<strong>​第5-7位（所属组权限</strong> ​<strong>​第8-10位（其他用户权限）</strong> 如果显示的是数字的话 规则为 ​<strong>​r=4，w=2，x=1​</strong>​，每组权限相加后组合成3位数字 这也很好理解，二进制数 0 0 0 r w x 按照这个思路去理解就简单清晰很多 <em>ls-a</em> 显示隐藏文件（.开头的） <em>ls -la</em> 就是两者结合起来，列出所有文件（包括隐藏） <h2 id="cd">cd</h2> <p><em>cd..</em> 返回上一层目录 <em>cd dir</em> 进入dir文件目录（如果当前文件夹有的话） <em>cd -</em> 回到你刚才来的目录</p> <h2 id="cat">cat</h2> <p><code class="language-plaintext highlighter-rouge">cat</code>（全称 ​<strong>​concatenate​</strong>​）是Linux系统中用于 ​<strong>​查看、拼接、创建或修改文本文件​</strong>​ 的基础工具。其核心功能包括：</p> </li> <li>​<strong>​快速显示文件内容​</strong>​：直接输出到终端，无需分页</li> <li>​<strong>​多文件操作​</strong>​：合并多个文件内容为一个新文件</li> <li>​<strong>​创建/追加文件​</strong>​：通过重定向符 <code class="language-plaintext highlighter-rouge">&gt;</code> 或 <code class="language-plaintext highlighter-rouge">&gt;&gt;</code> 生成或修改文件 <div class="language-bash highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="nb">cat </span>filename.txt         <span class="c"># 显示单个文件内容[1,6](@ref)</span>
+<span class="nb">cat </span>file1.txt file2.txt  <span class="c"># 依次显示多个文件内容[3,5](@ref)</span>
+</code></pre></div> </div> </li> <li> <code class="language-plaintext highlighter-rouge">-n</code>：显示所有行的行号（包含空格）</li> <li> <code class="language-plaintext highlighter-rouge">-b</code>：仅对非空行编号</li> <li> <code class="language-plaintext highlighter-rouge">-s</code>：合并连续空行为单行</li> <li> <code class="language-plaintext highlighter-rouge">-E</code>：在行尾显示 <code class="language-plaintext highlighter-rouge">$</code> 符号</li> <li> <code class="language-plaintext highlighter-rouge">-T</code>：将制表符显示为 <code class="language-plaintext highlighter-rouge">^I</code> 合并文件 <div class="language-bash highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="nb">cat </span>file1.txt file2.txt <span class="o">&gt;</span> merged.txt  <span class="c"># 合并到新文件[3,6](@ref)</span>
+<span class="nb">cat</span> <span class="k">*</span>.log <span class="o">&gt;&gt;</span> all_logs.txt             <span class="c"># 追加所有日志文件到现有文件[5,7](@ref)</span>
+</code></pre></div> </div> <h4 id="创建与编辑文件"> <strong>创建与编辑文件​</strong>​</h4> </li> <li>​<strong>​创建新文件​</strong>​： <code class="language-plaintext highlighter-rouge">cat &gt; newfile.txt # 输入内容后按 Ctrl+D 结束</code> </li> <li>​<strong>​追加内容​</strong>​： <code class="language-plaintext highlighter-rouge">cat &gt;&gt; existing.txt # 向现有文件追加内容</code> <div class="language-bash highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>coldskin7@ubuntu:~/Desktop<span class="nv">$ </span><span class="nb">cat</span> <span class="o">&gt;</span> test.txt
+hi Hellobgduiwqgdi7uqwg diuwqguidwqqq
+ndqwiidwqnidqwhi
+coldskin7@ubuntu:~/Desktop<span class="nv">$ </span><span class="nb">cat </span>test.txt
+hi Hellobgduiwqgdi7uqwg diuwqguidwqqq
+ndqwiidwqnidqwhi
+</code></pre></div> </div> </li> </ul> <h2 id="head">head</h2> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">head</span> <span class="nt">--lines</span> <span class="o">=</span> n xxx.txt
+</code></pre></div></div> <p>查看一个文件的开头，lines指定多少行 tail同理</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">tail</span> <span class="nt">--lines</span> <span class="o">=</span> n xxx.txt
+</code></pre></div></div> <h2 id="less">less</h2> <p>可以支持你用键盘上下键来阅读文本</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>less xxx.txt
+</code></pre></div></div> <h2 id="文本编辑器-nano--vim">文本编辑器 nano &amp; vim</h2> <p>nano里面更像是一个特殊的界面，底部有相关的操作 vim更加轻量化，相对应的就没那么多提示了 vim中常用的:w：保存；:q：退出；:wq 或 :x：保存并退出；:q!：强制退出不保存</p> <h2 id="file">file</h2> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>file <span class="o">[</span>选项] 文件名
+</code></pre></div></div> <p>通过分析文件的​<strong>​魔术数字（Magic Number）​</strong>​和元数据（而非文件扩展名）来判定文件类型</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>coldskin7@ubuntu:~/Desktop<span class="nv">$ </span>file test.txt
+test.txt: ASCII text
+</code></pre></div></div> <h2 id="find">find</h2> <p>find用来查看当前目录里面有没有指定文件</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>find filename
+</code></pre></div></div> <h2 id="echo">echo</h2> <p>echo可以打印字符串</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"Hello, World!"</span>  <span class="c"># 输出 "Hello, World!"</span>
+</code></pre></div></div> <ul> <li>​<strong>​覆盖写入文件​</strong>​： <div class="language-bash highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="nb">echo</span> <span class="s2">"New content"</span> <span class="o">&gt;</span> file.txt  <span class="c"># 覆盖 file.txt 内容</span>
+</code></pre></div> </div> </li> </ul> <p><strong>​追加内容到文件​</strong>​：</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="sb">`</span><span class="nb">echo</span> <span class="s2">"Appended line"</span> <span class="o">&gt;&gt;</span> file.txt  <span class="c"># 向 file.txt 末尾追加内容`</span>
+</code></pre></div></div> <h2 id="man">man</h2> <p>使用man可以查看相关用法</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>man <span class="nb">command</span>
+</code></pre></div></div> <h2 id="mv">mv</h2> <p>mv是move，他即使移动也是改名，原理是命名一个指定名字的文件，把原来文件的东西拷贝进去</p> <ul> <li> <strong>语法​</strong>​：<code class="language-plaintext highlighter-rouge">mv [选项] 源文件/目录 目标文件/目录</code> </li> <li>​<strong>​核心选项​</strong>​： <ul> <li> <code class="language-plaintext highlighter-rouge">-i</code>：覆盖前询问用户确认（交互模式）</li> <li> <code class="language-plaintext highlighter-rouge">-f</code>：强制覆盖目标文件，不提示</li> <li> <code class="language-plaintext highlighter-rouge">-b</code>：覆盖前创建备份文件（备份后缀默认 <code class="language-plaintext highlighter-rouge">~</code>）</li> <li> <code class="language-plaintext highlighter-rouge">-u</code>：仅当源文件比目标文件新时执行移动</li> <li> <code class="language-plaintext highlighter-rouge">-t 目录</code>：指定目标目录，批量移动多个文件（如 <code class="language-plaintext highlighter-rouge">mv file1 file2 -t dir/</code>）</li> <li> <code class="language-plaintext highlighter-rouge">-v</code>：显示操作细节（如移动路径） <div class="language-bash highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="nb">mv</span> <span class="nt">-i</span> old.txt new.txt       <span class="c"># 重命名文件（若 new.txt 存在则询问）</span>
+<span class="nb">mv</span> <span class="k">*</span>.log /var/log/          <span class="c"># 移动所有 .log 文件到指定目录</span>
+<span class="nb">mv</span> <span class="nt">-b</span> config.conf backup/   <span class="c"># 覆盖前备份原文件为 config.conf~</span>
+</code></pre></div> </div> <h2 id="rm">rm</h2> </li> </ul> </li> <li> <strong>语法​</strong>​：<code class="language-plaintext highlighter-rouge">rm [选项] 文件/目录</code> </li> <li>​<strong>​核心选项​</strong>​：</li> <li> <code class="language-plaintext highlighter-rouge">-r</code> 或 <code class="language-plaintext highlighter-rouge">-R</code>：递归删除目录及其子内容</li> <li> <code class="language-plaintext highlighter-rouge">-f</code>：强制删除，忽略不存在文件或权限问题</li> <li> <code class="language-plaintext highlighter-rouge">-i</code>：删除前逐一确认</li> <li> <code class="language-plaintext highlighter-rouge">-d</code>：删除空目录（等效 <code class="language-plaintext highlighter-rouge">rmdir</code>）</li> <li> <code class="language-plaintext highlighter-rouge">-v</code>：显示删除过程 <div class="language-bash highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="nb">rm</span> <span class="nt">-r</span> temp/           <span class="c"># 递归删除目录（慎用！）</span>
+<span class="nb">rm</span> <span class="nt">-i</span> <span class="k">*</span>.bak           <span class="c"># 删除所有 .bak 文件前确认</span>
+<span class="nb">rm</span> <span class="nt">-f</span> /tmp/cache.log  <span class="c"># 强制删除日志文件（不提示）</span>
+</code></pre></div> </div> <h2 id="简单的shell脚本">简单的Shell脚本</h2> <p><em>$</em> 代表变量 例如</p> <div class="language-bash highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="nb">echo </span>file#输出的是字符串file
+<span class="nb">echo</span> <span class="nv">$file</span><span class="c">#输出的是变量file</span>
+</code></pre></div> </div> <p>’ * ‘通配符</p> <div class="language-bash highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="k">for </span>file <span class="k">in </span><span class="nb">test</span><span class="k">*</span>
+<span class="o">&gt;</span> <span class="k">do</span>
+<span class="o">&gt;</span> <span class="nb">echo</span> <span class="nv">$file</span>
+<span class="o">&gt;</span> <span class="k">done
+</span><span class="nb">test
+</span>test1.txt
+test2.txt
+test.txt
+</code></pre></div> </div> <p>’ # ‘ 不仅有注释的意思 还有 变量替换中，<code class="language-plaintext highlighter-rouge">#</code>用于删除字符串前缀，支持两种模式</p> <ol> <li> <strong>最短匹配删除​</strong>​<br> <code class="language-plaintext highlighter-rouge">${var#pattern}</code>：删除从左起第一个匹配<code class="language-plaintext highlighter-rouge">pattern</code>的部分。 <div class="language-bash highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>  <span class="nv">path</span><span class="o">=</span><span class="s2">"/usr/local/bin"</span> <span class="nb">echo</span> <span class="k">${</span><span class="nv">path</span><span class="p">#*/</span><span class="k">}</span>  <span class="c"># 输出 "usr/local/bin"（删除首个`/`）</span>
+</code></pre></div> </div> </li> <li>​<strong>​最长匹配删除​</strong>​<br> <code class="language-plaintext highlighter-rouge">${var##pattern}</code>：删除从左起最长匹配<code class="language-plaintext highlighter-rouge">pattern</code>的部分。 <div class="language-bash highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>  <span class="sb">``</span><span class="nv">path</span><span class="o">=</span><span class="s2">"/usr/local/bin"</span> <span class="nb">echo</span> <span class="k">${</span><span class="nv">path</span><span class="p">##*/</span><span class="k">}</span>  <span class="c"># 输出 "bin"（删除最后一个`/`前的所有内容）</span>
+</code></pre></div> </div> </li> </ol> </li> </ul> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/colpali-multimodal-rag-qa/">掌握 ColPali 多模态 RAG 需要回答的 8 个问题</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/proposition-chunking-summary/">Proposition Chunking 命题化切分总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/query-transformations-summary/">Query Transformations 查询转换技术总结</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "about",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "nav-repositories",
+          title: "repositories",
+          description: "Edit the `_data/repositories.yml` and change the `github_users` and `github_repos` lists to include your own GitHub profile and repositories.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/repositories/";
+          },
+        },{id: "post-二叉树刷题总结",
+        
+          title: "二叉树刷题总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/";
+          
+        },
+      },{id: "post-rag-技术体系化分类-从-pipeline-阶段到失败模式",
+        
+          title: "RAG 技术体系化分类——从 Pipeline 阶段到失败模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/RAG-techniques-pipeline-categorization/";
+          
+        },
+      },{id: "post-memorag-记忆增强型-rag-总结",
+        
+          title: "MemoRAG 记忆增强型 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/memorag-summary/";
+          
+        },
+      },{id: "post-microsoft-graphrag-基于知识图谱的-rag-总结",
+        
+          title: "Microsoft GraphRAG 基于知识图谱的 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/microsoft-graphrag-summary/";
+          
+        },
+      },{id: "post-multimodal-rag-with-captioning-图像描述型多模态-rag-总结",
+        
+          title: "Multimodal RAG with Captioning 图像描述型多模态 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/multimodal-rag-with-captioning-summary/";
+          
+        },
+      },{id: "post-掌握-colpali-多模态-rag-需要回答的-8-个问题",
+        
+          title: "掌握 ColPali 多模态 RAG 需要回答的 8 个问题",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/colpali-multimodal-rag-qa/";
+          
+        },
+      },{id: "post-proposition-chunking-命题化切分总结",
+        
+          title: "Proposition Chunking 命题化切分总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/proposition-chunking-summary/";
+          
+        },
+      },{id: "post-query-transformations-查询转换技术总结",
+        
+          title: "Query Transformations 查询转换技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/query-transformations-summary/";
+          
+        },
+      },{id: "post-raptor-技术总结",
+        
+          title: "RAPTOR 技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/raptor-summary/";
+          
+        },
+      },{id: "post-relevant-segment-extraction-rse-学习笔记-从片段到段落",
+        
+          title: "Relevant Segment Extraction (RSE) 学习笔记 —— 从片段到段落",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/relevant-segment-extraction/";
+          
+        },
+      },{id: "post-reranking-with-llamaindex-学习笔记-llm-与-cross-encoder-重排",
+        
+          title: "Reranking with LlamaIndex 学习笔记 —— LLM 与 Cross-Encoder 重排",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/reranking-with-llamaindex/";
+          
+        },
+      },{id: "post-rag-with-feedback-loop-学习笔记-从机制到隐患",
+        
+          title: "RAG with Feedback Loop 学习笔记 —— 从机制到隐患",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rag-feedback-loop/";
+          
+        },
+      },{id: "post-self-rag-学习笔记-从论文思想到代码实现",
+        
+          title: "Self-RAG 学习笔记 —— 从论文思想到代码实现",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/self-rag/";
+          
+        },
+      },{id: "post-claude-code学习13-memory",
+        
+          title: "Claude code学习13 Memory",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B013/";
+          
+        },
+      },{id: "post-claude-code学习12-fileedittool",
+        
+          title: "Claude code学习12 FileEditTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B012/";
+          
+        },
+      },{id: "post-claude-code学习11-bashtool",
+        
+          title: "Claude code学习11 BashTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B011/";
+          
+        },
+      },{id: "post-claude-code学习10-permission-与-hooks-系统",
+        
+          title: "Claude code学习10 Permission 与 Hooks 系统",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B010/";
+          
+        },
+      },{id: "post-claude-code学习9-agent-loop",
+        
+          title: "Claude code学习9 Agent loop",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B09/";
+          
+        },
+      },{id: "post-claude-code学习8-system-reminder-动态信息是如何入prompt的",
+        
+          title: "Claude code学习8 system-reminder，动态信息是如何入prompt的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B08/";
+          
+        },
+      },{id: "post-claude-code学习7-权限模式",
+        
+          title: "Claude code学习7 权限模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B07/";
+          
+        },
+      },{id: "post-claude-code学习6-动态prompt的组装2",
+        
+          title: "Claude code学习6 动态prompt的组装2",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B06/";
+          
+        },
+      },{id: "post-claude-code学习5-动态prompt的组装1",
+        
+          title: "Claude code学习5 动态prompt的组装1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B05/";
+          
+        },
+      },{id: "post-claude-code学习4-静态prompt里面有什么以及claude-code启动时做了些什么",
+        
+          title: "Claude code学习4 静态prompt里面有什么以及Claude code启动时做了些什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B04/";
+          
+        },
+      },{id: "post-claude-code学习3-为什么claude-code工程化设计是这样的",
+        
+          title: "Claude code学习3 为什么Claude code工程化设计是这样的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/";
+          
+        },
+      },{id: "post-claude-code学习2-claude-code的上下文管理",
+        
+          title: "Claude code学习2 Claude code的上下文管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02/";
+          
+        },
+      },{id: "post-claude-code学习1-我们要从这个项目里学到什么",
+        
+          title: "Claude code学习1 我们要从这个项目里学到什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B01/";
+          
+        },
+      },{id: "post-learn-claude-code项目学习",
+        
+          title: "learn claude code项目学习",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/learn-claude-code%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/";
+          
+        },
+      },{id: "post-如何理解transformer",
+        
+          title: "如何理解transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformer-a/";
+          
+        },
+      },{id: "post-旋转矩阵的理解",
+        
+          title: "旋转矩阵的理解",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformation/";
+          
+        },
+      },{id: "post-cs231a-相机模型笔记",
+        
+          title: "CS231A 相机模型笔记",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cs231a-1/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv2/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv1/";
+          
+        },
+      },{id: "post-linux权限",
+        
+          title: "Linux权限",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP3/";
+          
+        },
+      },{id: "post-linux命令格式",
+        
+          title: "Linux命令格式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP2/";
+          
+        },
+      },{id: "post-excel常用操作",
+        
+          title: "Excel常用操作",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/excel/";
+          
+        },
+      },{id: "post-linux文件路径",
+        
+          title: "Linux文件路径",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP1/";
+          
+        },
+      },{id: "post-常见linux命令和shell脚本",
+        
+          title: "常见Linux命令和shell脚本",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/shellLinux/";
+          
+        },
+      },{id: "post-micropytorch",
+        
+          title: "microPytorch",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/.microPYtorch/";
+          
+        },
+      },{id: "post-c-vector",
+        
+          title: "C++ Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-c-template",
+        
+          title: "C++ Template",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppTemplate/";
+          
+        },
+      },{id: "post-pandas库的基本使用",
+        
+          title: "pandas库的基本使用",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/pandas1/";
+          
+        },
+      },{id: "post-c-中的static和const-1",
+        
+          title: "C++中的static和const 1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppStaticandConst/";
+          
+        },
+      },{id: "post-c-的内外部连接",
+        
+          title: "C++的内外部连接",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppLink/";
+          
+        },
+      },{id: "post-用c-实现内存池1",
+        
+          title: "用C++实现内存池1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo_pool/";
+          
+        },
+      },{id: "post-c-的内存管理",
+        
+          title: "C++的内存管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo/";
+          
+        },
+      },{id: "post-每日一题2296-设计一个文本编辑器",
+        
+          title: "每日一题2296. 设计一个文本编辑器",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LC/";
+          
+        },
+      },{id: "post-c-中的vector",
+        
+          title: "C++中的Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-transformer",
+        
+          title: "Transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transfomer/";
+          
+        },
+      },{id: "post-深度学习和机器学习中的重要概念",
+        
+          title: "深度学习和机器学习中的重要概念",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/MLfun/";
+          
+        },
+      },{id: "post-attention注意力机制-修正补充版",
+        
+          title: "Attention注意力机制（修正补充版）",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention2/";
+          
+        },
+      },{id: "post-attention注意力机制",
+        
+          title: "Attention注意力机制",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention/";
+          
+        },
+      },{id: "post-unet网络",
+        
+          title: "Unet网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Unet/";
+          
+        },
+      },{id: "post-seq2seq的模型-构建以及损失函数",
+        
+          title: "Seq2Seq的模型，构建以及损失函数",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Seq2Seq-1/";
+          
+        },
+      },{id: "post-text-generation",
+        
+          title: "Text Generation",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Text-Generation/";
+          
+        },
+      },{id: "post-rnn的优化",
+        
+          title: "RNN的优化",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/RNN%E7%9A%84%E4%BC%98%E5%8C%96/";
+          
+        },
+      },{id: "post-lstm长短记忆网络",
+        
+          title: "LSTM长短记忆网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LSTM%E9%95%BF%E7%9F%AD%E8%AE%B0%E5%BF%86%E7%BD%91%E7%BB%9C/";
+          
+        },
+      },{id: "post-simple-rnn",
+        
+          title: "Simple RNN",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Simple-RNN/";
+          
+        },
+      },{id: "post-linux内核全注释阅读-linux内核体系结构1",
+        
+          title: "Linux内核全注释阅读 Linux内核体系结构1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Linux%E5%86%85%E6%A0%B8%E5%85%A8%E6%B3%A8%E9%87%8A%E9%98%85%E8%AF%BB-Linux%E5%86%85%E6%A0%B8%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%841/";
+          
+        },
+      },{id: "post-nlp的数据处理-文本处理以及词嵌套",
+        
+          title: "NLP的数据处理 文本处理以及词嵌套",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/NLP%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86-%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%BB%A5%E5%8F%8A%E8%AF%8D%E5%B5%8C%E5%A5%97/";
+          
+        },
+      },{id: "post-deepseek-r1论文解读",
+        
+          title: "DeepSeek R1论文解读",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/DeepSeek-R1%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/";
+          
+        },
+      },{id: "post-deepseek蒸馏模型的本地部署",
+        
+          title: "Deepseek蒸馏模型的本地部署",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Deepseek%E8%92%B8%E9%A6%8F%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/";
+          
+        },
+      },{id: "post-测试博客",
+        
+          title: "测试博客",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Test/";
+          
+        },
+      },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
+        
+          title: 'Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "We’re sharing updates across our Gemini family of models and a glimpse of Project Astra, our vision for the future of AI assistants.",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/", "_blank");
+          
+        },
+      },{id: "post-displaying-external-posts-on-your-al-folio-blog",
+        
+          title: 'Displaying External Posts on Your al-folio Blog <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2", "_blank");
+          
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/Mr-coldskin7", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/feed.xml", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>

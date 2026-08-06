@@ -1,0 +1,857 @@
+<!DOCTYPE html> <html lang="zh"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Python版本opencv1 | leesanyee </title> <meta name="author" content="Lee SanYee"> <meta name="description" content="LeeSanYee 的技术博客，记录 ML/NLP、C++、Linux 等方向的学习笔记与思考。 "> <meta name="keywords" content="blog, ml, nlp, cpp, linux"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://mr-coldskin7.github.io/blog/2025/opencv2/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Python版本opencv1</h1> <p class="post-meta"> Created on June 16, 2025 </p> <p class="post-tags"> <a href="/blog/2025"> <i class="fa-solid fa-calendar fa-sm"></i> 2025 </a>   ·   <a href="/blog/tag/cv"> <i class="fa-solid fa-hashtag fa-sm"></i> cv</a>   <a href="/blog/tag/opencv"> <i class="fa-solid fa-hashtag fa-sm"></i> opencv</a>   <a href="/blog/tag/python"> <i class="fa-solid fa-hashtag fa-sm"></i> python</a>   ·   <a href="/blog/category/cv"> <i class="fa-solid fa-tag fa-sm"></i> CV</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <p>OpenCV 中的图像边框填充（cv.copyMakeBorder()） cv.copyMakeBorder() 是 OpenCV 中处理图像边界的关键函数，在图像处理中扮演着重要角色，特别是在以下场景：</p> <p>​​卷积操作​​：在进行滤波、边缘检测等操作时，需要处理图像边界 ​​特征提取​​：某些特征描述符需要处理边界像素 ​​图像增强​​：为图像添加相框效果 ​​几何变换​​：在旋转、缩放等操作前扩展图像</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dst</span> <span class="o">=</span> <span class="n">cv</span><span class="p">.</span><span class="nf">copyMakeBorder</span><span class="p">(</span>
+    <span class="n">src</span><span class="p">,</span>          <span class="c1"># 源图像
+</span>    <span class="n">top</span><span class="p">,</span>          <span class="c1"># 顶部填充像素数
+</span>    <span class="n">bottom</span><span class="p">,</span>       <span class="c1"># 底部填充像素数
+</span>    <span class="n">left</span><span class="p">,</span>         <span class="c1"># 左侧填充像素数
+</span>    <span class="n">right</span><span class="p">,</span>        <span class="c1"># 右侧填充像素数
+</span>    <span class="n">borderType</span><span class="p">,</span>   <span class="c1"># 边框类型
+</span>    <span class="n">value</span><span class="o">=</span><span class="bp">None</span>    <span class="c1"># 边框颜色（仅用于BORDER_CONSTANT）
+</span><span class="p">)</span>
+</code></pre></div></div> <p>cv.BORDER_CONSTANT - 恒定颜色边框</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 添加灰色边框（value=[128,128,128]）
+[..........]
+[..abcdefgh..]
+[..........]
+</code></pre></div></div> <p>cv.BORDER_REFLECT - 镜像边框</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fedcba|abcdefgh|hgfedcb
+ ^^^^^         ^^^^^^^
+ 左边框         右边框
+</code></pre></div></div> <p>cv.BORDER_REFLECT_101 - 镜像边框(最常用)</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gfedcb|abcdefgh|gfedcba
+ ^^^^^         ^^^^^^^
+ 左边框         右边框
+</code></pre></div></div> <p>cv.BORDER_REPLICATE - 复制边框</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>aaaaaa|abcdefgh|hhhhhhh
+ ^^^^^         ^^^^^^^
+ 左边框         右边框
+</code></pre></div></div> <p>cv.BORDER_WRAP - 循环边框</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 循环边框
+cdefgh|abcdefgh|abcdefg
+ ^^^^^         ^^^^^^^
+ 左边框         右边框
+</code></pre></div></div> <h2 id="图像上的算术运算">图像上的算术运算</h2> <p>图像加法 您可以通过OpenCV函数cv.add()或仅通过numpy操作res = img1 + img2添加两个图像。两个图像应具有相同的深度和类型，或者第二个图像可以只是一个标量值。</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">uint8</span><span class="p">([</span><span class="mi">250</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">uint8</span><span class="p">([</span><span class="mi">10</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nf">print</span><span class="p">(</span> <span class="n">cv</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="p">)</span> <span class="c1"># 250+10 = 260 =&gt; 255
+</span><span class="p">[[</span><span class="mi">255</span><span class="p">]]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nf">print</span><span class="p">(</span> <span class="n">x</span><span class="o">+</span><span class="n">y</span> <span class="p">)</span>          <span class="c1"># 250+10 = 260 % 256 = 4
+</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+</code></pre></div></div> <p>二者作用不一样，opencv是最大就是最大，进行饱和运算；而np是会取模的</p> <h2 id="图像融合">图像融合</h2> <p>也是图像加法，但是给了特定的权重</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">img1</span> <span class="o">=</span> <span class="n">cv</span><span class="p">.</span><span class="nf">imread</span><span class="p">(</span><span class="sh">'</span><span class="s">ml.png</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">img2</span> <span class="o">=</span> <span class="n">cv</span><span class="p">.</span><span class="nf">imread</span><span class="p">(</span><span class="sh">'</span><span class="s">opencv-logo.png</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">dst</span> <span class="o">=</span> <span class="n">cv</span><span class="p">.</span><span class="nf">addWeighted</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span><span class="n">img2</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">cv</span><span class="p">.</span><span class="nf">imshow</span><span class="p">(</span><span class="sh">'</span><span class="s">dst</span><span class="sh">'</span><span class="p">,</span><span class="n">dst</span><span class="p">)</span>
+<span class="n">cv</span><span class="p">.</span><span class="nf">waitKey</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">cv</span><span class="p">.</span><span class="nf">destroyAllWindows</span><span class="p">()</span>
+</code></pre></div></div> <h2 id="图像位运算">图像位运算</h2> <p>对两个图像的每个像素进行二进制操作，可以实现图像的逻辑运算、位运算等。 ​​mask参数​​: 8位单通道图像（二值图像） 只在mask不为0的位置执行操作 例如在cv.bitwise_and()中：dst = src1 ∧ src2 if mask ≠ 0 这包括按位 AND、 OR、NOT 和 XOR 操作</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cv</span><span class="p">.</span><span class="nf">bitwise_and</span><span class="p">(</span><span class="n">src1</span><span class="p">,</span> <span class="n">src2</span><span class="p">[,</span> <span class="n">dst</span><span class="p">[,</span> <span class="n">mask</span><span class="p">]])</span>
+<span class="n">cv</span><span class="p">.</span><span class="nf">bitwise_or</span><span class="p">(</span><span class="n">src1</span><span class="p">,</span> <span class="n">src2</span><span class="p">[,</span> <span class="n">dst</span><span class="p">[,</span> <span class="n">mask</span><span class="p">]])</span>
+<span class="n">cv</span><span class="p">.</span><span class="nf">bitwise_not</span><span class="p">(</span><span class="n">src</span><span class="p">[,</span> <span class="n">dst</span><span class="p">[,</span> <span class="n">mask</span><span class="p">]])</span>
+<span class="n">cv</span><span class="p">.</span><span class="nf">bitwise_xor</span><span class="p">(</span><span class="n">src1</span><span class="p">,</span> <span class="n">src2</span><span class="p">[,</span> <span class="n">dst</span><span class="p">[,</span> <span class="n">mask</span><span class="p">]])</span>
+</code></pre></div></div> <p><strong>cv.getTickCount</strong>函数返回从参考事件（如打开机器的那一刻）到调用此函数那一刻之间的时钟周期数。因此，如果在函数执行之前和之后调用它，则会获得用于执行函数的时钟周期数。</p> <p><strong>cv.getTickFrequency</strong>函数返回时钟周期的频率或每秒的时钟周期数</p> <p>OpenCV中的默认优化 许多 OpenCV 函数都是使用 SSE2、 AVX 等进行优化的。 它还包含未优化的代码。因此，如果我们的系统支持这些特性，我们就应该利用它们(几乎所有现代的处理器都支持它们)。在编译时默认启用它。因此，如果启用了 OpenCV，它将运行优化的代码，否则它将运行未优化的代码。你可以使用 cvUseoptimized 检查是否启用 / 禁用和 cvSetuseoptimized 以启用 / 禁用它。让我们看一个简单的例子。</p> <h2 id="改变颜色空间">改变颜色空间</h2> <p>cvtColor(input_image, flag)，其中flag决定转换的类型。 对于BGR→灰度转换，我们使用标志cv.COLOR_BGR2GRAY。类似地，对于BGR→HSV，我们使用标志cv.COLOR_BGR2HSV。</p> <h2 id="图像缩放">图像缩放</h2> <p>cv2.warpAffine(src, M, dsize, dst, flags, borderMode, borderValue) → dst 仿射变换 用途：执行仿射变换（线性变换+平移） 参数要求：需要2×3变换矩阵 支持变换类型：缩放、平移、旋转、仿射变换 ​​cv.warpPerspective()​​ 用途：执行透视变换 参数要求：需要3×3变换矩阵 特点：直线在变换后仍保持直线</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cv</span><span class="p">.</span><span class="nf">resize</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">dsize</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fx</span><span class="o">=</span><span class="n">scale_x</span><span class="p">,</span> <span class="n">fy</span><span class="o">=</span><span class="n">scale_y</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="p">)</span>
+</code></pre></div></div> <p>cv.INTER_AREA：缩小图像时推荐（区域插值） cv.INTER_CUBIC：放大时使用（效果更好但较慢） cv.INTER_LINEAR：默认方法（平衡速度和质量） 平移 平移是物体位置的移动。如果您知道在(x,y)方向上的位移，则将其设为(tx,ty)，则可以对图像进行平移。 <code class="language-plaintext highlighter-rouge">M=[[1,0,tx],[0,1,ty]]</code> 如下所示： <img src="/assets/2025-06-16-opencv2-1.png" alt="alt text"></p> <p>对于这个函数的实现 一、平移变换的数学基础 平移变换的本质是：​​在二维平面上，所有点沿特定方向移动固定距离​​</p> <p>数学表达式： x’ = x + t_x y’ = y + t_y 其中： (x, y) 是原坐标 (x’, y’) 是新坐标 t_x 是x方向位移 t_y 是y方向位移 二、齐次坐标：解决平移问题的关键 在标准二维坐标系统中，平移无法用简单的矩阵乘法表示（因为平移不是线性变换）。​​齐次坐标​​解决了这个问题： 将二维点 (x, y) 表示为三维向量： [x, y, 1]^T 平移变换矩阵扩展为3×3形式： [1 0 t_x] [0 1 t_y] [0 0 1 ] 变换计算： [x’] [1 0 t_x] [x] [y’] = [0 1 t_y] [y] [1 ] [0 0 1 ] [1] 展开： x’ = 1<em>x + 0</em>y + t_x<em>1 = x + t_x y’ = 0</em>x + 1<em>y + t_y</em>1 = y + t_y 1 = 0<em>x + 0</em>y + 1 * 1 = 1</p> <p>​​旋转变换 <code class="language-plaintext highlighter-rouge">M = cv.getRotationMatrix2D(center, angle, scale)</code> 可以以不同的点作为旋转点 center：旋转中心坐标，是一个元组参数(col, row)</p> <p>angle：旋转角度，旋转方向，负号为逆时针，正号为顺时针</p> <p>scale：旋转后图像相比原来的缩放比例，1为等比例缩放</p> <h2 id="图像阈值">图像阈值</h2> <p>cv.threshold和cv.adaptiveThreshold <code class="language-plaintext highlighter-rouge">cv.threshold(src, thresh, maxval, type)</code> 第一个参数是源图像，它<strong>应该是灰度图像</strong>。第二个参数是阈值，用于对像素值进行分类。第三个参数是分配给超过阈值的像素值的最大值。OpenCV提供了不同类型的阈值，这由函数的第四个参数给出。</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>enum ThresholdTypes {
+    THRESH_BINARY     = 0,#大于阈值的像素设为最大值(通常为255)，其余设为0
+    THRESH_BINARY_INV = 1,#大于阈值的像素设为0，其余设为最大值
+    THRESH_TRUNC      = 2,#大于阈值的像素被截断为阈值，其余保持不变
+    THRESH_TOZERO     = 3,#小于或等于阈值的像素设为0，其余保持不变
+    THRESH_TOZERO_INV = 4,#大于阈值的像素设为0，其余保持不变
+    THRESH_MASK       = 7,
+    THRESH_OTSU       = 8,
+    THRESH_TRIANGLE   = 16
+};
+</code></pre></div></div> <h3 id="自适应阈值">自适应阈值</h3> <p>cv.adaptiveThreshold</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">cv</span><span class="p">.</span><span class="nf">adaptiveThreshold</span><span class="p">(</span>
+    <span class="n">src</span><span class="p">,</span>                <span class="c1"># 输入图像（单通道，8位）
+</span>    <span class="n">maxValue</span><span class="p">,</span>           <span class="c1"># 超过阈值时分配的最大值（通常为255）
+</span>    <span class="n">adaptiveMethod</span><span class="p">,</span>     <span class="c1"># 自适应方法（见下文）
+</span>    <span class="n">thresholdType</span><span class="p">,</span>      <span class="c1"># 阈值类型（见下文）
+</span>    <span class="n">blockSize</span><span class="p">,</span>          <span class="c1"># 邻域大小（奇数，大于1）
+</span>    <span class="n">C</span>                   <span class="c1"># 常量（从计算值中减去的值）
+</span><span class="p">)</span>
+</code></pre></div></div> <p>Otsu的二值化 在全局阈值化中，我们使用任意选择的值作为阈值。相反，Otsu的方法避免了必须选择一个值并自动确定它的情况。</p> <p>考虑仅具有两个不同图像值的图像（双峰图像），其中直方图将仅包含两个峰。一个好的阈值应该在这两个值的中间。类似地，Otsu的方法从图像直方图中确定最佳全局阈值。</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">thresh</span><span class="p">,</span><span class="n">ig2</span> <span class="o">=</span> <span class="n">cv2</span><span class="p">.</span><span class="nf">threshold</span><span class="p">(</span><span class="n">ig1</span><span class="p">,</span><span class="mi">140</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="n">cv2</span><span class="p">.</span><span class="n">THRESH_BINARY</span> <span class="o">+</span> <span class="n">cv2</span><span class="p">.</span><span class="n">THRESH_OTSU</span><span class="p">)</span>
+</code></pre></div></div> <h2 id="图像平滑">图像平滑</h2> <p>图像滤波处理，做卷积操作 cv.blur()或cv.boxFilter() 操作就是卷积取平均值，区别是boxFilter是用方框，可以不用标准化，blur是用标准化的方框 高斯模糊 在这种情况下，代替盒式滤波器，使用了高斯核。这是通过功能<strong>cv.GaussianBlur()</strong> 完成的。我们应指定内核的宽度和高度，该宽度和高度应为正数和奇数。我们还应指定X和Y方向的标准偏差，分别为sigmaX和sigmaY。如果仅指定sigmaX，则将sigmaY与sigmaX相同。如果两个都为零，则根据内核大小进行计算。高斯模糊对于从图像中去除高斯噪声非常有效。</p> <p>如果需要，可以使用函数<strong>cv.getGaussianKernel()</strong> 创建高斯内核。</p> <h2 id="形态学转换">形态学转换</h2> <p>cv.erode()和cv.dilate() 侵蚀 cv.erode() 侵蚀的基本思想就像土壤侵蚀一样，它侵蚀前景物体的边界(尽量使前景保持白色)。它是做什么的呢?内核滑动通过图像(在2D卷积中)。原始图像中的一个像素(无论是1还是0)只有当内核下的所有像素都是1时才被认为是1，否则它就会被侵蚀(变成0)。 需要传入kernel参数，以及对应的图像还有迭代次数 dilate跟erode在参数上是一样的，但dilate是扩张的意思，它会扩张前景物体的边界(使前景变黑色)，可以看作是erode的逆操作。 开放只是<strong>侵蚀然后扩张</strong>的另一个名称。如上文所述，它对于消除噪音很有用。在这里，我们使用函数<strong>cv.morphologyEx</strong>()</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">opening</span> <span class="o">=</span> <span class="n">cv</span><span class="p">.</span><span class="nf">morphologyEx</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv</span><span class="p">.</span><span class="n">MORPH_OPEN</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span> 
+</code></pre></div></div> <p>闭运算与开运算相反，先扩张然后再侵蚀。在关闭前景对象内部的小孔或对象上的小黑点时很有用。</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">closing</span> <span class="o">=</span> <span class="n">cv</span><span class="p">.</span><span class="nf">morphologyEx</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv</span><span class="p">.</span><span class="n">MORPH_CLOSE</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span>
+</code></pre></div></div> <p>形态学梯度</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gradient</span> <span class="o">=</span> <span class="n">cv</span><span class="p">.</span><span class="nf">morphologyEx</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cv</span><span class="p">.</span><span class="n">MORPH_GRADIENT</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span> 
+</code></pre></div></div> <p>扩展的部分 顶帽 它是输入图像和图像开运算之差。</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tophat = cv.morphologyEx(img, cv.MORPH_TOPHAT, kernel) 
+</code></pre></div></div> <p>黑帽 它是图像闭运算和输入图像之差。</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>blackhat = cv.morphologyEx(img, cv.MORPH_BLACKHAT, kernel) 
+</code></pre></div></div> <p>sobel算子 右减左，上减下 水平梯度矩阵G=[[-1,0,1],[-2,0,2],[-1,0,1]] 垂直梯度矩阵G=[[-1,-2,-1],[0,0,0],[1,2,1]]</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sobelx</span> <span class="o">=</span> <span class="n">cv</span><span class="p">.</span><span class="nc">Sobel</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">cv</span><span class="p">.</span><span class="n">CV_64F</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">ksize</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">sobely</span> <span class="o">=</span> <span class="n">cv</span><span class="p">.</span><span class="nc">Sobel</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">cv</span><span class="p">.</span><span class="n">CV_64F</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">ksize</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div></div> <p>img需要为灰度图，​​cv.CV_64F​为图像深度，​dx = 1, dy = 0：计算 x 方向（水平）导数 → 检测垂直边缘 dx = 0, dy = 1：计算 y 方向（垂直）导数 → 检测水平边缘Sobel 核的大小：5×5 的核 可选值：-1 (3×3 Scharr 核)、1、3、5、7</p> <p>scharr算子 x方向：[[-3,0,3],[-10,0,10],[-3,0,3]] y方向：[[-3,-10,-3],[0,0,0],[3,10,3]]</p> <p>整体计算跟sobel一样，但是使用scharr核，更敏感 laplacian算子 Laplacian算子也是用来计算图像梯度的，作用也是提取边界。它与上面两种算子的不同是： sobel算子和scharr算子一般先算一个水平梯度，再算一个垂直方向梯度，然后把两个结果按照0.5的权重进行图像融合以得到完整的边界。</p> <p>但Laplacian算子则不同，它本身就是一个二阶的算子，它的运算规则就是在水平方向运算两次，垂直方向运算两次，两个结果相叠加替换中心点（锚点）的像素值（灰度值）</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">kernel</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]],</span><span class="n">np</span><span class="p">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="n">laplacian</span> <span class="o">=</span> <span class="n">cv</span><span class="p">.</span><span class="nc">Laplacian</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">cv</span><span class="p">.</span><span class="n">CV_64F</span><span class="p">)</span>
+</code></pre></div></div> <h2 id="canney边缘检测">Canney边缘检测</h2> <p>Canny边缘检测是一种基于图像梯度的边缘检测算法。 ·1)使用高斯滤波器，以平滑图像，滤除噪声。 ·2)计算图像中每个像素点的梯度强度和方向。 ·3)应用非极大值(Non-Maximum Suppression)抑制，以消除边缘检测带来的杂散响应。 .4)应用双闽值(Double-Threshold)检测来确定真实的和潜在的边缘。 .5)通过抑制孤立的弱边缘最终完成边缘检测。 edges = cv.Canny(img,100,200)</p> <h2 id="非极大值抑制">非极大值抑制</h2> <p>顾名思义，抑制不是最大值的其他值 线性插值法 取一条线经过两条边，产生两个交点，如果中间的点的梯度小于这两个交点，就会被抑制 简化计算就是一个像素点的梯度发散到他的八个方向上 +—–+—–+—–+ | ↖ | ↑ | ↗ | → 离散的8个方向 +—–+—–+—–+ | ← | ● | → | ● 中心像素(当前处理点) +—–+—–+—–+ | ↙ | ↓ | ↘ | ← 通过箭头判断比较方向 +—–+—–+—–+ Step 1️⃣：确定中心像素的梯度方向​​ 如图中红点表示的当前像素 ​​Step 2️⃣：找出梯度方向线上的相邻像素​​ 例如： 若梯度方向→，则比较左右像素 若梯度方向↗，则比较右上和左下像素 ​​Step 3️⃣：抑制非极大值​​ if 中心像素梯度值 &lt; 相邻像素1的梯度值 or 中心像素梯度值 &lt; 相邻像素2的梯度值: 将中心像素值设为0(抑制) else: 保留中心像素值(这是真实边缘)</p> <h3 id="双阈值检测">双阈值检测</h3> <p>他有两个梯度阈值maxval和minval 如果梯度值大于maxval，那么则处理为边界 如果梯度值小于maxval大于minval，如果连接边界则保留，没有则舍弃 小于minval则舍弃 canny边缘检测就是使用双阈值检测</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">edges</span> <span class="o">=</span> <span class="n">cv</span><span class="p">.</span><span class="nc">Canny</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">200</span><span class="p">)</span>
+</code></pre></div></div> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/colpali-multimodal-rag-qa/">掌握 ColPali 多模态 RAG 需要回答的 8 个问题</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/proposition-chunking-summary/">Proposition Chunking 命题化切分总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/query-transformations-summary/">Query Transformations 查询转换技术总结</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "about",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "nav-repositories",
+          title: "repositories",
+          description: "Edit the `_data/repositories.yml` and change the `github_users` and `github_repos` lists to include your own GitHub profile and repositories.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/repositories/";
+          },
+        },{id: "post-二叉树刷题总结",
+        
+          title: "二叉树刷题总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/";
+          
+        },
+      },{id: "post-rag-技术体系化分类-从-pipeline-阶段到失败模式",
+        
+          title: "RAG 技术体系化分类——从 Pipeline 阶段到失败模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/RAG-techniques-pipeline-categorization/";
+          
+        },
+      },{id: "post-memorag-记忆增强型-rag-总结",
+        
+          title: "MemoRAG 记忆增强型 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/memorag-summary/";
+          
+        },
+      },{id: "post-microsoft-graphrag-基于知识图谱的-rag-总结",
+        
+          title: "Microsoft GraphRAG 基于知识图谱的 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/microsoft-graphrag-summary/";
+          
+        },
+      },{id: "post-multimodal-rag-with-captioning-图像描述型多模态-rag-总结",
+        
+          title: "Multimodal RAG with Captioning 图像描述型多模态 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/multimodal-rag-with-captioning-summary/";
+          
+        },
+      },{id: "post-掌握-colpali-多模态-rag-需要回答的-8-个问题",
+        
+          title: "掌握 ColPali 多模态 RAG 需要回答的 8 个问题",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/colpali-multimodal-rag-qa/";
+          
+        },
+      },{id: "post-proposition-chunking-命题化切分总结",
+        
+          title: "Proposition Chunking 命题化切分总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/proposition-chunking-summary/";
+          
+        },
+      },{id: "post-query-transformations-查询转换技术总结",
+        
+          title: "Query Transformations 查询转换技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/query-transformations-summary/";
+          
+        },
+      },{id: "post-raptor-技术总结",
+        
+          title: "RAPTOR 技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/raptor-summary/";
+          
+        },
+      },{id: "post-relevant-segment-extraction-rse-学习笔记-从片段到段落",
+        
+          title: "Relevant Segment Extraction (RSE) 学习笔记 —— 从片段到段落",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/relevant-segment-extraction/";
+          
+        },
+      },{id: "post-reranking-with-llamaindex-学习笔记-llm-与-cross-encoder-重排",
+        
+          title: "Reranking with LlamaIndex 学习笔记 —— LLM 与 Cross-Encoder 重排",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/reranking-with-llamaindex/";
+          
+        },
+      },{id: "post-rag-with-feedback-loop-学习笔记-从机制到隐患",
+        
+          title: "RAG with Feedback Loop 学习笔记 —— 从机制到隐患",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rag-feedback-loop/";
+          
+        },
+      },{id: "post-self-rag-学习笔记-从论文思想到代码实现",
+        
+          title: "Self-RAG 学习笔记 —— 从论文思想到代码实现",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/self-rag/";
+          
+        },
+      },{id: "post-claude-code学习13-memory",
+        
+          title: "Claude code学习13 Memory",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B013/";
+          
+        },
+      },{id: "post-claude-code学习12-fileedittool",
+        
+          title: "Claude code学习12 FileEditTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B012/";
+          
+        },
+      },{id: "post-claude-code学习11-bashtool",
+        
+          title: "Claude code学习11 BashTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B011/";
+          
+        },
+      },{id: "post-claude-code学习10-permission-与-hooks-系统",
+        
+          title: "Claude code学习10 Permission 与 Hooks 系统",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B010/";
+          
+        },
+      },{id: "post-claude-code学习9-agent-loop",
+        
+          title: "Claude code学习9 Agent loop",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B09/";
+          
+        },
+      },{id: "post-claude-code学习8-system-reminder-动态信息是如何入prompt的",
+        
+          title: "Claude code学习8 system-reminder，动态信息是如何入prompt的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B08/";
+          
+        },
+      },{id: "post-claude-code学习7-权限模式",
+        
+          title: "Claude code学习7 权限模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B07/";
+          
+        },
+      },{id: "post-claude-code学习6-动态prompt的组装2",
+        
+          title: "Claude code学习6 动态prompt的组装2",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B06/";
+          
+        },
+      },{id: "post-claude-code学习5-动态prompt的组装1",
+        
+          title: "Claude code学习5 动态prompt的组装1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B05/";
+          
+        },
+      },{id: "post-claude-code学习4-静态prompt里面有什么以及claude-code启动时做了些什么",
+        
+          title: "Claude code学习4 静态prompt里面有什么以及Claude code启动时做了些什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B04/";
+          
+        },
+      },{id: "post-claude-code学习3-为什么claude-code工程化设计是这样的",
+        
+          title: "Claude code学习3 为什么Claude code工程化设计是这样的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/";
+          
+        },
+      },{id: "post-claude-code学习2-claude-code的上下文管理",
+        
+          title: "Claude code学习2 Claude code的上下文管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02/";
+          
+        },
+      },{id: "post-claude-code学习1-我们要从这个项目里学到什么",
+        
+          title: "Claude code学习1 我们要从这个项目里学到什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B01/";
+          
+        },
+      },{id: "post-learn-claude-code项目学习",
+        
+          title: "learn claude code项目学习",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/learn-claude-code%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/";
+          
+        },
+      },{id: "post-如何理解transformer",
+        
+          title: "如何理解transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformer-a/";
+          
+        },
+      },{id: "post-旋转矩阵的理解",
+        
+          title: "旋转矩阵的理解",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformation/";
+          
+        },
+      },{id: "post-cs231a-相机模型笔记",
+        
+          title: "CS231A 相机模型笔记",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cs231a-1/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv2/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv1/";
+          
+        },
+      },{id: "post-linux权限",
+        
+          title: "Linux权限",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP3/";
+          
+        },
+      },{id: "post-linux命令格式",
+        
+          title: "Linux命令格式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP2/";
+          
+        },
+      },{id: "post-excel常用操作",
+        
+          title: "Excel常用操作",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/excel/";
+          
+        },
+      },{id: "post-linux文件路径",
+        
+          title: "Linux文件路径",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP1/";
+          
+        },
+      },{id: "post-常见linux命令和shell脚本",
+        
+          title: "常见Linux命令和shell脚本",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/shellLinux/";
+          
+        },
+      },{id: "post-micropytorch",
+        
+          title: "microPytorch",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/.microPYtorch/";
+          
+        },
+      },{id: "post-c-vector",
+        
+          title: "C++ Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-c-template",
+        
+          title: "C++ Template",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppTemplate/";
+          
+        },
+      },{id: "post-pandas库的基本使用",
+        
+          title: "pandas库的基本使用",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/pandas1/";
+          
+        },
+      },{id: "post-c-中的static和const-1",
+        
+          title: "C++中的static和const 1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppStaticandConst/";
+          
+        },
+      },{id: "post-c-的内外部连接",
+        
+          title: "C++的内外部连接",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppLink/";
+          
+        },
+      },{id: "post-用c-实现内存池1",
+        
+          title: "用C++实现内存池1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo_pool/";
+          
+        },
+      },{id: "post-c-的内存管理",
+        
+          title: "C++的内存管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo/";
+          
+        },
+      },{id: "post-每日一题2296-设计一个文本编辑器",
+        
+          title: "每日一题2296. 设计一个文本编辑器",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LC/";
+          
+        },
+      },{id: "post-c-中的vector",
+        
+          title: "C++中的Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-transformer",
+        
+          title: "Transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transfomer/";
+          
+        },
+      },{id: "post-深度学习和机器学习中的重要概念",
+        
+          title: "深度学习和机器学习中的重要概念",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/MLfun/";
+          
+        },
+      },{id: "post-attention注意力机制-修正补充版",
+        
+          title: "Attention注意力机制（修正补充版）",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention2/";
+          
+        },
+      },{id: "post-attention注意力机制",
+        
+          title: "Attention注意力机制",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention/";
+          
+        },
+      },{id: "post-unet网络",
+        
+          title: "Unet网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Unet/";
+          
+        },
+      },{id: "post-seq2seq的模型-构建以及损失函数",
+        
+          title: "Seq2Seq的模型，构建以及损失函数",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Seq2Seq-1/";
+          
+        },
+      },{id: "post-text-generation",
+        
+          title: "Text Generation",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Text-Generation/";
+          
+        },
+      },{id: "post-rnn的优化",
+        
+          title: "RNN的优化",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/RNN%E7%9A%84%E4%BC%98%E5%8C%96/";
+          
+        },
+      },{id: "post-lstm长短记忆网络",
+        
+          title: "LSTM长短记忆网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LSTM%E9%95%BF%E7%9F%AD%E8%AE%B0%E5%BF%86%E7%BD%91%E7%BB%9C/";
+          
+        },
+      },{id: "post-simple-rnn",
+        
+          title: "Simple RNN",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Simple-RNN/";
+          
+        },
+      },{id: "post-linux内核全注释阅读-linux内核体系结构1",
+        
+          title: "Linux内核全注释阅读 Linux内核体系结构1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Linux%E5%86%85%E6%A0%B8%E5%85%A8%E6%B3%A8%E9%87%8A%E9%98%85%E8%AF%BB-Linux%E5%86%85%E6%A0%B8%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%841/";
+          
+        },
+      },{id: "post-nlp的数据处理-文本处理以及词嵌套",
+        
+          title: "NLP的数据处理 文本处理以及词嵌套",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/NLP%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86-%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%BB%A5%E5%8F%8A%E8%AF%8D%E5%B5%8C%E5%A5%97/";
+          
+        },
+      },{id: "post-deepseek-r1论文解读",
+        
+          title: "DeepSeek R1论文解读",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/DeepSeek-R1%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/";
+          
+        },
+      },{id: "post-deepseek蒸馏模型的本地部署",
+        
+          title: "Deepseek蒸馏模型的本地部署",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Deepseek%E8%92%B8%E9%A6%8F%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/";
+          
+        },
+      },{id: "post-测试博客",
+        
+          title: "测试博客",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Test/";
+          
+        },
+      },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
+        
+          title: 'Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "We’re sharing updates across our Gemini family of models and a glimpse of Project Astra, our vision for the future of AI assistants.",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/", "_blank");
+          
+        },
+      },{id: "post-displaying-external-posts-on-your-al-folio-blog",
+        
+          title: 'Displaying External Posts on Your al-folio Blog <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2", "_blank");
+          
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/Mr-coldskin7", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/feed.xml", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>

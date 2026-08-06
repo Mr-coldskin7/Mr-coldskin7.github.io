@@ -1,0 +1,1108 @@
+<!DOCTYPE html> <html lang="zh"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Claude code学习9 Agent loop | leesanyee </title> <meta name="author" content="Lee SanYee"> <meta name="description" content="LeeSanYee 的技术博客，记录 ML/NLP、C++、Linux 等方向的学习笔记与思考。 "> <meta name="keywords" content="blog, ml, nlp, cpp, linux"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://mr-coldskin7.github.io/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B09/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Claude code学习9 Agent loop</h1> <p class="post-meta"> Created on July 01, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/agent"> <i class="fa-solid fa-hashtag fa-sm"></i> agent</a>   <a href="/blog/tag/claude-code"> <i class="fa-solid fa-hashtag fa-sm"></i> claude-code</a>   <a href="/blog/tag/agent-loop"> <i class="fa-solid fa-hashtag fa-sm"></i> agent-loop</a>   ·   <a href="/blog/category/agent"> <i class="fa-solid fa-tag fa-sm"></i> agent</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h2 id="agent-loop">agent loop</h2> <p>对于Claude code而言，agent loop是其核心 这也是所有agent的核心 决定其是否可以较为智能工作的一个核心</p> <h3 id="query_loop">query_loop</h3> <p>对于claude code而言，query_loop是其实现的核心代码 query loop的设计有许多值得学习的地方 第一，其不是普通的异步函数，而是async function* ，这是一个异步生成器函数，通过中间yield输出各种数据给其他接口使用，这样不会给用户或者使用者一个一直没有反馈的cli，而是有实时的信息反馈让用户可以判断当前的执行情况。 第二，yield 的对象不只是文本，还包括 StreamEvent、中间状态、工具摘要、墓碑消息和恢复提示，就是上面所说的各类数据 第三，对于一个需要运行长任务的agent loop而言，state状态的管理是极其重要的，对于Claude code而言，他把</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="kd">let</span> <span class="nx">state</span><span class="p">:</span> <span class="nx">State</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">messages</span><span class="p">:</span> <span class="nx">params</span><span class="p">.</span><span class="nx">messages</span><span class="p">,</span>
+    <span class="na">toolUseContext</span><span class="p">:</span> <span class="nx">params</span><span class="p">.</span><span class="nx">toolUseContext</span><span class="p">,</span>
+    <span class="na">maxOutputTokensOverride</span><span class="p">:</span> <span class="nx">params</span><span class="p">.</span><span class="nx">maxOutputTokensOverride</span><span class="p">,</span>
+    <span class="na">autoCompactTracking</span><span class="p">:</span> <span class="kc">undefined</span><span class="p">,</span>
+    <span class="na">stopHookActive</span><span class="p">:</span> <span class="kc">undefined</span><span class="p">,</span>
+    <span class="na">maxOutputTokensRecoveryCount</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="na">hasAttemptedReactiveCompact</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+    <span class="na">turnCount</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="na">pendingToolUseSummary</span><span class="p">:</span> <span class="kc">undefined</span><span class="p">,</span>
+    <span class="na">transition</span><span class="p">:</span> <span class="kc">undefined</span><span class="p">,</span>
+  <span class="p">}</span>
+</code></pre></div></div> <p>一些长任务必须的状态管理塞入了state里面，由于代码条件分支，很多时候莫名其妙改了忘记改回去或者说其他原因导致最后结果不一样，这个问题最好的解决问题就是用这种state打包状态，最后所有跨轮状态都要显式声明 总的来说，每次进入下一轮前，完整重建整个 State，而不是局部修改变量。这样每个分支都必须是自洽的状态跃迁，避免”改了 A 忘记改 B”的漂移问题。</p> <p>transition 字段是 State 设计的点睛之笔</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">transition</span><span class="p">:</span> <span class="p">{</span> <span class="nl">reason</span><span class="p">:</span> <span class="dl">'</span><span class="s1">next_turn</span><span class="dl">'</span> <span class="p">}</span>
+</code></pre></div></div> <p>这个字段不直接影响运行，但有两个重要作用：</p> <p>A. 调试和日志 当某轮行为异常时，看 transition.reason 就知道”上一轮为什么 continue”，不用翻消息内容。</p> <p>B. 测试断言</p> <p>测试可以检查： expect(nextState.transition.reason).toBe(‘reactive_compact_retry’)</p> <p>而不用去比对复杂的 messages 数组。</p> <h3 id="query-与-queryloop-的关系">query() 与 queryLoop() 的关系</h3> <p>query() 是外层封装，queryLoop() 是内部状态机。</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="k">async</span> <span class="kd">function</span><span class="o">*</span> <span class="nf">query</span><span class="p">(</span>
+  <span class="nx">params</span><span class="p">:</span> <span class="nx">QueryParams</span><span class="p">,</span>
+<span class="p">):</span> <span class="nx">AsyncGenerator</span><span class="o">&lt;</span><span class="p">...,</span> <span class="nx">Terminal</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="na">consumedCommandUuids</span><span class="p">:</span> <span class="kr">string</span><span class="p">[]</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="kd">const</span> <span class="nx">terminal</span> <span class="o">=</span> <span class="k">yield</span><span class="o">*</span> <span class="nf">queryLoop</span><span class="p">(</span><span class="nx">params</span><span class="p">,</span> <span class="nx">consumedCommandUuids</span><span class="p">)</span>
+  <span class="k">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">uuid</span> <span class="k">of</span> <span class="nx">consumedCommandUuids</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nf">notifyCommandLifecycle</span><span class="p">(</span><span class="nx">uuid</span><span class="p">,</span> <span class="dl">'</span><span class="s1">completed</span><span class="dl">'</span><span class="p">)</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">terminal</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>query() 做三件事：</p> <ol> <li>创建 consumedCommandUuids 数组；</li> <li>用 yield* 把 queryLoop 的事件流透明转发出去；</li> <li>等 queryLoop 正常返回后，统一通知消费的命令”已完成”。</li> </ol> <p>拆成两层的原因：</p> <ul> <li>queryLoop 内部已经有 1700+ 行的复杂状态机，再把命令生命周期通知塞进去会严重增加复杂度；</li> <li>命令开始是实时通知的，但完成通知 completed 必须等到整轮查询正常结束才发；</li> <li>如果 queryLoop 抛异常或被 .return() 中断，completed 通知不会执行。</li> </ul> <h3 id="state-字段与修改分支">State 字段与修改分支</h3> <p>State 的 10 个字段：</p> <table> <thead> <tr> <th>字段</th> <th>含义</th> </tr> </thead> <tbody> <tr> <td>messages</td> <td>当前对话历史</td> </tr> <tr> <td>toolUseContext</td> <td>工具上下文、abort 信号、选项</td> </tr> <tr> <td>maxOutputTokensOverride</td> <td>临时输出 token 覆盖</td> </tr> <tr> <td>autoCompactTracking</td> <td>自动压缩追踪状态</td> </tr> <tr> <td>stopHookActive</td> <td>stop hook 是否已激活</td> </tr> <tr> <td>maxOutputTokensRecoveryCount</td> <td>输出截断恢复计数</td> </tr> <tr> <td>hasAttemptedReactiveCompact</td> <td>是否已尝试过 reactive compact</td> </tr> <tr> <td>turnCount</td> <td>当前轮数</td> </tr> <tr> <td>pendingToolUseSummary</td> <td>上一轮的 tool use 摘要 Promise</td> </tr> <tr> <td>transition</td> <td>上一轮为什么 continue</td> </tr> </tbody> </table> <p>7 个关键 continue sites：</p> <table> <thead> <tr> <th>continue 点</th> <th>位置</th> <th>触发原因</th> </tr> </thead> <tbody> <tr> <td>collapse_drain_retry</td> <td>query.ts:1115</td> <td>prompt-too-long → 提交已折叠上下文</td> </tr> <tr> <td>reactive_compact_retry</td> <td>query.ts:1165</td> <td>轻量恢复失败或 media 错误 → 摘要压缩</td> </tr> <tr> <td>max_output_tokens_escalate</td> <td>query.ts:1220</td> <td>输出达到默认上限 → 升 64k</td> </tr> <tr> <td>max_output_tokens_recovery</td> <td>query.ts:1251</td> <td>64k 也满了 → 分段续写</td> </tr> <tr> <td>stop_hook_blocking</td> <td>query.ts:1305</td> <td>stop hook 要求修正后重试</td> </tr> <tr> <td>token_budget_continuation</td> <td>query.ts:1340</td> <td>预算内继续生成</td> </tr> <tr> <td>next_turn</td> <td>query.ts:1727</td> <td>正常进入下一轮</td> </tr> </tbody> </table> <p>关键观察：</p> <ul> <li>maxOutputTokensOverride 几乎总是重置为 undefined，只有 escalate 分支设为 ESCALATED_MAX_TOKENS；</li> <li>hasAttemptedReactiveCompact 在 stop_hook_blocking 分支里保持原值，不能重置为 false，否则会导致 compact → 仍然 413 → error → stop hook → compact 的死循环；</li> <li>turnCount 只在 next_turn 时递增，恢复路径不算新轮次；</li> <li>pendingToolUseSummary 只在 next_turn 传承，其他分支都重置为 undefined。</li> </ul> <hr> <p>生命周期总览</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[入口]
+   ↓
+[Pre-model 边界] ── 上下文组装、压缩、预算检查
+   │
+   ├── return: blocking_limit        (自动压缩关闭，上下文超过硬阻塞上限)
+   │
+   ├── continue: collapse_drain_retry (PTL → 折叠 drain)
+   ├── continue: reactive_compact_retry (PTL/media → 摘要压缩)
+   │
+   ↓
+[Model 边界] ── API 调用、流式响应
+   │
+   ├── continue: fallback retry      (模型 fallback，同请求重试)
+   │
+   ├── return: image_error           (图片处理错误)
+   ├── return: model_error           (模型调用异常)
+   ├── return: aborted_streaming     (用户中断流式响应)
+   │
+   ↓
+[Post-model 边界] ── 响应已接收，无 tool_use 或 tool_use 待执行
+   │
+   ├── continue: max_output_tokens_escalate (默认上限 → 升 64k)
+   ├── continue: max_output_tokens_recovery (64k 也满 → 分段续写)
+   │
+   ├── return: prompt_too_long       (PTL 恢复失败)
+   ├── return: image_error           (media 恢复失败)
+   │
+   ├── continue: stop_hook_blocking  (stop hook 要求修正后重试)
+   ├── return: stop_hook_prevented   (stop hook 决定终止)
+   │
+   ├── continue: token_budget_continuation (预算内继续生成)
+   │
+   ├── return: completed             (正常完成，无后续 tool_use)
+   │
+   ↓
+[Tool 边界] ── 执行 tool_use 块
+   │
+   ├── return: aborted_tools         (用户中断工具执行)
+   ├── return: hook_stopped          (hook 阻止继续)
+   │
+   ↓
+[Post-tool 边界] ── 工具结果已收集
+   │
+   ├── return: max_turns             (达到最大轮数)
+   │
+   └── continue: next_turn           (正常进入下一轮)
+</code></pre></div></div> <p>一、Pre-model 边界：模型请求之前</p> <p>这个阶段做 context assembly 和 compression。问题主要是上下文太大或压缩后需要重试。</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌────────────────────────────────┬───────────────┬─────────────────────────────────────────────────────┐
+│               点               │     位置       │                    生命周期含义                       │
+├────────────────────────────────┼───────────────┼─────────────────────────────────────────────────────┤
+│ return { reason:               │ query.ts:646  │ 自动压缩关闭，上下文超过硬阻塞上限，无法继续。      │
+│ 'blocking_limit' }             │               │                                                     │
+├────────────────────────────────┼───────────────┼─────────────────────────────────────────────────────┤
+│ continue                       │ query.ts:1115 │ prompt-too-long → 提交已折叠上下文，释放 token      │
+│ (collapse_drain_retry)         │               │ 后重试。                                            │
+├────────────────────────────────┼───────────────┼─────────────────────────────────────────────────────┤
+│ continue                       │ query.ts:1165 │ 轻量恢复失败或 media 错误 → 完整摘要压缩后重试。    │
+│ (reactive_compact_retry)       │               │                                                     │
+└────────────────────────────────┴───────────────┴─────────────────────────────────────────────────────┘
+</code></pre></div></div> <p>设计思想：在真正花钱调用模型之前，先把上下文问题解决掉。从轻到重分层恢复。</p> <hr> <p>二、Model 边界：API 调用期间</p> <p>这是实际调用 Anthropic API 的阶段。问题主要是模型失败、fallback、用户中断。</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌───────────────────────────────────────┬───────────────┬──────────────────────────────────────────────┐
+│                  点                   │     位置      │                 生命周期含义                 │
+├───────────────────────────────────────┼───────────────┼──────────────────────────────────────────────┤
+│ continue (fallback retry)             │ query.ts:950  │ 主模型触发                                   │
+│                                       │               │ fallback，切换到备用模型重新请求。           │
+├───────────────────────────────────────┼───────────────┼──────────────────────────────────────────────┤
+│ return { reason: 'image_error' }      │ query.ts:977  │ 图片大小/缩放错误，无法继续。                │
+├───────────────────────────────────────┼───────────────┼──────────────────────────────────────────────┤
+│ return { reason: 'model_error', error │ query.ts:996  │ 模型调用抛异常，且不是可恢复错误。           │
+│  }                                    │               │                                              │
+├───────────────────────────────────────┼───────────────┼──────────────────────────────────────────────┤
+│ return { reason: 'aborted_streaming'  │ query.ts:1051 │ 用户在模型流式输出时按 Ctrl+C。              │
+│ }                                     │               │                                              │
+└───────────────────────────────────────┴───────────────┴──────────────────────────────────────────────┘
+</code></pre></div></div> <p>设计思想：这个边界处理”模型本身”的问题。fallback retry 是内部重试，不进入新一轮；用户中断则立即终止并清理状态。</p> <hr> <p>三、Post-model 边界：响应已收完，需要决定下一步</p> <p>模型响应已经完整接收。这里分两种情况：</p> <ul> <li>没有 tool_use → 评估各种恢复/终止条件；</li> <li>有 tool_use → 进入 Tool 边界。</li> </ul> <p>3.1 输出 token 相关</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌───────────────────────────────────────┬───────────────┬─────────────────────────────────────────────┐
+│                  点                   │     位置      │                生命周期含义                 │
+├───────────────────────────────────────┼───────────────┼─────────────────────────────────────────────┤
+│ continue (max_output_tokens_escalate) │ query.ts:1220 │ 输出达到默认上限 → 同请求升 64k 重试。      │
+├───────────────────────────────────────┼───────────────┼─────────────────────────────────────────────┤
+│ continue (max_output_tokens_recovery) │ query.ts:1251 │ 64k 也满了 → 保留已输出内容，注入续写提示。 │
+└───────────────────────────────────────┴───────────────┴─────────────────────────────────────────────┘
+</code></pre></div></div> <p>3.2 上下文错误恢复失败</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──────────────────────────────────┬────────────────────┬─────────────────────────────────────────────┐
+│                点                │        位置        │                生命周期含义                 │
+├──────────────────────────────────┼────────────────────┼─────────────────────────────────────────────┤
+│ return { reason:                 │ query.ts:1175 /    │ 所有 PTL 恢复手段耗尽，只能暴露错误。       │
+│ 'prompt_too_long' }              │ 1182               │                                             │
+├──────────────────────────────────┼────────────────────┼─────────────────────────────────────────────┤
+│ return { reason: 'image_error' } │ query.ts:1175      │ media size 错误无法通过 reactive compact    │
+│                                  │                    │ 恢复。                                      │
+└──────────────────────────────────┴────────────────────┴─────────────────────────────────────────────┘
+</code></pre></div></div> <p>3.3 Stop hook 相关</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌────────────────────────────────────┬───────────────┬─────────────────────────────────────────────────┐
+│                 点                 │     位置      │                  生命周期含义                   │
+├────────────────────────────────────┼───────────────┼─────────────────────────────────────────────────┤
+│ continue (stop_hook_blocking)      │ query.ts:1305 │ stop hook 认为需要修正 → 注入 blocking errors   │
+│                                    │               │ 重试。                                          │
+├────────────────────────────────────┼───────────────┼─────────────────────────────────────────────────┤
+│ return { reason:                   │ query.ts:1279 │ stop hook 决定阻止继续（如检测到危险操作）。    │
+│ 'stop_hook_prevented' }            │               │                                                 │
+└────────────────────────────────────┴───────────────┴─────────────────────────────────────────────────┘
+</code></pre></div></div> <p>3.4 Token 预算</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──────────────────────────────────────┬───────────────┬───────────────────────────────────────────┐
+│                  点                  │     位置      │               生命周期含义                │
+├──────────────────────────────────────┼───────────────┼───────────────────────────────────────────┤
+│ continue (token_budget_continuation) │ query.ts:1340 │ 预算未耗尽且任务可能未完成 → nudge 继续。 │
+└──────────────────────────────────────┴───────────────┴───────────────────────────────────────────┘
+</code></pre></div></div> <p>3.5 正常完成</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌────────────────────────────────┬───────────────┬─────────────────────────────────────────────┐
+│               点               │     位置      │                生命周期含义                 │
+├────────────────────────────────┼───────────────┼─────────────────────────────────────────────┤
+│ return { reason: 'completed' } │ query.ts:1357 │ 模型正常响应完毕，没有 tool_use，可以结束。 │
+└────────────────────────────────┴───────────────┴─────────────────────────────────────────────┘
+</code></pre></div></div> <p>设计思想：Post-model 边界是”决策点”。响应已经拿到了，系统要决定：是正常结束、恢复重试、还是被 hook 拦截。这个阶段的 continue 都不会增加 turnCount——它们是对同一轮的恢复/延续。</p> <hr> <p>四、Tool 边界：执行工具期间</p> <p>模型要求调用工具，系统开始执行。</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌────────────────────────────────────┬───────────────┬──────────────────────────────────────┐
+│                 点                 │     位置      │             生命周期含义             │
+├────────────────────────────────────┼───────────────┼──────────────────────────────────────┤
+│ return { reason: 'aborted_tools' } │ query.ts:1515 │ 用户在工具执行期间按 Ctrl+C。        │
+├────────────────────────────────────┼───────────────┼──────────────────────────────────────┤
+│ return { reason: 'hook_stopped' }  │ query.ts:1520 │ 某个 hook 在执行过程中决定阻止继续。 │
+└────────────────────────────────────┴───────────────┴──────────────────────────────────────┘
+</code></pre></div></div> <p>设计思想：工具执行可能耗时很长（比如跑测试、截图），所以单独设置中断边界。这里也会做 MCP 清理等收尾。</p> <hr> <p>五、Post-tool 边界：工具执行完毕</p> <p>工具结果已收集，准备进入下一轮。</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌───────────────────────────────────────────┬───────────────┬────────────────────────────────────────┐
+│                    点                     │     位置      │              生命周期含义              │
+├───────────────────────────────────────────┼───────────────┼────────────────────────────────────────┤
+│ return { reason: 'max_turns', turnCount } │ query.ts:1711 │ 达到最大轮数限制，强制终止。           │
+├───────────────────────────────────────────┼───────────────┼────────────────────────────────────────┤
+│ continue (next_turn)                      │ query.ts:1727 │ 正常把工具结果回传给模型，进入下一轮。 │
+└───────────────────────────────────────────┴───────────────┴────────────────────────────────────────┘
+</code></pre></div></div> <p>设计思想：这是每轮循环的”出口”。要么因为轮数限制终止，要么把本轮所有产出合并成新的 messages 继续循环。</p> <h3 id="关于-querycheckpoint">关于 queryCheckpoint</h3> <p>queryCheckpoint 不是用于”备份和防止被打断”的，它主要是性能分析/埋点标记，不是恢复机制。</p> <p>queryCheckpoint(‘query_api_loop_start’) queryCheckpoint(‘query_api_streaming_start’) queryCheckpoint(‘query_tool_execution_start’)</p> <p>这些 checkpoint 是在关键阶段打时间戳，用于：</p> <ul> <li>测量每个阶段花了多久；</li> <li>分析延迟瓶颈；</li> <li>上报 telemetry 事件。</li> </ul> <p>它们不参与恢复、不保存状态、不能防止中断。真正用于恢复的是 State 对象、transition 字段、yield 的消息序列、yieldMissingToolResultBlocks 等。</p> <h3 id="中断时消息是否持久化">中断时消息是否持久化</h3> <p>会持久化，但不是 queryLoop 自己直接落盘，而是通过持续 yield 消息给外层，由外层写入 transcript / 会话状态。</p> <p>中断处理的核心目标：让被中断这轮产生的消息仍然能构成一个合法、可恢复的对话历史。</p> <p>query.ts:1015-1051：</p> <ul> <li>如果 streamingToolExecutor 存在，消费 remaining results，生成合成的 tool_result；</li> <li>否则 yield* yieldMissingToolResultBlocks，补齐缺失的 tool_result；</li> <li>产出 createUserInterruptionMessage；</li> <li>return { reason: ‘aborted_streaming’ }。</li> </ul> <p>Terminal 原因本身不会被持久化，但整个迭代过程中 yield 出去的消息序列会被外层记录，用于下一次对话。</p> <h3 id="applytoolresultbudget">applyToolResultBudget</h3> <p>applyToolResultBudget 返回的是 Message[]，不是工具结果。</p> <p>它的作用是：检查消息历史中每条工具结果的大小，如果超过预算，就把过大的内容替换成占位符/摘要，然后返回替换后的消息数组。</p> <p>在 query.ts:379 的用法：</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">messagesForQuery</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">applyToolResultBudget</span><span class="p">(</span>
+  <span class="nx">messagesForQuery</span><span class="p">,</span>
+  <span class="nx">toolUseContext</span><span class="p">.</span><span class="nx">contentReplacementState</span><span class="p">,</span>
+  <span class="nx">persistReplacements</span> <span class="p">?</span> <span class="nx">records</span> <span class="o">=&gt;</span> <span class="k">void</span> <span class="nf">recordContentReplacement</span><span class="p">(...)</span> <span class="p">:</span> <span class="kc">undefined</span><span class="p">,</span>
+  <span class="k">new</span> <span class="nc">Set</span><span class="p">(</span><span class="nx">toolUseContext</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">tools</span>
+    <span class="p">.</span><span class="nf">filter</span><span class="p">(</span><span class="nx">t</span> <span class="o">=&gt;</span> <span class="o">!</span><span class="nb">Number</span><span class="p">.</span><span class="nf">isFinite</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nx">maxResultSizeChars</span><span class="p">))</span>
+    <span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="nx">t</span> <span class="o">=&gt;</span> <span class="nx">t</span><span class="p">.</span><span class="nx">name</span><span class="p">)),</span>
+<span class="p">)</span>
+</code></pre></div></div> <p>第三个参数 writeToTranscript 只在 persistReplacements 为 true 时传入，即 querySource 为 repl_main_thread* 或 agent:* 时。因为这两种来源的会话会被恢复，必须让 budget 系统在恢复后做出和原来一致的替换选择。</p> <h3 id="工具调度">工具调度</h3> <p>对于agent的工具调用来说，他不是promise.all 原因有如下几个： 第一、不是所有工具都是并发的，并且也并不是所有看起来可以并发的工具都实际上可以并发，例如读文件这一个操作，如果同时读同一个文件或者一下读就读一大段，那么它的缓存就会特别大导致运行慢或者崩溃 第二，工具之间可能存在隐形依赖，创建文件夹和进入对应的文件夹就是很典型的一个例子，如果是没有先后顺序的话，那么就会出错 第三就是ui以及用户方面需要流式输出 promise all一次性给不合适</p> <p>StreamingToolExecutor 用的是一个带并发控制的队列执行器。</p> <p>ToolStatus：</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">type</span> <span class="nx">ToolStatus</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">queued</span><span class="dl">'</span> <span class="o">|</span> <span class="dl">'</span><span class="s1">executing</span><span class="dl">'</span> <span class="o">|</span> <span class="dl">'</span><span class="s1">completed</span><span class="dl">'</span> <span class="o">|</span> <span class="dl">'</span><span class="s1">yielded</span><span class="dl">'</span>
+</code></pre></div></div> <ul> <li>queued：刚加入队列，等待执行；</li> <li>executing：正在执行；</li> <li>completed：执行完成，结果已收集但未产出；</li> <li>yielded：结果已经产出给外层。</li> </ul> <p>并发控制规则（canExecuteTool）：</p> <ul> <li>当前没有工具在执行 → 任何工具可以开始；</li> <li>当前有工具在执行 → 新工具必须自己是并发安全的，且所有正在执行的工具也都是并发安全的。</li> </ul> <p>也就是说：并发安全工具可以组成一组并行执行；但只要有一个非并发工具在执行，所有人都得等它。</p> <p>StreamingToolExecutor 的关键方法：</p> <ul> <li>addTool：接收模型产生的 tool_use 块，加入队列；</li> <li>processQueue：根据并发规则调度执行；</li> <li>executeTool：真正执行单个工具，收集结果和进度；</li> <li>getCompletedResults：非阻塞地产出已完成结果和进度；</li> <li>getRemainingResults：阻塞等待所有工具完成；</li> <li>discard：streaming fallback 时丢弃所有待处理工具。</li> </ul> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * Process the queue, starting tools when concurrency conditions allow
+ */</span>
+<span class="k">private</span> <span class="k">async</span> <span class="nf">processQueue</span><span class="p">():</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="k">void</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="k">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">tool</span> <span class="k">of</span> <span class="k">this</span><span class="p">.</span><span class="nx">tools</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">status</span> <span class="o">!==</span> <span class="dl">'</span><span class="s1">queued</span><span class="dl">'</span><span class="p">)</span> <span class="k">continue</span>
+
+    <span class="k">if </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nf">canExecuteTool</span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">isConcurrencySafe</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">await</span> <span class="k">this</span><span class="p">.</span><span class="nf">executeTool</span><span class="p">(</span><span class="nx">tool</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="c1">// Can't execute this tool yet, and since we need to maintain order for non-concurrent tools, stop here</span>
+      <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">tool</span><span class="p">.</span><span class="nx">isConcurrencySafe</span><span class="p">)</span> <span class="k">break</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>processQueue()的逻辑很简单，是queue的且可以并发的执行 其他的还是按照顺序执行</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+   * Execute a tool and collect its results
+   */</span>
+  <span class="k">private</span> <span class="k">async</span> <span class="nf">executeTool</span><span class="p">(</span><span class="nx">tool</span><span class="p">:</span> <span class="nx">TrackedTool</span><span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="k">void</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="nx">tool</span><span class="p">.</span><span class="nx">status</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">executing</span><span class="dl">'</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">toolUseContext</span><span class="p">.</span><span class="nf">setInProgressToolUseIDs</span><span class="p">(</span><span class="nx">prev</span> <span class="o">=&gt;</span>
+      <span class="k">new</span> <span class="nc">Set</span><span class="p">(</span><span class="nx">prev</span><span class="p">).</span><span class="nf">add</span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">id</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">this</span><span class="p">.</span><span class="nf">updateInterruptibleState</span><span class="p">()</span>
+
+    <span class="kd">const</span> <span class="na">messages</span><span class="p">:</span> <span class="nx">Message</span><span class="p">[]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="kd">const</span> <span class="na">contextModifiers</span><span class="p">:</span> <span class="nb">Array</span><span class="o">&lt;</span><span class="p">(</span><span class="na">context</span><span class="p">:</span> <span class="nx">ToolUseContext</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">ToolUseContext</span><span class="o">&gt;</span> <span class="o">=</span>
+      <span class="p">[]</span>
+
+    <span class="kd">const</span> <span class="nx">collectResults</span> <span class="o">=</span> <span class="k">async </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="c1">// If already aborted (by error or user), generate synthetic error block instead of running the tool</span>
+      <span class="kd">const</span> <span class="nx">initialAbortReason</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nf">getAbortReason</span><span class="p">(</span><span class="nx">tool</span><span class="p">)</span>
+      <span class="k">if </span><span class="p">(</span><span class="nx">initialAbortReason</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">messages</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span>
+          <span class="k">this</span><span class="p">.</span><span class="nf">createSyntheticErrorMessage</span><span class="p">(</span>
+            <span class="nx">tool</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span>
+            <span class="nx">initialAbortReason</span><span class="p">,</span>
+            <span class="nx">tool</span><span class="p">.</span><span class="nx">assistantMessage</span><span class="p">,</span>
+          <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="nx">tool</span><span class="p">.</span><span class="nx">results</span> <span class="o">=</span> <span class="nx">messages</span>
+        <span class="nx">tool</span><span class="p">.</span><span class="nx">contextModifiers</span> <span class="o">=</span> <span class="nx">contextModifiers</span>
+        <span class="nx">tool</span><span class="p">.</span><span class="nx">status</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">completed</span><span class="dl">'</span>
+        <span class="k">this</span><span class="p">.</span><span class="nf">updateInterruptibleState</span><span class="p">()</span>
+        <span class="k">return</span>
+      <span class="p">}</span>
+
+      <span class="c1">// Per-tool child controller. Lets siblingAbortController kill running</span>
+      <span class="c1">// subprocesses (Bash spawns listen to this signal) when a Bash error</span>
+      <span class="c1">// cascades. Permission-dialog rejection also aborts this controller</span>
+      <span class="c1">// (PermissionContext.ts cancelAndAbort) — that abort must bubble up to</span>
+      <span class="c1">// the query controller so the query loop's post-tool abort check ends</span>
+      <span class="c1">// the turn. Without bubble-up, ExitPlanMode "clear context + auto"</span>
+      <span class="c1">// sends REJECT_MESSAGE to the model instead of aborting (#21056 regression).</span>
+      <span class="kd">const</span> <span class="nx">toolAbortController</span> <span class="o">=</span> <span class="nf">createChildAbortController</span><span class="p">(</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">siblingAbortController</span><span class="p">,</span>
+      <span class="p">)</span>
+      <span class="nx">toolAbortController</span><span class="p">.</span><span class="nx">signal</span><span class="p">.</span><span class="nf">addEventListener</span><span class="p">(</span>
+        <span class="dl">'</span><span class="s1">abort</span><span class="dl">'</span><span class="p">,</span>
+        <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+          <span class="k">if </span><span class="p">(</span>
+            <span class="nx">toolAbortController</span><span class="p">.</span><span class="nx">signal</span><span class="p">.</span><span class="nx">reason</span> <span class="o">!==</span> <span class="dl">'</span><span class="s1">sibling_error</span><span class="dl">'</span> <span class="o">&amp;&amp;</span>
+            <span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">toolUseContext</span><span class="p">.</span><span class="nx">abortController</span><span class="p">.</span><span class="nx">signal</span><span class="p">.</span><span class="nx">aborted</span> <span class="o">&amp;&amp;</span>
+            <span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">discarded</span>
+          <span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">toolUseContext</span><span class="p">.</span><span class="nx">abortController</span><span class="p">.</span><span class="nf">abort</span><span class="p">(</span>
+              <span class="nx">toolAbortController</span><span class="p">.</span><span class="nx">signal</span><span class="p">.</span><span class="nx">reason</span><span class="p">,</span>
+            <span class="p">)</span>
+          <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="p">{</span> <span class="na">once</span><span class="p">:</span> <span class="kc">true</span> <span class="p">},</span>
+      <span class="p">)</span>
+
+      <span class="kd">const</span> <span class="nx">generator</span> <span class="o">=</span> <span class="nf">runToolUse</span><span class="p">(</span>
+        <span class="nx">tool</span><span class="p">.</span><span class="nx">block</span><span class="p">,</span>
+        <span class="nx">tool</span><span class="p">.</span><span class="nx">assistantMessage</span><span class="p">,</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">canUseTool</span><span class="p">,</span>
+        <span class="p">{</span> <span class="p">...</span><span class="k">this</span><span class="p">.</span><span class="nx">toolUseContext</span><span class="p">,</span> <span class="na">abortController</span><span class="p">:</span> <span class="nx">toolAbortController</span> <span class="p">},</span>
+      <span class="p">)</span>
+
+      <span class="c1">// Track if this specific tool has produced an error result.</span>
+      <span class="c1">// This prevents the tool from receiving a duplicate "sibling error"</span>
+      <span class="c1">// message when it is the one that caused the error.</span>
+      <span class="kd">let</span> <span class="nx">thisToolErrored</span> <span class="o">=</span> <span class="kc">false</span>
+
+      <span class="k">for</span> <span class="k">await </span><span class="p">(</span><span class="kd">const</span> <span class="nx">update</span> <span class="k">of</span> <span class="nx">generator</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// Check if we were aborted by a sibling tool error or user interruption.</span>
+        <span class="c1">// Only add the synthetic error if THIS tool didn't produce the error.</span>
+        <span class="kd">const</span> <span class="nx">abortReason</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nf">getAbortReason</span><span class="p">(</span><span class="nx">tool</span><span class="p">)</span>
+        <span class="k">if </span><span class="p">(</span><span class="nx">abortReason</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="nx">thisToolErrored</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">messages</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span>
+            <span class="k">this</span><span class="p">.</span><span class="nf">createSyntheticErrorMessage</span><span class="p">(</span>
+              <span class="nx">tool</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span>
+              <span class="nx">abortReason</span><span class="p">,</span>
+              <span class="nx">tool</span><span class="p">.</span><span class="nx">assistantMessage</span><span class="p">,</span>
+            <span class="p">),</span>
+          <span class="p">)</span>
+          <span class="k">break</span>
+        <span class="p">}</span>
+
+        <span class="kd">const</span> <span class="nx">isErrorResult</span> <span class="o">=</span>
+          <span class="nx">update</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">user</span><span class="dl">'</span> <span class="o">&amp;&amp;</span>
+          <span class="nb">Array</span><span class="p">.</span><span class="nf">isArray</span><span class="p">(</span><span class="nx">update</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">content</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+          <span class="nx">update</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">content</span><span class="p">.</span><span class="nf">some</span><span class="p">(</span>
+            <span class="nx">_</span> <span class="o">=&gt;</span> <span class="nx">_</span><span class="p">.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">tool_result</span><span class="dl">'</span> <span class="o">&amp;&amp;</span> <span class="nx">_</span><span class="p">.</span><span class="nx">is_error</span> <span class="o">===</span> <span class="kc">true</span><span class="p">,</span>
+          <span class="p">)</span>
+
+        <span class="k">if </span><span class="p">(</span><span class="nx">isErrorResult</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">thisToolErrored</span> <span class="o">=</span> <span class="kc">true</span>
+          <span class="c1">// Only Bash errors cancel siblings. Bash commands often have implicit</span>
+          <span class="c1">// dependency chains (e.g. mkdir fails → subsequent commands pointless).</span>
+          <span class="c1">// Read/WebFetch/etc are independent — one failure shouldn't nuke the rest.</span>
+          <span class="k">if </span><span class="p">(</span><span class="nx">tool</span><span class="p">.</span><span class="nx">block</span><span class="p">.</span><span class="nx">name</span> <span class="o">===</span> <span class="nx">BASH_TOOL_NAME</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">hasErrored</span> <span class="o">=</span> <span class="kc">true</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">erroredToolDescription</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nf">getToolDescription</span><span class="p">(</span><span class="nx">tool</span><span class="p">)</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">siblingAbortController</span><span class="p">.</span><span class="nf">abort</span><span class="p">(</span><span class="dl">'</span><span class="s1">sibling_error</span><span class="dl">'</span><span class="p">)</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="k">if </span><span class="p">(</span><span class="nx">update</span><span class="p">.</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
+          <span class="c1">// Progress messages go to pendingProgress for immediate yielding</span>
+          <span class="k">if </span><span class="p">(</span><span class="nx">update</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="kd">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">progress</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">tool</span><span class="p">.</span><span class="nx">pendingProgress</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="nx">update</span><span class="p">.</span><span class="nx">message</span><span class="p">)</span>
+            <span class="c1">// Signal that progress is available</span>
+            <span class="k">if </span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">progressAvailableResolve</span><span class="p">)</span> <span class="p">{</span>
+              <span class="k">this</span><span class="p">.</span><span class="nf">progressAvailableResolve</span><span class="p">()</span>
+              <span class="k">this</span><span class="p">.</span><span class="nx">progressAvailableResolve</span> <span class="o">=</span> <span class="kc">undefined</span>
+            <span class="p">}</span>
+          <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">messages</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="nx">update</span><span class="p">.</span><span class="nx">message</span><span class="p">)</span>
+          <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">if </span><span class="p">(</span><span class="nx">update</span><span class="p">.</span><span class="nx">contextModifier</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">contextModifiers</span><span class="p">.</span><span class="nf">push</span><span class="p">(</span><span class="nx">update</span><span class="p">.</span><span class="nx">contextModifier</span><span class="p">.</span><span class="nx">modifyContext</span><span class="p">)</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+      <span class="nx">tool</span><span class="p">.</span><span class="nx">results</span> <span class="o">=</span> <span class="nx">messages</span>
+      <span class="nx">tool</span><span class="p">.</span><span class="nx">contextModifiers</span> <span class="o">=</span> <span class="nx">contextModifiers</span>
+      <span class="nx">tool</span><span class="p">.</span><span class="nx">status</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">completed</span><span class="dl">'</span>
+      <span class="k">this</span><span class="p">.</span><span class="nf">updateInterruptibleState</span><span class="p">()</span>
+
+      <span class="c1">// NOTE: we currently don't support context modifiers for concurrent</span>
+      <span class="c1">//       tools. None are actively being used, but if we want to use</span>
+      <span class="c1">//       them in concurrent tools, we need to support that here.</span>
+      <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">tool</span><span class="p">.</span><span class="nx">isConcurrencySafe</span> <span class="o">&amp;&amp;</span> <span class="nx">contextModifiers</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for </span><span class="p">(</span><span class="kd">const</span> <span class="nx">modifier</span> <span class="k">of</span> <span class="nx">contextModifiers</span><span class="p">)</span> <span class="p">{</span>
+          <span class="k">this</span><span class="p">.</span><span class="nx">toolUseContext</span> <span class="o">=</span> <span class="nf">modifier</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">toolUseContext</span><span class="p">)</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="kd">const</span> <span class="nx">promise</span> <span class="o">=</span> <span class="nf">collectResults</span><span class="p">()</span>
+    <span class="nx">tool</span><span class="p">.</span><span class="nx">promise</span> <span class="o">=</span> <span class="nx">promise</span>
+
+    <span class="c1">// Process more queue when done</span>
+    <span class="k">void</span> <span class="nx">promise</span><span class="p">.</span><span class="k">finally</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="k">void</span> <span class="k">this</span><span class="p">.</span><span class="nf">processQueue</span><span class="p">()</span>
+    <span class="p">})</span>
+  <span class="p">}</span>
+</code></pre></div></div> <p>三层 abort 控制器：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>queryLoop 的 abortController          ← 用户中断整个查询
+    ↓
+siblingAbortController                ← Bash 错误时取消兄弟工具
+    ↓
+toolAbortController                   ← 单个工具的取消/权限拒绝
+</code></pre></div></div> <h3 id="hook">Hook</h3> <p>Hook 是 Claude Code 生命周期中的”外部介入点”。主流程在特定时刻调用用户定义的 shell 命令，让用户在不修改 Claude Code 源码的情况下，实现安全检查、审计、通知、外部集成等自定义行为。</p> <p>src/utils/hooks.ts 定义：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Hooks are user-defined shell commands that can be executed at various points
+in Claude Code's lifecycle.
+</code></pre></div></div> <p>常见 hook 类型：</p> <ul> <li>StopHook：每轮模型响应后，检查并决定是否阻止继续；</li> <li>PreToolUseHook / PostToolUseHook：工具执行前后；</li> <li>PreCompactHook / PostCompactHook：压缩前后；</li> <li>SessionStartHook / SessionEndHook：会话开始/结束；</li> <li>FileChangedHook：文件变更时；</li> <li>TaskCreatedHook / TaskCompletedHook：任务创建/完成。</li> </ul> <p>最典型的 StopHook 返回两种结果：</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">type</span> <span class="nx">StopHookResult</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">blockingErrors</span><span class="p">:</span> <span class="nx">Message</span><span class="p">[]</span>
+  <span class="na">preventContinuation</span><span class="p">:</span> <span class="nx">boolean</span>
+<span class="p">}</span>
+</code></pre></div></div> <ul> <li>preventContinuation: true → 直接结束本轮；</li> <li>blockingErrors → 把 hook 的反馈当作用户消息，让模型在下一轮修正。</li> </ul> <h3 id="reactive_compact_retry">reactive_compact_retry</h3> <p>reactive_compact_retry 是 queryLoop 的被动压缩恢复路径。</p> <p>触发条件：</p> <ul> <li>模型返回 prompt-too-long；</li> <li>且前面更轻的恢复手段（如 collapse_drain_retry）已经失败或不可用；</li> <li>或者返回 media size 错误（图片/PDF 太大）；</li> <li>且系统启用了 reactiveCompact 功能。</li> </ul> <p>与 proactive autocompact 的区别：</p> <ul> <li>proactive：在调用模型之前就判断上下文是否太大，提前压缩；</li> <li>reactive：等错误发生了再压缩。</li> </ul> <p>reactive_compact_retry 的处理：</p> <ol> <li>调用 reactiveCompact.tryReactiveCompact 对上下文做摘要；</li> <li>更新 taskBudgetRemaining；</li> <li>用 buildPostCompactMessages 构建压缩后消息；</li> <li>设置 hasAttemptedReactiveCompact: true 防止无限重试；</li> <li>continue 回到循环顶部重新请求。</li> </ol> <p>为什么需要 hasAttemptedReactiveCompact: true： 没有这个标记，可能陷入”请求 → 413 → reactive compact → 仍然 413 → reactive compact → …“的无限循环。</p> <h3 id="只读不等于并发安全">只读不等于并发安全</h3> <p>只读操作仍然可能并发不安全，原因包括：</p> <ol> <li>共享缓存：并发大量读取不同大文件会互相驱逐缓存页，导致内存抖动；</li> <li>速率限制：外部 API 按请求次数限流，并发只读会共享配额；</li> <li>认证状态：多个并发请求同时发现 token 过期，会同时触发 token 刷新，导致竞态；</li> <li>外部系统副作用：读操作可能触发审计日志、计费、锁、缓存回填等。</li> </ol> <p>因此 isConcurrencySafe 不是问”这个工具写不写文件”，而是问”这个工具在并发执行时，是否不会导致共享资源冲突、配额耗尽或竞态”。</p> <h3 id="显式-planner-vs-极简-loop">显式 Planner vs 极简 Loop</h3> <p>显式 Planner 适合：</p> <ul> <li>任务有明显的前置依赖关系；</li> <li>需要长程规划和 replanning；</li> <li>工具调用有复杂组合逻辑（如 map-reduce）；</li> <li>需要人类预先审批计划。</li> </ul> <p>极简 Loop + 厚边界适合：</p> <ul> <li>交互式对话 / REPL；</li> <li>工具调用相对独立；</li> <li>流式体验要求高；</li> <li>错误恢复路径多且细。</li> </ul> <p>Claude Code 选择极简 Loop + 厚边界，因为核心场景是交互式编程助手：用户每次输入不可预测，响应需要实时流式，工具调用以文件/命令为主。</p> <h3 id="掌握-agent-loop-的层次">掌握 agent loop 的层次</h3> <p>Level 1：能讲清楚控制流； Level 2：能追踪状态跃迁； Level 3：能解释设计决策； Level 4：能修改和扩展； Level 5：能诊断复杂 bug； Level 6：能设计新的 agent loop 架构。</p> <p>最有效的练习：</p> <ol> <li>自己画一张 queryLoop 的完整状态图；</li> <li>追踪 hasAttemptedReactiveCompact 和 maxOutputTokensRecoveryCount 在每个 State 重建点的值；</li> <li>尝试改一个小东西，跑测试看会不会破坏。</li> </ol> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/colpali-multimodal-rag-qa/">掌握 ColPali 多模态 RAG 需要回答的 8 个问题</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/proposition-chunking-summary/">Proposition Chunking 命题化切分总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/query-transformations-summary/">Query Transformations 查询转换技术总结</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "about",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "nav-repositories",
+          title: "repositories",
+          description: "Edit the `_data/repositories.yml` and change the `github_users` and `github_repos` lists to include your own GitHub profile and repositories.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/repositories/";
+          },
+        },{id: "post-二叉树刷题总结",
+        
+          title: "二叉树刷题总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/";
+          
+        },
+      },{id: "post-rag-技术体系化分类-从-pipeline-阶段到失败模式",
+        
+          title: "RAG 技术体系化分类——从 Pipeline 阶段到失败模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/RAG-techniques-pipeline-categorization/";
+          
+        },
+      },{id: "post-memorag-记忆增强型-rag-总结",
+        
+          title: "MemoRAG 记忆增强型 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/memorag-summary/";
+          
+        },
+      },{id: "post-microsoft-graphrag-基于知识图谱的-rag-总结",
+        
+          title: "Microsoft GraphRAG 基于知识图谱的 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/microsoft-graphrag-summary/";
+          
+        },
+      },{id: "post-multimodal-rag-with-captioning-图像描述型多模态-rag-总结",
+        
+          title: "Multimodal RAG with Captioning 图像描述型多模态 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/multimodal-rag-with-captioning-summary/";
+          
+        },
+      },{id: "post-掌握-colpali-多模态-rag-需要回答的-8-个问题",
+        
+          title: "掌握 ColPali 多模态 RAG 需要回答的 8 个问题",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/colpali-multimodal-rag-qa/";
+          
+        },
+      },{id: "post-proposition-chunking-命题化切分总结",
+        
+          title: "Proposition Chunking 命题化切分总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/proposition-chunking-summary/";
+          
+        },
+      },{id: "post-query-transformations-查询转换技术总结",
+        
+          title: "Query Transformations 查询转换技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/query-transformations-summary/";
+          
+        },
+      },{id: "post-raptor-技术总结",
+        
+          title: "RAPTOR 技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/raptor-summary/";
+          
+        },
+      },{id: "post-relevant-segment-extraction-rse-学习笔记-从片段到段落",
+        
+          title: "Relevant Segment Extraction (RSE) 学习笔记 —— 从片段到段落",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/relevant-segment-extraction/";
+          
+        },
+      },{id: "post-reranking-with-llamaindex-学习笔记-llm-与-cross-encoder-重排",
+        
+          title: "Reranking with LlamaIndex 学习笔记 —— LLM 与 Cross-Encoder 重排",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/reranking-with-llamaindex/";
+          
+        },
+      },{id: "post-rag-with-feedback-loop-学习笔记-从机制到隐患",
+        
+          title: "RAG with Feedback Loop 学习笔记 —— 从机制到隐患",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rag-feedback-loop/";
+          
+        },
+      },{id: "post-self-rag-学习笔记-从论文思想到代码实现",
+        
+          title: "Self-RAG 学习笔记 —— 从论文思想到代码实现",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/self-rag/";
+          
+        },
+      },{id: "post-claude-code学习13-memory",
+        
+          title: "Claude code学习13 Memory",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B013/";
+          
+        },
+      },{id: "post-claude-code学习12-fileedittool",
+        
+          title: "Claude code学习12 FileEditTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B012/";
+          
+        },
+      },{id: "post-claude-code学习11-bashtool",
+        
+          title: "Claude code学习11 BashTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B011/";
+          
+        },
+      },{id: "post-claude-code学习10-permission-与-hooks-系统",
+        
+          title: "Claude code学习10 Permission 与 Hooks 系统",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B010/";
+          
+        },
+      },{id: "post-claude-code学习9-agent-loop",
+        
+          title: "Claude code学习9 Agent loop",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B09/";
+          
+        },
+      },{id: "post-claude-code学习8-system-reminder-动态信息是如何入prompt的",
+        
+          title: "Claude code学习8 system-reminder，动态信息是如何入prompt的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B08/";
+          
+        },
+      },{id: "post-claude-code学习7-权限模式",
+        
+          title: "Claude code学习7 权限模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B07/";
+          
+        },
+      },{id: "post-claude-code学习6-动态prompt的组装2",
+        
+          title: "Claude code学习6 动态prompt的组装2",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B06/";
+          
+        },
+      },{id: "post-claude-code学习5-动态prompt的组装1",
+        
+          title: "Claude code学习5 动态prompt的组装1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B05/";
+          
+        },
+      },{id: "post-claude-code学习4-静态prompt里面有什么以及claude-code启动时做了些什么",
+        
+          title: "Claude code学习4 静态prompt里面有什么以及Claude code启动时做了些什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B04/";
+          
+        },
+      },{id: "post-claude-code学习3-为什么claude-code工程化设计是这样的",
+        
+          title: "Claude code学习3 为什么Claude code工程化设计是这样的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/";
+          
+        },
+      },{id: "post-claude-code学习2-claude-code的上下文管理",
+        
+          title: "Claude code学习2 Claude code的上下文管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02/";
+          
+        },
+      },{id: "post-claude-code学习1-我们要从这个项目里学到什么",
+        
+          title: "Claude code学习1 我们要从这个项目里学到什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B01/";
+          
+        },
+      },{id: "post-learn-claude-code项目学习",
+        
+          title: "learn claude code项目学习",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/learn-claude-code%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/";
+          
+        },
+      },{id: "post-如何理解transformer",
+        
+          title: "如何理解transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformer-a/";
+          
+        },
+      },{id: "post-旋转矩阵的理解",
+        
+          title: "旋转矩阵的理解",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformation/";
+          
+        },
+      },{id: "post-cs231a-相机模型笔记",
+        
+          title: "CS231A 相机模型笔记",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cs231a-1/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv2/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv1/";
+          
+        },
+      },{id: "post-linux权限",
+        
+          title: "Linux权限",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP3/";
+          
+        },
+      },{id: "post-linux命令格式",
+        
+          title: "Linux命令格式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP2/";
+          
+        },
+      },{id: "post-excel常用操作",
+        
+          title: "Excel常用操作",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/excel/";
+          
+        },
+      },{id: "post-linux文件路径",
+        
+          title: "Linux文件路径",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP1/";
+          
+        },
+      },{id: "post-常见linux命令和shell脚本",
+        
+          title: "常见Linux命令和shell脚本",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/shellLinux/";
+          
+        },
+      },{id: "post-micropytorch",
+        
+          title: "microPytorch",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/.microPYtorch/";
+          
+        },
+      },{id: "post-c-vector",
+        
+          title: "C++ Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-c-template",
+        
+          title: "C++ Template",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppTemplate/";
+          
+        },
+      },{id: "post-pandas库的基本使用",
+        
+          title: "pandas库的基本使用",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/pandas1/";
+          
+        },
+      },{id: "post-c-中的static和const-1",
+        
+          title: "C++中的static和const 1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppStaticandConst/";
+          
+        },
+      },{id: "post-c-的内外部连接",
+        
+          title: "C++的内外部连接",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppLink/";
+          
+        },
+      },{id: "post-用c-实现内存池1",
+        
+          title: "用C++实现内存池1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo_pool/";
+          
+        },
+      },{id: "post-c-的内存管理",
+        
+          title: "C++的内存管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo/";
+          
+        },
+      },{id: "post-每日一题2296-设计一个文本编辑器",
+        
+          title: "每日一题2296. 设计一个文本编辑器",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LC/";
+          
+        },
+      },{id: "post-c-中的vector",
+        
+          title: "C++中的Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-transformer",
+        
+          title: "Transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transfomer/";
+          
+        },
+      },{id: "post-深度学习和机器学习中的重要概念",
+        
+          title: "深度学习和机器学习中的重要概念",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/MLfun/";
+          
+        },
+      },{id: "post-attention注意力机制-修正补充版",
+        
+          title: "Attention注意力机制（修正补充版）",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention2/";
+          
+        },
+      },{id: "post-attention注意力机制",
+        
+          title: "Attention注意力机制",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention/";
+          
+        },
+      },{id: "post-unet网络",
+        
+          title: "Unet网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Unet/";
+          
+        },
+      },{id: "post-seq2seq的模型-构建以及损失函数",
+        
+          title: "Seq2Seq的模型，构建以及损失函数",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Seq2Seq-1/";
+          
+        },
+      },{id: "post-text-generation",
+        
+          title: "Text Generation",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Text-Generation/";
+          
+        },
+      },{id: "post-rnn的优化",
+        
+          title: "RNN的优化",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/RNN%E7%9A%84%E4%BC%98%E5%8C%96/";
+          
+        },
+      },{id: "post-lstm长短记忆网络",
+        
+          title: "LSTM长短记忆网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LSTM%E9%95%BF%E7%9F%AD%E8%AE%B0%E5%BF%86%E7%BD%91%E7%BB%9C/";
+          
+        },
+      },{id: "post-simple-rnn",
+        
+          title: "Simple RNN",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Simple-RNN/";
+          
+        },
+      },{id: "post-linux内核全注释阅读-linux内核体系结构1",
+        
+          title: "Linux内核全注释阅读 Linux内核体系结构1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Linux%E5%86%85%E6%A0%B8%E5%85%A8%E6%B3%A8%E9%87%8A%E9%98%85%E8%AF%BB-Linux%E5%86%85%E6%A0%B8%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%841/";
+          
+        },
+      },{id: "post-nlp的数据处理-文本处理以及词嵌套",
+        
+          title: "NLP的数据处理 文本处理以及词嵌套",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/NLP%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86-%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%BB%A5%E5%8F%8A%E8%AF%8D%E5%B5%8C%E5%A5%97/";
+          
+        },
+      },{id: "post-deepseek-r1论文解读",
+        
+          title: "DeepSeek R1论文解读",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/DeepSeek-R1%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/";
+          
+        },
+      },{id: "post-deepseek蒸馏模型的本地部署",
+        
+          title: "Deepseek蒸馏模型的本地部署",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Deepseek%E8%92%B8%E9%A6%8F%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/";
+          
+        },
+      },{id: "post-测试博客",
+        
+          title: "测试博客",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Test/";
+          
+        },
+      },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
+        
+          title: 'Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "We’re sharing updates across our Gemini family of models and a glimpse of Project Astra, our vision for the future of AI assistants.",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/", "_blank");
+          
+        },
+      },{id: "post-displaying-external-posts-on-your-al-folio-blog",
+        
+          title: 'Displaying External Posts on Your al-folio Blog <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2", "_blank");
+          
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/Mr-coldskin7", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/feed.xml", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>

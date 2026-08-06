@@ -1,0 +1,956 @@
+<!DOCTYPE html> <html lang="zh"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> microPytorch | leesanyee </title> <meta name="author" content="Lee SanYee"> <meta name="description" content="LeeSanYee 的技术博客，记录 ML/NLP、C++、Linux 等方向的学习笔记与思考。 "> <meta name="keywords" content="blog, ml, nlp, cpp, linux"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://mr-coldskin7.github.io/blog/2025/.microPYtorch/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">microPytorch</h1> <p class="post-meta"> Created on May 09, 2025 </p> <p class="post-tags"> <a href="/blog/2025"> <i class="fa-solid fa-calendar fa-sm"></i> 2025 </a>   ·   <a href="/blog/tag/deep-learning"> <i class="fa-solid fa-hashtag fa-sm"></i> deep-learning</a>   <a href="/blog/tag/pytorch"> <i class="fa-solid fa-hashtag fa-sm"></i> pytorch</a>   <a href="/blog/tag/python"> <i class="fa-solid fa-hashtag fa-sm"></i> python</a>   <a href="/blog/tag/autograd"> <i class="fa-solid fa-hashtag fa-sm"></i> autograd</a>   ·   <a href="/blog/category/python"> <i class="fa-solid fa-tag fa-sm"></i> Python</a>   <a href="/blog/category/dl"> <i class="fa-solid fa-tag fa-sm"></i> DL</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h1 id="实现迷你pytorch">实现迷你Pytorch</h1> <p>这是教学视频：</p> <iframe src="https://player.bilibili.com/player.html?bvid=BV1De4y1p7Z8&amp;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" width="100%" height="500"></iframe> <p>这里面主要讲解他自己写的库Micrograd,基本上是一个_autograd_(自动梯度)引擎，它的真正作用是<strong>实现反向传播</strong>。 反向传播是一种算法，可以有效地<strong>计算<a href="https://zh.wikipedia.org/wiki/%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C" rel="external nofollow noopener" target="_blank">神经网络</a>中某种损失函数相对于权重的梯度</strong>。这让我们能够迭代地调整神经网络的权重，以最小化损失函数，从而提高网络的准确性。因此，反向传播将成为任何现代深度神经网络库(如PyTorch、JAX)的数学核心。 如果详细来讲，神经网络是一个计算的式子（更加类似与公式？）不过它可以自动迭代并且更新，了解导数可以更加方便了解神经网络（维度的多少跟核心的数学思想并无关联）。</p> <p>导数，就跟我们之前在中学里面学习的一样 \(f'(x_0) = \lim_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}\) 神经元就像作一个个小单元小积木一样，我们像搭乐高一样搭建，但我们需要清楚其中的运算，至少得追根溯源吧</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Value</span><span class="p">:</span>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">_children</span><span class="o">=</span><span class="p">(),</span> <span class="n">_op</span><span class="o">=</span><span class="sh">''</span><span class="p">):</span>
+	        <span class="n">self</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+	        <span class="n">self</span><span class="p">.</span><span class="n">_prev</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">_children</span><span class="p">)</span>
+	        <span class="n">self</span><span class="p">.</span><span class="n">_op</span> <span class="o">=</span> <span class="n">_op</span>
+			<span class="n">self</span><span class="p">.</span><span class="n">grad</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Value(</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="si">}</span><span class="s">)</span><span class="sh">"</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nc">Value</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span> <span class="o">+</span> <span class="n">other</span><span class="p">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">other</span><span class="p">),</span> <span class="sh">'</span><span class="s">+</span><span class="sh">'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+    
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nc">Value</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">other</span><span class="p">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">other</span><span class="p">),</span> <span class="sh">'</span><span class="s">*</span><span class="sh">'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+</code></pre></div></div> <p>作者通过维护这么一个类，记录下一个对象所作的操作<code class="language-plaintext highlighter-rouge">_op</code>，从而做到追根溯源 作者同时也做了个可视化的界面</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">graphviz</span> <span class="kn">import</span> <span class="n">Digraph</span>
+
+<span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="c1"># builds a set of all node and edges in the graph
+</span>    <span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(),</span> <span class="nf">set</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">nodes</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">v</span><span class="p">.</span><span class="n">_prev</span><span class="p">:</span>
+                <span class="n">edges</span><span class="p">.</span><span class="nf">add</span><span class="p">((</span><span class="n">child</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+                <span class="nf">build</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>    
+    <span class="nf">build</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span>
+
+<span class="k">def</span> <span class="nf">draw_dot</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="n">dot</span> <span class="o">=</span> <span class="nc">Digraph</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="sh">'</span><span class="s">svg</span><span class="sh">'</span><span class="p">,</span> <span class="n">graph_attr</span><span class="o">=</span><span class="p">{</span><span class="sh">'</span><span class="s">rankdir</span><span class="sh">'</span><span class="p">:</span> <span class="sh">'</span><span class="s">LR</span><span class="sh">'</span><span class="p">})</span> <span class="c1"># LR = left to right
+</span>
+    <span class="n">nodes</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="nf">trace</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+        <span class="n">uid</span> <span class="o">=</span> <span class="nf">str</span><span class="p">(</span><span class="nf">id</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+        <span class="c1"># for many value in graph, create a rectangular ('record') node for it 
+</span>        <span class="n">dot</span><span class="p">.</span><span class="nf">node</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="n">uid</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="sh">"</span><span class="s">{ %s | data %.4f}</span><span class="sh">"</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">.</span><span class="n">label</span><span class="p">,</span> <span class="n">n</span><span class="p">.</span><span class="n">data</span><span class="p">),</span> <span class="n">shape</span> <span class="o">=</span> <span class="sh">'</span><span class="s">record</span><span class="sh">'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n</span><span class="p">.</span><span class="n">_op</span><span class="p">:</span>
+            <span class="c1"># if this value is a result of some operation, create an op node for it 
+</span>            <span class="n">dot</span><span class="p">.</span><span class="nf">node</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="n">uid</span> <span class="o">+</span> <span class="n">n</span><span class="p">.</span><span class="n">_op</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">n</span><span class="p">.</span><span class="n">_op</span><span class="p">)</span>
+            <span class="c1"># and connect this node for it 
+</span>            <span class="n">dot</span><span class="p">.</span><span class="nf">edge</span><span class="p">(</span><span class="n">uid</span> <span class="o">+</span> <span class="n">n</span><span class="p">.</span><span class="n">_op</span><span class="p">,</span> <span class="n">uid</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+        <span class="c1"># connect n1 to the op node of n2 
+</span>        <span class="n">dot</span><span class="p">.</span><span class="nf">edge</span><span class="p">(</span><span class="nf">str</span><span class="p">(</span><span class="nf">id</span><span class="p">(</span><span class="n">n1</span><span class="p">)),</span> <span class="nf">str</span><span class="p">(</span><span class="nf">id</span><span class="p">(</span><span class="n">n2</span><span class="p">))</span> <span class="o">+</span> <span class="n">n2</span><span class="p">.</span><span class="n">_op</span><span class="p">)</span>   
+
+    <span class="k">return</span> <span class="n">dot</span>
+
+<span class="nf">draw_dot</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+</code></pre></div></div> <h2 id="反向传播">反向传播</h2> <p>在导数方面中链式法则可以帮助我们更好的理解反向传播 链式法则更像是找到一个中间量，从而帮助我们去测量，度量另外两个变量之间的斜率 \(\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx} \quad \text{或} \quad (f \circ g)'(x) = f'(g(x)) \cdot g'(x)\) 在神经网络中，每个节点的操作都会对梯度的传播方式产生影响。对于加法节点，假设有两个输入 a 和 b，它们相加得到 c = a + b 。在反向传播过程中，c 相对于 a 和 b 的梯度都分别是 1。</p> <p>在加法节点中，梯度会被“原样”传递给所有输入节点。这意味着<strong>加法节点不会改变梯度的大小</strong>，而是将梯度<strong>均匀分配给所有输入</strong>。这是因为加法操作对于每个输入来说是线性的，并且每个输入对输出的贡献是独立的。 乘法也是一样的，也是取导数，然后进行计算，就类似于代值进去运算。 通过反向传播，可以知道变量的梯度，在优化问题中可以通过梯度来改进模型</p> <h2 id="神经网络">神经网络</h2> <p>就像我们学习的一样 输入，求和，激活函数 在视频中</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x1</span> <span class="o">=</span> <span class="nc">Value</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">x1</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">x2</span> <span class="o">=</span> <span class="nc">Value</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">x2</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># weights w1,w2, 每个输入的突触强度
+</span><span class="n">w1</span> <span class="o">=</span> <span class="nc">Value</span><span class="p">(</span><span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">w1</span><span class="sh">'</span><span class="p">)</span>
+<span class="n">w2</span> <span class="o">=</span> <span class="nc">Value</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">w2</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># bias b 偏置
+</span><span class="n">b</span> <span class="o">=</span> <span class="nc">Value</span><span class="p">(</span><span class="mf">6.8813735870195432</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sh">'</span><span class="s">b</span><span class="sh">'</span><span class="p">)</span>
+
+<span class="c1"># x1*w1 + x2*w2 + b
+</span><span class="n">x1w1</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">w1</span><span class="p">;</span> <span class="n">x1w1</span><span class="p">.</span><span class="n">label</span> <span class="o">=</span> <span class="sh">'</span><span class="s">x1w1</span><span class="sh">'</span>
+<span class="n">x2w2</span> <span class="o">=</span> <span class="n">x2</span> <span class="o">*</span> <span class="n">w2</span><span class="p">;</span> <span class="n">x2w2</span><span class="p">.</span><span class="n">label</span> <span class="o">=</span> <span class="sh">'</span><span class="s">x2w2</span><span class="sh">'</span>
+<span class="n">x1w1x2w2</span> <span class="o">=</span> <span class="n">x1w1</span> <span class="o">+</span> <span class="n">x2w2</span><span class="p">;</span> <span class="n">x1w1x2w2</span><span class="p">.</span><span class="n">label</span> <span class="o">=</span> <span class="sh">'</span><span class="s">x1w1x2w2</span><span class="sh">'</span> 
+<span class="n">n</span> <span class="o">=</span> <span class="n">x1w1x2w2</span> <span class="o">+</span> <span class="n">b</span><span class="p">;</span> <span class="n">n</span><span class="p">.</span><span class="n">label</span> <span class="o">=</span> <span class="sh">'</span><span class="s">n</span><span class="sh">'</span> <span class="c1"># 细胞体的原始激活值
+</span></code></pre></div></div> <p>激活函数使用的是tanh</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># 现在用一个激活函数来处理，这里使用tanh，在先前的类中实现。
+</span><span class="k">def</span> <span class="nf">tanh</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">data</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nc">Value</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="p">(</span><span class="n">self</span><span class="p">,),</span> <span class="sh">'</span><span class="s">tanh</span><span class="sh">'</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+</code></pre></div></div> <p>后面再通过导数计算求出各个神经元的导数值 例如视频中的n节点是求和以后的点，而o节点是经过激活函数tanh的节点 那么求出n节点的导数就是 \(\begin{aligned} o &amp;= \tanh(n), \\ \frac{do}{dn} &amp;= 1 - \tanh(n)^2 \\ &amp;= 1 - o^2 \\ &amp;= 0.5 \end{aligned}\)</p> <h2 id="自动化">自动化</h2> <p>现实里不可能让你手动更新这些梯度的，所以需要编写让其自动更新 根据上文的导数的相关概念，可以清楚的明白 对于加法来说，导数是1 对于乘法来说，可以看作 \(\frac{dL}{da} = \frac{dL}{dc} \cdot \frac{dc}{da} \quad\) 其中\(\frac{dL}{dc}\)可以看作是是out的梯度 \(\frac{dc}{da}\) 可以看作ab=c中a的导数b 类中定义一个</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Value</span><span class="p">:</span>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">_children</span><span class="o">=</span><span class="p">(),</span> <span class="n">_op</span><span class="o">=</span><span class="sh">''</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span><span class="sh">''</span><span class="p">):</span>
+	        <span class="n">self</span><span class="p">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+	        <span class="n">self</span><span class="p">.</span><span class="n">_prev</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">_children</span><span class="p">)</span>
+	        <span class="n">self</span><span class="p">.</span><span class="n">_op</span> <span class="o">=</span> <span class="n">_op</span>
+			<span class="n">self</span><span class="p">.</span><span class="n">grad</span> <span class="o">=</span> <span class="mi">0</span>
+			<span class="n">self</span><span class="p">.</span><span class="n">_backward</span> <span class="o">=</span> <span class="n">lamada</span><span class="p">:</span> <span class="bp">None</span>
+			<span class="n">self</span><span class="p">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Value(</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="si">}</span><span class="s">)</span><span class="sh">"</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+		<span class="n">other</span> <span class="o">=</span> <span class="n">other</span> <span class="k">if</span> <span class="nf">isInstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="n">Value</span><span class="p">)</span> <span class="k">else</span> <span class="nc">Value</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nc">Value</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span> <span class="o">+</span> <span class="n">other</span><span class="p">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">other</span><span class="p">),</span> <span class="sh">'</span><span class="s">+</span><span class="sh">'</span><span class="p">)</span>
+		    <span class="k">def</span> <span class="nf">backward</span><span class="p">():</span>
+			    <span class="n">self</span><span class="p">.</span><span class="n">grad</span> <span class="o">+=</span> <span class="mi">1</span>
+			    <span class="n">other</span><span class="p">.</span><span class="n">grad</span> <span class="o">+=</span> <span class="mi">1</span>
+		<span class="n">self</span><span class="p">.</span><span class="n">_backward</span><span class="o">=</span><span class="n">backward</span>
+        <span class="k">return</span> <span class="n">out</span>
+		
+    <span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">self</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">other</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+		<span class="n">other</span> <span class="o">=</span> <span class="n">other</span> <span class="k">if</span> <span class="nf">isInstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="n">Value</span><span class="p">)</span> <span class="k">else</span> <span class="nc">Value</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nc">Value</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">other</span><span class="p">.</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">other</span><span class="p">),</span> <span class="sh">'</span><span class="s">*</span><span class="sh">'</span><span class="p">)</span>
+		    <span class="k">def</span> <span class="nf">backward</span><span class="p">():</span>
+			    <span class="n">self</span><span class="p">.</span><span class="n">grad</span> <span class="o">+=</span> <span class="n">other</span><span class="p">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">out</span><span class="p">.</span><span class="n">grad</span>
+			    <span class="n">other</span><span class="p">.</span><span class="n">grad</span> <span class="o">+=</span> <span class="n">self</span><span class="p">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">out</span><span class="p">.</span><span class="n">grad</span>
+		<span class="n">self</span><span class="p">.</span><span class="n">_backward</span><span class="o">=</span><span class="n">backward</span>
+		<span class="k">return</span> <span class="n">out</span>
+
+	<span class="k">def</span> <span class="nf">__truediv__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">self</span> <span class="o">*</span> <span class="n">other</span><span class="o">**-</span><span class="mi">1</span>
+
+	<span class="k">def</span> <span class="nf">__pow__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+	        <span class="k">assert</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+	        <span class="n">out</span> <span class="o">=</span> <span class="nc">Value</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">data</span><span class="o">**</span><span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">self</span><span class="p">,),</span> <span class="sa">f</span><span class="sh">'</span><span class="s">**</span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">Backward</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+		<span class="n">out</span><span class="p">.</span><span class="n">grad</span> <span class="o">=</span> <span class="mi">1</span>
+		<span class="n">topo</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="n">visited</span> <span class="o">=</span> <span class="nf">set</span><span class="p">()</span>
+		<span class="k">def</span> <span class="nf">build_topo</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+			<span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">visited</span><span class="p">:</span>
+				<span class="n">visited</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+				<span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">v</span><span class="p">.</span><span class="n">_prev</span><span class="p">:</span>
+					<span class="nf">build_topo</span><span class="p">(</span><span class="n">child</span><span class="p">)</span> <span class="c1">#DFS search
+</span>				<span class="n">topo</span><span class="p">.</span><span class="nf">append</span><span class="p">()</span>
+		<span class="nf">build_topo</span><span class="p">(</span><span class="n">self</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nf">reversed</span><span class="p">(</span><span class="n">topo</span><span class="p">):</span>
+			<span class="n">node</span><span class="p">.</span><span class="nf">_backward</span><span class="p">()</span>
+		
+    <span class="k">def</span> <span class="nf">__rmul__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">__mul__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">exp</span><span class="p">(</span><span class="n">self</span><span class="p">):</span>
+		<span class="n">out</span> <span class="o">=</span> <span class="nc">Value</span><span class="p">(</span><span class="n">math</span><span class="p">.</span><span class="nf">exp</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="nf">data</span><span class="p">(),(</span><span class="n">self</span><span class="p">,),</span><span class="sh">'</span><span class="s">exp</span><span class="sh">'</span><span class="p">)</span>
+		<span class="k">def</span> <span class="nf">backward</span><span class="p">():</span>
+			    <span class="n">self</span><span class="p">.</span><span class="n">grad</span> <span class="o">=</span> <span class="n">out</span><span class="p">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">out</span><span class="p">.</span><span class="n">grad</span>
+		<span class="n">out</span><span class="p">.</span><span class="n">_backward</span><span class="o">=</span><span class="n">backward</span>
+		<span class="k">return</span> <span class="n">out</span>
+	
+    <span class="k">def</span> <span class="nf">__rmul__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">__mul__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+    
+</code></pre></div></div> <p>可以观察到代码里面</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">visited</span><span class="p">:</span>
+    <span class="n">visited</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">v</span><span class="p">.</span><span class="n">_prev</span><span class="p">:</span>  <span class="c1"># 遍历所有前驱节点（输入节点）
+</span>        <span class="nf">build_topo</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>  <span class="c1"># 递归搜索枝叶
+</span>    <span class="n">topo</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>        <span class="c1"># 后序加入拓扑列表
+</span></code></pre></div></div> <p>是一种常见的拓扑排序的实现：DFS+后序遍历，让根节点（最后的输出）在集合的最后 确保反向传播时按 ​<strong>​计算图的依赖逆序​</strong>​（从输出到输入）处理节点，避免梯度计算顺序错误</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">backward</span><span class="p">():</span>
+	<span class="n">self</span><span class="p">.</span><span class="n">grad</span> <span class="o">+=</span> <span class="n">other</span><span class="p">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">out</span><span class="p">.</span><span class="n">grad</span>
+	<span class="n">other</span><span class="p">.</span><span class="n">grad</span> <span class="o">+=</span> <span class="n">self</span><span class="p">.</span><span class="n">data</span> <span class="o">*</span> <span class="n">out</span><span class="p">.</span><span class="n">grad</span>
+</code></pre></div></div> <p>同时可以观察到这里梯度使用了累加，这是因为​<strong>​变量在计算图中存在多个影响路径​</strong>​，如果某个变量在计算图中通过多个路径影响输出，其梯度是各路径贡献的累加，因此需要使用 <code class="language-plaintext highlighter-rouge">+=</code> 而非 <code class="language-plaintext highlighter-rouge">=</code> \(\frac{\partial L}{\partial \text{self}} = \sum_{\text{path}} \frac{\partial L}{\partial \text{out}} \cdot \frac{\partial \text{out}}{\partial \text{self}}\)</p> <h2 id="pytorch中对应的操作">Pytorch中对应的操作</h2> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">torch</span>
+
+<span class="c1"># 初始化张量并设置requires_grad=True用于自动求导
+</span><span class="n">x1</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">([</span><span class="mf">2.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="n">double</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">x2</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">([</span><span class="mf">0.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="n">double</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">w1</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">([</span><span class="o">-</span><span class="mf">3.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="n">double</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">w2</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="n">double</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tensor</span><span class="p">([</span><span class="mf">6.8813735870195432</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="p">.</span><span class="n">double</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># 前向传播计算
+</span><span class="n">n</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">*</span> <span class="n">w1</span> <span class="o">+</span> <span class="n">x2</span> <span class="o">*</span> <span class="n">w2</span> <span class="o">+</span> <span class="n">b</span>
+<span class="n">o</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">tanh</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+<span class="c1"># 打印输出值
+</span><span class="nf">print</span><span class="p">(</span><span class="n">o</span><span class="p">.</span><span class="nf">item</span><span class="p">())</span>
+
+<span class="c1"># 反向传播计算梯度
+</span><span class="n">o</span><span class="p">.</span><span class="nf">backward</span><span class="p">()</span>
+
+<span class="c1"># 打印各变量的梯度值
+</span><span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="s">x2</span><span class="sh">'</span><span class="p">,</span> <span class="n">x2</span><span class="p">.</span><span class="n">grad</span><span class="p">.</span><span class="nf">item</span><span class="p">())</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="s">w2</span><span class="sh">'</span><span class="p">,</span> <span class="n">w2</span><span class="p">.</span><span class="n">grad</span><span class="p">.</span><span class="nf">item</span><span class="p">())</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="s">x1</span><span class="sh">'</span><span class="p">,</span> <span class="n">x1</span><span class="p">.</span><span class="n">grad</span><span class="p">.</span><span class="nf">item</span><span class="p">())</span>
+<span class="nf">print</span><span class="p">(</span><span class="sh">'</span><span class="s">w1</span><span class="sh">'</span><span class="p">,</span> <span class="n">w1</span><span class="p">.</span><span class="n">grad</span><span class="p">.</span><span class="nf">item</span><span class="p">())</span>
+</code></pre></div></div> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/colpali-multimodal-rag-qa/">掌握 ColPali 多模态 RAG 需要回答的 8 个问题</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/proposition-chunking-summary/">Proposition Chunking 命题化切分总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/query-transformations-summary/">Query Transformations 查询转换技术总结</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "about",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "nav-repositories",
+          title: "repositories",
+          description: "Edit the `_data/repositories.yml` and change the `github_users` and `github_repos` lists to include your own GitHub profile and repositories.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/repositories/";
+          },
+        },{id: "post-二叉树刷题总结",
+        
+          title: "二叉树刷题总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/";
+          
+        },
+      },{id: "post-rag-技术体系化分类-从-pipeline-阶段到失败模式",
+        
+          title: "RAG 技术体系化分类——从 Pipeline 阶段到失败模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/RAG-techniques-pipeline-categorization/";
+          
+        },
+      },{id: "post-memorag-记忆增强型-rag-总结",
+        
+          title: "MemoRAG 记忆增强型 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/memorag-summary/";
+          
+        },
+      },{id: "post-microsoft-graphrag-基于知识图谱的-rag-总结",
+        
+          title: "Microsoft GraphRAG 基于知识图谱的 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/microsoft-graphrag-summary/";
+          
+        },
+      },{id: "post-multimodal-rag-with-captioning-图像描述型多模态-rag-总结",
+        
+          title: "Multimodal RAG with Captioning 图像描述型多模态 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/multimodal-rag-with-captioning-summary/";
+          
+        },
+      },{id: "post-掌握-colpali-多模态-rag-需要回答的-8-个问题",
+        
+          title: "掌握 ColPali 多模态 RAG 需要回答的 8 个问题",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/colpali-multimodal-rag-qa/";
+          
+        },
+      },{id: "post-proposition-chunking-命题化切分总结",
+        
+          title: "Proposition Chunking 命题化切分总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/proposition-chunking-summary/";
+          
+        },
+      },{id: "post-query-transformations-查询转换技术总结",
+        
+          title: "Query Transformations 查询转换技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/query-transformations-summary/";
+          
+        },
+      },{id: "post-raptor-技术总结",
+        
+          title: "RAPTOR 技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/raptor-summary/";
+          
+        },
+      },{id: "post-relevant-segment-extraction-rse-学习笔记-从片段到段落",
+        
+          title: "Relevant Segment Extraction (RSE) 学习笔记 —— 从片段到段落",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/relevant-segment-extraction/";
+          
+        },
+      },{id: "post-reranking-with-llamaindex-学习笔记-llm-与-cross-encoder-重排",
+        
+          title: "Reranking with LlamaIndex 学习笔记 —— LLM 与 Cross-Encoder 重排",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/reranking-with-llamaindex/";
+          
+        },
+      },{id: "post-rag-with-feedback-loop-学习笔记-从机制到隐患",
+        
+          title: "RAG with Feedback Loop 学习笔记 —— 从机制到隐患",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rag-feedback-loop/";
+          
+        },
+      },{id: "post-self-rag-学习笔记-从论文思想到代码实现",
+        
+          title: "Self-RAG 学习笔记 —— 从论文思想到代码实现",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/self-rag/";
+          
+        },
+      },{id: "post-claude-code学习13-memory",
+        
+          title: "Claude code学习13 Memory",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B013/";
+          
+        },
+      },{id: "post-claude-code学习12-fileedittool",
+        
+          title: "Claude code学习12 FileEditTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B012/";
+          
+        },
+      },{id: "post-claude-code学习11-bashtool",
+        
+          title: "Claude code学习11 BashTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B011/";
+          
+        },
+      },{id: "post-claude-code学习10-permission-与-hooks-系统",
+        
+          title: "Claude code学习10 Permission 与 Hooks 系统",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B010/";
+          
+        },
+      },{id: "post-claude-code学习9-agent-loop",
+        
+          title: "Claude code学习9 Agent loop",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B09/";
+          
+        },
+      },{id: "post-claude-code学习8-system-reminder-动态信息是如何入prompt的",
+        
+          title: "Claude code学习8 system-reminder，动态信息是如何入prompt的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B08/";
+          
+        },
+      },{id: "post-claude-code学习7-权限模式",
+        
+          title: "Claude code学习7 权限模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B07/";
+          
+        },
+      },{id: "post-claude-code学习6-动态prompt的组装2",
+        
+          title: "Claude code学习6 动态prompt的组装2",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B06/";
+          
+        },
+      },{id: "post-claude-code学习5-动态prompt的组装1",
+        
+          title: "Claude code学习5 动态prompt的组装1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B05/";
+          
+        },
+      },{id: "post-claude-code学习4-静态prompt里面有什么以及claude-code启动时做了些什么",
+        
+          title: "Claude code学习4 静态prompt里面有什么以及Claude code启动时做了些什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B04/";
+          
+        },
+      },{id: "post-claude-code学习3-为什么claude-code工程化设计是这样的",
+        
+          title: "Claude code学习3 为什么Claude code工程化设计是这样的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/";
+          
+        },
+      },{id: "post-claude-code学习2-claude-code的上下文管理",
+        
+          title: "Claude code学习2 Claude code的上下文管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02/";
+          
+        },
+      },{id: "post-claude-code学习1-我们要从这个项目里学到什么",
+        
+          title: "Claude code学习1 我们要从这个项目里学到什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B01/";
+          
+        },
+      },{id: "post-learn-claude-code项目学习",
+        
+          title: "learn claude code项目学习",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/learn-claude-code%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/";
+          
+        },
+      },{id: "post-如何理解transformer",
+        
+          title: "如何理解transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformer-a/";
+          
+        },
+      },{id: "post-旋转矩阵的理解",
+        
+          title: "旋转矩阵的理解",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformation/";
+          
+        },
+      },{id: "post-cs231a-相机模型笔记",
+        
+          title: "CS231A 相机模型笔记",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cs231a-1/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv2/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv1/";
+          
+        },
+      },{id: "post-linux权限",
+        
+          title: "Linux权限",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP3/";
+          
+        },
+      },{id: "post-linux命令格式",
+        
+          title: "Linux命令格式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP2/";
+          
+        },
+      },{id: "post-excel常用操作",
+        
+          title: "Excel常用操作",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/excel/";
+          
+        },
+      },{id: "post-linux文件路径",
+        
+          title: "Linux文件路径",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP1/";
+          
+        },
+      },{id: "post-常见linux命令和shell脚本",
+        
+          title: "常见Linux命令和shell脚本",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/shellLinux/";
+          
+        },
+      },{id: "post-micropytorch",
+        
+          title: "microPytorch",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/.microPYtorch/";
+          
+        },
+      },{id: "post-c-vector",
+        
+          title: "C++ Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-c-template",
+        
+          title: "C++ Template",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppTemplate/";
+          
+        },
+      },{id: "post-pandas库的基本使用",
+        
+          title: "pandas库的基本使用",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/pandas1/";
+          
+        },
+      },{id: "post-c-中的static和const-1",
+        
+          title: "C++中的static和const 1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppStaticandConst/";
+          
+        },
+      },{id: "post-c-的内外部连接",
+        
+          title: "C++的内外部连接",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppLink/";
+          
+        },
+      },{id: "post-用c-实现内存池1",
+        
+          title: "用C++实现内存池1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo_pool/";
+          
+        },
+      },{id: "post-c-的内存管理",
+        
+          title: "C++的内存管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo/";
+          
+        },
+      },{id: "post-每日一题2296-设计一个文本编辑器",
+        
+          title: "每日一题2296. 设计一个文本编辑器",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LC/";
+          
+        },
+      },{id: "post-c-中的vector",
+        
+          title: "C++中的Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-transformer",
+        
+          title: "Transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transfomer/";
+          
+        },
+      },{id: "post-深度学习和机器学习中的重要概念",
+        
+          title: "深度学习和机器学习中的重要概念",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/MLfun/";
+          
+        },
+      },{id: "post-attention注意力机制-修正补充版",
+        
+          title: "Attention注意力机制（修正补充版）",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention2/";
+          
+        },
+      },{id: "post-attention注意力机制",
+        
+          title: "Attention注意力机制",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention/";
+          
+        },
+      },{id: "post-unet网络",
+        
+          title: "Unet网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Unet/";
+          
+        },
+      },{id: "post-seq2seq的模型-构建以及损失函数",
+        
+          title: "Seq2Seq的模型，构建以及损失函数",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Seq2Seq-1/";
+          
+        },
+      },{id: "post-text-generation",
+        
+          title: "Text Generation",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Text-Generation/";
+          
+        },
+      },{id: "post-rnn的优化",
+        
+          title: "RNN的优化",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/RNN%E7%9A%84%E4%BC%98%E5%8C%96/";
+          
+        },
+      },{id: "post-lstm长短记忆网络",
+        
+          title: "LSTM长短记忆网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LSTM%E9%95%BF%E7%9F%AD%E8%AE%B0%E5%BF%86%E7%BD%91%E7%BB%9C/";
+          
+        },
+      },{id: "post-simple-rnn",
+        
+          title: "Simple RNN",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Simple-RNN/";
+          
+        },
+      },{id: "post-linux内核全注释阅读-linux内核体系结构1",
+        
+          title: "Linux内核全注释阅读 Linux内核体系结构1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Linux%E5%86%85%E6%A0%B8%E5%85%A8%E6%B3%A8%E9%87%8A%E9%98%85%E8%AF%BB-Linux%E5%86%85%E6%A0%B8%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%841/";
+          
+        },
+      },{id: "post-nlp的数据处理-文本处理以及词嵌套",
+        
+          title: "NLP的数据处理 文本处理以及词嵌套",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/NLP%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86-%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%BB%A5%E5%8F%8A%E8%AF%8D%E5%B5%8C%E5%A5%97/";
+          
+        },
+      },{id: "post-deepseek-r1论文解读",
+        
+          title: "DeepSeek R1论文解读",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/DeepSeek-R1%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/";
+          
+        },
+      },{id: "post-deepseek蒸馏模型的本地部署",
+        
+          title: "Deepseek蒸馏模型的本地部署",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Deepseek%E8%92%B8%E9%A6%8F%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/";
+          
+        },
+      },{id: "post-测试博客",
+        
+          title: "测试博客",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Test/";
+          
+        },
+      },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
+        
+          title: 'Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "We’re sharing updates across our Gemini family of models and a glimpse of Project Astra, our vision for the future of AI assistants.",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/", "_blank");
+          
+        },
+      },{id: "post-displaying-external-posts-on-your-al-folio-blog",
+        
+          title: 'Displaying External Posts on Your al-folio Blog <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2", "_blank");
+          
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/Mr-coldskin7", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/feed.xml", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>

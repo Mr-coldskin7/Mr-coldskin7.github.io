@@ -1,0 +1,1039 @@
+<!DOCTYPE html> <html lang="zh"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Claude code学习6 动态prompt的组装2 | leesanyee </title> <meta name="author" content="Lee SanYee"> <meta name="description" content="LeeSanYee 的技术博客，记录 ML/NLP、C++、Linux 等方向的学习笔记与思考。 "> <meta name="keywords" content="blog, ml, nlp, cpp, linux"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://mr-coldskin7.github.io/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B06/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Claude code学习6 动态prompt的组装2</h1> <p class="post-meta"> Created on June 17, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/agent"> <i class="fa-solid fa-hashtag fa-sm"></i> agent</a>   <a href="/blog/tag/claude-code"> <i class="fa-solid fa-hashtag fa-sm"></i> claude-code</a>   <a href="/blog/tag/prompt-engineering"> <i class="fa-solid fa-hashtag fa-sm"></i> prompt-engineering</a>   ·   <a href="/blog/category/agent"> <i class="fa-solid fa-tag fa-sm"></i> agent</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h2 id="动态prompt的组装">动态prompt的组装</h2> <p>前面的静态prompt，由于KV cache的最大利用化，把动态变化的prompt放在了最后面</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">ant_model_override</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
+      <span class="nf">getAntModelOverrideSection</span><span class="p">(),</span>
+    <span class="p">),</span>
+    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">env_info_simple</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
+      <span class="nf">computeSimpleEnvInfo</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">additionalWorkingDirectories</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">language</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
+      <span class="nf">getLanguageSection</span><span class="p">(</span><span class="nx">settings</span><span class="p">.</span><span class="nx">language</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">output_style</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
+      <span class="nf">getOutputStyleSection</span><span class="p">(</span><span class="nx">outputStyleConfig</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1">// When delta enabled, instructions are announced via persisted</span>
+    <span class="c1">// mcp_instructions_delta attachments (attachments.ts) instead of this</span>
+    <span class="c1">// per-turn recompute, which busts the prompt cache on late MCP connect.</span>
+    <span class="c1">// Gate check inside compute (not selecting between section variants)</span>
+    <span class="c1">// so a mid-session gate flip doesn't read a stale cached value.</span>
+    <span class="nc">DANGEROUS_uncachedSystemPromptSection</span><span class="p">(</span>
+      <span class="dl">'</span><span class="s1">mcp_instructions</span><span class="dl">'</span><span class="p">,</span>
+      <span class="p">()</span> <span class="o">=&gt;</span>
+        <span class="nf">isMcpInstructionsDeltaEnabled</span><span class="p">()</span>
+          <span class="p">?</span> <span class="kc">null</span>
+          <span class="p">:</span> <span class="nf">getMcpInstructionsSection</span><span class="p">(</span><span class="nx">mcpClients</span><span class="p">),</span>
+      <span class="dl">'</span><span class="s1">MCP servers connect/disconnect between turns</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">scratchpad</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getScratchpadInstructions</span><span class="p">()),</span>
+    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">frc</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getFunctionResultClearingSection</span><span class="p">(</span><span class="nx">model</span><span class="p">)),</span>
+    <span class="nf">systemPromptSection</span><span class="p">(</span>
+      <span class="dl">'</span><span class="s1">summarize_tool_results</span><span class="dl">'</span><span class="p">,</span>
+      <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">SUMMARIZE_TOOL_RESULTS_SECTION</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="c1">// Numeric length anchors — research shows ~1.2% output token reduction vs</span>
+    <span class="c1">// qualitative "be concise". Ant-only to measure quality impact first.</span>
+    <span class="p">...(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ant</span><span class="dl">'</span>
+      <span class="p">?</span> <span class="p">[</span>
+          <span class="nf">systemPromptSection</span><span class="p">(</span>
+            <span class="dl">'</span><span class="s1">numeric_length_anchors</span><span class="dl">'</span><span class="p">,</span>
+            <span class="p">()</span> <span class="o">=&gt;</span>
+              <span class="dl">'</span><span class="s1">Length limits: keep text between tool calls to </span><span class="se">\</span><span class="s1">u226425 words. Keep final responses to </span><span class="se">\</span><span class="s1">u2264100 words unless the task requires more detail.</span><span class="dl">'</span><span class="p">,</span>
+          <span class="p">),</span>
+        <span class="p">]</span>
+      <span class="p">:</span> <span class="p">[]),</span>
+    <span class="p">...(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">TOKEN_BUDGET</span><span class="dl">'</span><span class="p">)</span>
+      <span class="p">?</span> <span class="p">[</span>
+          <span class="c1">// Cached unconditionally — the "When the user specifies..." phrasing</span>
+          <span class="c1">// makes it a no-op with no budget active. Was DANGEROUS_uncached</span>
+          <span class="c1">// (toggled on getCurrentTurnTokenBudget()), busting ~20K tokens per</span>
+          <span class="c1">// budget flip. Not moved to a tail attachment: first-response and</span>
+          <span class="c1">// budget-continuation paths don't see attachments (#21577).</span>
+          <span class="nf">systemPromptSection</span><span class="p">(</span>
+            <span class="dl">'</span><span class="s1">token_budget</span><span class="dl">'</span><span class="p">,</span>
+            <span class="p">()</span> <span class="o">=&gt;</span>
+              <span class="dl">'</span><span class="s1">When the user specifies a token target (e.g., "+500k", "spend 2M tokens", "use 1B tokens"), your output token count will be shown each turn. Keep working until you approach the target </span><span class="se">\</span><span class="s1">u2014 plan your work to fill it productively. The target is a hard minimum, not a suggestion. If you stop early, the system will automatically continue you.</span><span class="dl">'</span><span class="p">,</span>
+          <span class="p">),</span>
+        <span class="p">]</span>
+      <span class="p">:</span> <span class="p">[]),</span>
+    <span class="p">...(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">KAIROS</span><span class="dl">'</span><span class="p">)</span> <span class="o">||</span> <span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">KAIROS_BRIEF</span><span class="dl">'</span><span class="p">)</span>
+      <span class="p">?</span> <span class="p">[</span><span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">brief</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getBriefSection</span><span class="p">())]</span>
+      <span class="p">:</span> <span class="p">[]),</span>
+  <span class="p">]</span>
+</code></pre></div></div> <p>前面讲了这两种动态的prompt 今天来看后面的种类 我发现似乎前面写的太过详细了 或者说有点没有必要 显得有些主次不分 所以这次会整的简单一点（但确实是很重要的两个part）</p> <h3 id="ant-model-override">ant model override</h3> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">getAntModelOverrideSection</span><span class="p">():</span> <span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">!==</span> <span class="dl">'</span><span class="s1">ant</span><span class="dl">'</span><span class="p">)</span> <span class="k">return</span> <span class="kc">null</span>
+  <span class="k">if </span><span class="p">(</span><span class="nf">isUndercover</span><span class="p">())</span> <span class="k">return</span> <span class="kc">null</span>
+  <span class="k">return</span> <span class="nf">getAntModelOverrideConfig</span><span class="p">()?.</span><span class="nx">defaultSystemPromptSuffix</span> <span class="o">||</span> <span class="kc">null</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>这个是antropic自己内部测试时候打开的开关，跟我们没啥关系，也跟要学习的prompt没啥关系</p> <h3 id="env-info-simple">env info simple</h3> <p>这简单来说就是工作环境的简单信息 告诉llm 这个函数把当前运行环境的信息注入到系统提示中，让 Claude 知道自己在哪运行、用什么模型。 大概的输出是这样的</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">#</span> <span class="nx">Environment</span>
+<span class="nx">You</span> <span class="nx">have</span> <span class="nx">been</span> <span class="nx">invoked</span> <span class="k">in</span> <span class="nx">the</span> <span class="nx">following</span> <span class="nx">environment</span><span class="p">:</span>
+<span class="o">-</span> <span class="nx">Primary</span> <span class="nx">working</span> <span class="nx">directory</span><span class="p">:</span> <span class="nx">E</span><span class="p">:</span><span class="err">\</span><span class="nx">your</span><span class="o">-</span><span class="nx">project</span><span class="o">-</span><span class="nx">folder</span>
+<span class="o">-</span> <span class="nx">Is</span> <span class="nx">a</span> <span class="nx">git</span> <span class="nx">repository</span><span class="p">:</span> <span class="kc">true</span>
+<span class="o">-</span> <span class="nx">Platform</span><span class="p">:</span> <span class="nx">win32</span>
+<span class="o">-</span> <span class="nx">Shell</span><span class="p">:</span> <span class="nc">PowerShell </span><span class="p">(</span><span class="nx">use</span> <span class="nx">PowerShell</span> <span class="nx">syntax</span><span class="p">...)</span>
+<span class="o">-</span> <span class="nx">OS</span> <span class="nx">Version</span><span class="p">:</span> <span class="nx">Windows</span> <span class="mi">11</span> <span class="nx">Home</span> <span class="nx">China</span> <span class="mf">10.0</span><span class="p">.</span><span class="mi">26200</span>
+<span class="o">-</span> <span class="nx">You</span> <span class="nx">are</span> <span class="nx">powered</span> <span class="nx">by</span> <span class="nx">the</span> <span class="nx">model</span> <span class="nx">named</span> <span class="nx">Claude</span> <span class="nx">Opus</span> <span class="mi">4</span><span class="p">.</span> <span class="nx">The</span> <span class="nx">exact</span> <span class="nx">model</span> <span class="nx">ID</span> <span class="k">is</span> <span class="nx">claude</span><span class="o">-</span><span class="nx">opus</span><span class="o">-</span><span class="mi">4</span><span class="o">-</span><span class="mi">8</span><span class="p">.</span>
+<span class="o">-</span> <span class="nx">Assistant</span> <span class="nx">knowledge</span> <span class="nx">cutoff</span> <span class="k">is</span> <span class="mi">2025</span><span class="o">-</span><span class="mi">05</span><span class="p">.</span>
+<span class="o">-</span> <span class="nx">The</span> <span class="nx">most</span> <span class="nx">recent</span> <span class="nx">Claude</span> <span class="nx">model</span> <span class="nx">family</span> <span class="k">is</span> <span class="nx">Claude</span> <span class="mf">4.5</span><span class="o">/</span><span class="mf">4.6</span><span class="p">...</span>
+<span class="o">-</span> <span class="nx">Claude</span> <span class="nx">Code</span> <span class="k">is</span> <span class="nx">available</span> <span class="kd">as </span><span class="nx">a</span> <span class="nx">CLI</span> <span class="k">in</span> <span class="nx">the</span> <span class="nx">terminal</span><span class="p">,</span> <span class="nx">desktop</span> <span class="nx">app</span><span class="p">...</span>
+<span class="o">-</span> <span class="nx">Fast</span> <span class="nx">mode</span> <span class="k">for</span> <span class="nx">Claude</span> <span class="nx">Code</span> <span class="nx">uses</span> <span class="nx">the</span> <span class="nx">same</span> <span class="nx">Claude</span> <span class="nx">Opus</span> <span class="nx">model</span><span class="p">...</span>
+</code></pre></div></div> <p>可以看出操作系统，模型名，知识的日期，etc</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="kd">const</span> <span class="nx">envItems</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">`Primary working directory: </span><span class="p">${</span><span class="nx">cwd</span><span class="p">}</span><span class="s2">`</span><span class="p">,</span>
+    <span class="nx">isWorktree</span>
+      <span class="p">?</span> <span class="s2">`This is a git worktree — an isolated copy of the repository. Run all commands from this directory. Do NOT </span><span class="se">\`</span><span class="s2">cd</span><span class="se">\`</span><span class="s2"> to the original repository root.`</span>
+      <span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="p">[</span><span class="s2">`Is a git repository: </span><span class="p">${</span><span class="nx">isGit</span><span class="p">}</span><span class="s2">`</span><span class="p">],</span>
+    <span class="nx">additionalWorkingDirectories</span> <span class="o">&amp;&amp;</span> <span class="nx">additionalWorkingDirectories</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span>
+      <span class="p">?</span> <span class="s2">`Additional working directories:`</span>
+      <span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nx">additionalWorkingDirectories</span> <span class="o">&amp;&amp;</span> <span class="nx">additionalWorkingDirectories</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span>
+      <span class="p">?</span> <span class="nx">additionalWorkingDirectories</span>
+      <span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="s2">`Platform: </span><span class="p">${</span><span class="nx">env</span><span class="p">.</span><span class="nx">platform</span><span class="p">}</span><span class="s2">`</span><span class="p">,</span>
+    <span class="nf">getShellInfoLine</span><span class="p">(),</span>
+    <span class="s2">`OS Version: </span><span class="p">${</span><span class="nx">unameSR</span><span class="p">}</span><span class="s2">`</span><span class="p">,</span>
+    <span class="nx">modelDescription</span><span class="p">,</span>
+    <span class="nx">knowledgeCutoffMessage</span><span class="p">,</span>
+    <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ant</span><span class="dl">'</span> <span class="o">&amp;&amp;</span> <span class="nf">isUndercover</span><span class="p">()</span>
+      <span class="p">?</span> <span class="kc">null</span>
+      <span class="p">:</span> <span class="s2">`The most recent Claude model family is Claude 4.5/4.6. Model IDs — Opus 4.6: '</span><span class="p">${</span><span class="nx">CLAUDE_4_5_OR_4_6_MODEL_IDS</span><span class="p">.</span><span class="nx">opus</span><span class="p">}</span><span class="s2">', Sonnet 4.6: '</span><span class="p">${</span><span class="nx">CLAUDE_4_5_OR_4_6_MODEL_IDS</span><span class="p">.</span><span class="nx">sonnet</span><span class="p">}</span><span class="s2">', Haiku 4.5: '</span><span class="p">${</span><span class="nx">CLAUDE_4_5_OR_4_6_MODEL_IDS</span><span class="p">.</span><span class="nx">haiku</span><span class="p">}</span><span class="s2">'. When building AI applications, default to the latest and most capable Claude models.`</span><span class="p">,</span>
+    <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ant</span><span class="dl">'</span> <span class="o">&amp;&amp;</span> <span class="nf">isUndercover</span><span class="p">()</span>
+      <span class="p">?</span> <span class="kc">null</span>
+      <span class="p">:</span> <span class="s2">`Claude Code is available as a CLI in the terminal, desktop app (Mac/Windows), web app (claude.ai/code), and IDE extensions (VS Code, JetBrains).`</span><span class="p">,</span>
+    <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ant</span><span class="dl">'</span> <span class="o">&amp;&amp;</span> <span class="nf">isUndercover</span><span class="p">()</span>
+      <span class="p">?</span> <span class="kc">null</span>
+      <span class="p">:</span> <span class="s2">`Fast mode for Claude Code uses the same </span><span class="p">${</span><span class="nx">FRONTIER_MODEL_NAME</span><span class="p">}</span><span class="s2"> model with faster output. It does NOT switch to a different model. It can be toggled with /fast.`</span><span class="p">,</span>
+  <span class="p">].</span><span class="nf">filter</span><span class="p">(</span><span class="nx">item</span> <span class="o">=&gt;</span> <span class="nx">item</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span>
+</code></pre></div></div> <p>告诉我们的启示就是不要一股脑给模型工具，或者全部写在description里面，如果模型都不知道自己在什么平台工作，那还得了？windows平台那里用linux里面的命令，这很明显就是不太对的</p> <h3 id="language">language</h3> <p>顾名思义 语言</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">getLanguageSection</span><span class="p">(</span>
+  <span class="nx">languagePreference</span><span class="p">:</span> <span class="kr">string</span> <span class="o">|</span> <span class="kc">undefined</span><span class="p">,</span>
+<span class="p">):</span> <span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">languagePreference</span><span class="p">)</span> <span class="k">return</span> <span class="kc">null</span>
+
+  <span class="k">return</span> <span class="s2">`# Language
+Always respond in </span><span class="p">${</span><span class="nx">languagePreference</span><span class="p">}</span><span class="s2">. Use </span><span class="p">${</span><span class="nx">languagePreference</span><span class="p">}</span><span class="s2"> for all explanations, comments, and communications with the user. Technical terms and code identifiers should remain in their original form.`</span>
+<span class="p">}</span>
+</code></pre></div></div> <h3 id="output-style">output style</h3> <p>输出风格</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">getOutputStyleSection</span><span class="p">(</span>
+  <span class="nx">outputStyleConfig</span><span class="p">:</span> <span class="nx">OutputStyleConfig</span> <span class="o">|</span> <span class="kc">null</span><span class="p">,</span>
+<span class="p">):</span> <span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="nx">outputStyleConfig</span> <span class="o">===</span> <span class="kc">null</span><span class="p">)</span> <span class="k">return</span> <span class="kc">null</span>
+
+  <span class="k">return</span> <span class="s2">`# Output Style: </span><span class="p">${</span><span class="nx">outputStyleConfig</span><span class="p">.</span><span class="nx">name</span><span class="p">}</span><span class="s2">
+</span><span class="p">${</span><span class="nx">outputStyleConfig</span><span class="p">.</span><span class="nx">prompt</span><span class="p">}</span><span class="s2">`</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>三种内置风格</p> <ol> <li>default — 默认风格</li> </ol> <p>就是标准的 Claude Code 行为——简洁、直接、专注任务。getOutputStyleSection 收到 null 直接返回，不往系统提示里加任何东西。</p> <ol> <li>Explanatory — 解释型</li> </ol> <p>{ name: ‘Explanatory’, description: ‘Claude explains its implementation choices and codebase patterns’, keepCodingInstructions: true, prompt: <code class="language-plaintext highlighter-rouge">...</code> }</p> <p>Claude 在写代码的同时附带教育性解释。核心机制是 Insights 块：</p> <p><code class="language-plaintext highlighter-rouge">★ Insight ─────────────────────────────────────</code> [2-3 个关键教育点] <code class="language-plaintext highlighter-rouge">─────────────────────────────────────────────────</code></p> <p>特点：</p> <ul> <li>在写代码前后插入解释</li> <li>聚焦于这个代码库特有的洞察，不是通用编程概念</li> <li>可以超过通常的长度限制</li> <li>keepCodingInstructions: true → 保留编码指令（不覆盖默认行为）</li> </ul> <ol> <li>Learning — 学习型</li> </ol> <p>{ name: ‘Learning’, description: ‘Claude pauses and asks you to write small pieces of code for hands-on practice’, keepCodingInstructions: true, prompt: <code class="language-plaintext highlighter-rouge">...</code> }</p> <p>最复杂的风格。Claude 会暂停并让用户自己写代码来学习。核心机制： 三种内置风格</p> <ol> <li>default — 默认风格</li> </ol> <p>就是标准的 Claude Code 行为——简洁、直接、专注任务。getOutputStyleSection 收到 null 直接返回，不往系统提示里加任何东西。</p> <ol> <li>Explanatory — 解释型</li> </ol> <p>{ name: ‘Explanatory’, description: ‘Claude explains its implementation choices and codebase patterns’, keepCodingInstructions: true, prompt: <code class="language-plaintext highlighter-rouge">...</code> }</p> <p>Claude 在写代码的同时附带教育性解释。核心机制是 Insights 块：</p> <p><code class="language-plaintext highlighter-rouge">★ Insight ─────────────────────────────────────</code> [2-3 个关键教育点] <code class="language-plaintext highlighter-rouge">─────────────────────────────────────────────────</code></p> <p>特点：</p> <ul> <li>在写代码前后插入解释</li> <li>聚焦于这个代码库特有的洞察，不是通用编程概念</li> <li>可以超过通常的长度限制</li> <li>keepCodingInstructions: true → 保留编码指令（不覆盖默认行为）</li> </ul> <ol> <li>Learning — 学习型</li> </ol> <p>{ name: ‘Learning’, description: ‘Claude pauses and asks you to write small pieces of code for hands-on practice’, keepCodingInstructions: true, prompt: <code class="language-plaintext highlighter-rouge">...</code> }</p> <p>最复杂的风格。Claude 会暂停并让用户自己写代码来学习。核心机制：</p> <p>触发条件（Claude 生成 20+ 行代码时）：</p> <ul> <li>设计决策（错误处理、数据结构选择）</li> <li>有多种合理方案的业务逻辑</li> <li>关键算法或接口定义</li> </ul> <p>请求格式： • Learn by Doing</p> <p>Context: [已构建的内容和这个决策为什么重要] Your Task: [具体的函数/代码段，引用文件和 TODO(human)] Guidance: [要考虑的权衡和约束]</p> <p>工作流程：</p> <ol> <li>Claude 先在代码里插入 TODO(human) 标记</li> <li>发出 “Learn by Doing” 请求</li> <li>停止输出，等用户实现</li> <li>用户写完后，Claude 给出一个连接用户代码和 broader patterns 的洞察</li> </ol> <p>TodoList 集成： ✓ “Set up component structure with placeholder for logic” ✓ “Request human collaboration on decision logic implementation” ← 标记需要用户参与 ✓ “Integrate contribution and complete feature”</p> <p>也包含 Explanatory 的 Insights 块。</p> <h3 id="mcp_instructions">mcp_instructions</h3> <p>claude code实际上由有两层缓存 一层是软件这边的section cache ，第二层是大模型的prompt cache 对于这里的危险缓存来说，就是section cache 其他的在软件执行第一次的时候就会进行缓存（当然 大模型那边也是） 而mcp是每次都计算的危险缓存 因为用户可能随时连接或者断开mcp 所以每次invoke都要计算 当然 这种每次改变prompt的方式是不太符合大模型那边的prompt的 所以</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">isMcpInstructionsDeltaEnabled</span><span class="p">()</span>
+  <span class="p">?</span> <span class="kc">null</span>                                    <span class="c1">// ← delta 启用时返回 null</span>
+  <span class="p">:</span> <span class="nf">getMcpInstructionsSection</span><span class="p">(</span><span class="nx">mcpClients</span><span class="p">)</span>   <span class="c1">// ← 旧方案才走这里</span>
+</code></pre></div></div> <p>当 delta 功能启用后，这个 section 返回 null，根本不产生内容，不会破坏 cache。MCP 指令改为通过 attachment 增量注入。所以 DANGEROUS_uncached 只是过渡期的 fallback，不是长期方案。</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * True → announce MCP server instructions via persisted delta attachments.
+ * False → prompts.ts keeps its DANGEROUS_uncachedSystemPromptSection
+ * (rebuilt every turn; cache-busts on late connect).
+ *
+ * Env override for local testing: CLAUDE_CODE_MCP_INSTR_DELTA=true/false
+ * wins over both ant bypass and the GrowthBook gate.
+ */</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">isMcpInstructionsDeltaEnabled</span><span class="p">():</span> <span class="nx">boolean</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="nf">isEnvTruthy</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CLAUDE_CODE_MCP_INSTR_DELTA</span><span class="p">))</span> <span class="k">return</span> <span class="kc">true</span>
+  <span class="k">if </span><span class="p">(</span><span class="nf">isEnvDefinedFalsy</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CLAUDE_CODE_MCP_INSTR_DELTA</span><span class="p">))</span> <span class="k">return</span> <span class="kc">false</span>
+  <span class="k">return </span><span class="p">(</span>
+    <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ant</span><span class="dl">'</span> <span class="o">||</span>
+    <span class="nf">getFeatureValue_CACHED_MAY_BE_STALE</span><span class="p">(</span><span class="dl">'</span><span class="s1">tengu_basalt_3kr</span><span class="dl">'</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>这里注释也写明了这么处理并不是最终解决方案 最终的解决方案是： persisted delta attachments —— 增量通知机制 只在 MCP 服务器状态变化时，发送增量通知 → 无变化时不发任何东西</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">maybe</span><span class="p">(</span><span class="dl">'</span><span class="s1">mcp_instructions_delta</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
+      <span class="nb">Promise</span><span class="p">.</span><span class="nf">resolve</span><span class="p">(</span>
+        <span class="nf">getMcpInstructionsDeltaAttachment</span><span class="p">(</span>
+          <span class="nx">toolUseContext</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">mcpClients</span><span class="p">,</span>
+          <span class="nx">toolUseContext</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">tools</span><span class="p">,</span>
+          <span class="nx">toolUseContext</span><span class="p">.</span><span class="nx">options</span><span class="p">.</span><span class="nx">mainLoopModel</span><span class="p">,</span>
+          <span class="nx">messages</span><span class="p">,</span>
+        <span class="p">),</span>
+      <span class="p">),</span>
+    <span class="p">),</span>
+</code></pre></div></div> <p>attachments的具体机制不是这里讨论的主要问题，主要的点是在于知道mcp这类动态变化的服务器的更新周期是每次对话 为了更加符合prompt cache的机制，尽可能的把mcp放后面</p> <h3 id="scratchpad">scratchpad</h3> <p>告诉模型哪里存放临时文件</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * Returns instructions for using the scratchpad directory if enabled.
+ * The scratchpad is a per-session directory where Claude can write temporary files.
+ */</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">getScratchpadInstructions</span><span class="p">():</span> <span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nf">isScratchpadEnabled</span><span class="p">())</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kc">null</span>
+  <span class="p">}</span>
+
+  <span class="kd">const</span> <span class="nx">scratchpadDir</span> <span class="o">=</span> <span class="nf">getScratchpadDir</span><span class="p">()</span>
+
+  <span class="k">return</span> <span class="s2">`# Scratchpad Directory
+
+IMPORTANT: Always use this scratchpad directory for temporary files instead of </span><span class="se">\`</span><span class="s2">/tmp</span><span class="se">\`</span><span class="s2"> or other system temp directories:
+</span><span class="se">\`</span><span class="p">${</span><span class="nx">scratchpadDir</span><span class="p">}</span><span class="se">\`</span><span class="s2">
+
+Use this directory for ALL temporary file needs:
+- Storing intermediate results or data during multi-step tasks
+- Writing temporary scripts or configuration files
+- Saving outputs that don't belong in the user's project
+- Creating working files during analysis or processing
+- Any file that would otherwise go to </span><span class="se">\`</span><span class="s2">/tmp</span><span class="se">\`</span><span class="s2">
+
+Only use </span><span class="se">\`</span><span class="s2">/tmp</span><span class="se">\`</span><span class="s2"> if the user explicitly requests it.
+
+The scratchpad directory is session-specific, isolated from the user's project, and can be used freely without permission prompts.`</span>
+<span class="p">}</span>
+</code></pre></div></div> <h3 id="frc">frc</h3> <p>Function Result Clearing（工具结果清理） Claude Code 的对话越来越长时，早期的工具结果（Read 文件内容、Bash 输出、Grep 结果等）会占满上下文窗口。FRC 的作用是自动清理旧的工具结果来释放空间。告诉 Claude：”旧的工具结果会被自动清除，最近 N 个结果会保留。”</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">getFunctionResultClearingSection</span><span class="p">(</span><span class="nx">model</span><span class="p">:</span> <span class="kr">string</span><span class="p">):</span> <span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">CACHED_MICROCOMPACT</span><span class="dl">'</span><span class="p">)</span> <span class="o">||</span> <span class="o">!</span><span class="nx">getCachedMCConfigForFRC</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kc">null</span>
+  <span class="p">}</span>
+  <span class="kd">const</span> <span class="nx">config</span> <span class="o">=</span> <span class="nf">getCachedMCConfigForFRC</span><span class="p">()</span>
+  <span class="kd">const</span> <span class="nx">isModelSupported</span> <span class="o">=</span> <span class="nx">config</span><span class="p">.</span><span class="nx">supportedModels</span><span class="p">?.</span><span class="nf">some</span><span class="p">(</span><span class="nx">pattern</span> <span class="o">=&gt;</span>
+    <span class="nx">model</span><span class="p">.</span><span class="nf">includes</span><span class="p">(</span><span class="nx">pattern</span><span class="p">),</span>
+  <span class="p">)</span>
+  <span class="k">if </span><span class="p">(</span>
+    <span class="o">!</span><span class="nx">config</span><span class="p">.</span><span class="nx">enabled</span> <span class="o">||</span>
+    <span class="o">!</span><span class="nx">config</span><span class="p">.</span><span class="nx">systemPromptSuggestSummaries</span> <span class="o">||</span>
+    <span class="o">!</span><span class="nx">isModelSupported</span>
+  <span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kc">null</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="s2">`# Function Result Clearing
+
+Old tool results will be automatically cleared from context to free up space. The </span><span class="p">${</span><span class="nx">config</span><span class="p">.</span><span class="nx">keepRecent</span><span class="p">}</span><span class="s2"> most recent results are always kept.`</span>
+<span class="p">}</span>
+</code></pre></div></div> <h3 id="summarize_tool_results">summarize_tool_results</h3> <p>告诉模型重要步骤记下来 因为可能之后会被清理</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nf">systemPromptSection</span><span class="p">(</span>
+      <span class="dl">'</span><span class="s1">summarize_tool_results</span><span class="dl">'</span><span class="p">,</span>
+      <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">SUMMARIZE_TOOL_RESULTS_SECTION</span><span class="p">,</span>
+    <span class="p">),</span>
+<span class="kd">const</span> <span class="nx">SUMMARIZE_TOOL_RESULTS_SECTION</span> <span class="o">=</span> <span class="s2">`When working with tool results, write down any important information you might need later in your response, as the original tool result may be cleared later.`</span>
+</code></pre></div></div> <p>这些跟之前提到过的micro compact有关</p> <h3 id="numberic_length_anchors">numberic_length_anchors</h3> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ant</span><span class="dl">'</span>
+      <span class="p">?</span> <span class="p">[</span>
+          <span class="nf">systemPromptSection</span><span class="p">(</span>
+            <span class="dl">'</span><span class="s1">numeric_length_anchors</span><span class="dl">'</span><span class="p">,</span>
+            <span class="p">()</span> <span class="o">=&gt;</span>
+              <span class="dl">'</span><span class="s1">Length limits: keep text between tool calls to </span><span class="se">\</span><span class="s1">u226425 words. Keep final responses to </span><span class="se">\</span><span class="s1">u2264100 words unless the task requires more detail.</span><span class="dl">'</span><span class="p">,</span>
+          <span class="p">),</span>
+        <span class="p">]</span>
+      <span class="p">:</span> <span class="p">[]),</span>
+</code></pre></div></div> <p>争对内部员工测试的prompt</p> <h3 id="token_budget">token_budget</h3> <p>关于token预算相关的内容，比较token是每一轮都会变化的，谁也不想模型做一半被打断，给定一个budget可能会让模型更直观的判断怎么样才能在有限的token内完成任务呢</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">TOKEN_BUDGET</span><span class="dl">'</span><span class="p">)</span>
+      <span class="p">?</span> <span class="p">[</span>
+          <span class="c1">// Cached unconditionally — the "When the user specifies..." phrasing</span>
+          <span class="c1">// makes it a no-op with no budget active. Was DANGEROUS_uncached</span>
+          <span class="c1">// (toggled on getCurrentTurnTokenBudget()), busting ~20K tokens per</span>
+          <span class="c1">// budget flip. Not moved to a tail attachment: first-response and</span>
+          <span class="c1">// budget-continuation paths don't see attachments (#21577).</span>
+          <span class="nf">systemPromptSection</span><span class="p">(</span>
+            <span class="dl">'</span><span class="s1">token_budget</span><span class="dl">'</span><span class="p">,</span>
+            <span class="p">()</span> <span class="o">=&gt;</span>
+              <span class="dl">'</span><span class="s1">When the user specifies a token target (e.g., "+500k", "spend 2M tokens", "use 1B tokens"), your output token count will be shown each turn. Keep working until you approach the target </span><span class="se">\</span><span class="s1">u2014 plan your work to fill it productively. The target is a hard minimum, not a suggestion. If you stop early, the system will automatically continue you.</span><span class="dl">'</span><span class="p">,</span>
+          <span class="p">),</span>
+        <span class="p">]</span>
+      <span class="p">:</span> <span class="p">[]),</span>
+</code></pre></div></div> <h3 id="brief--简洁模式kairos">brief —— 简洁模式（KAIROS）</h3> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="p">...(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">KAIROS</span><span class="dl">'</span><span class="p">)</span> <span class="o">||</span> <span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">KAIROS_BRIEF</span><span class="dl">'</span><span class="p">)</span>
+      <span class="p">?</span> <span class="p">[</span><span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">brief</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getBriefSection</span><span class="p">())]</span>
+      <span class="p">:</span> <span class="p">[]),</span>
+</code></pre></div></div> <p>开启简介模式</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">getBriefSection</span><span class="p">():</span> <span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span> <span class="p">{</span>
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">KAIROS</span><span class="dl">'</span><span class="p">)</span> <span class="o">||</span> <span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">KAIROS_BRIEF</span><span class="dl">'</span><span class="p">)))</span> <span class="k">return</span> <span class="kc">null</span>
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">BRIEF_PROACTIVE_SECTION</span><span class="p">)</span> <span class="k">return</span> <span class="kc">null</span>
+  <span class="c1">// Whenever the tool is available, the model is told to use it. The</span>
+  <span class="c1">// /brief toggle and --brief flag now only control the isBriefOnly</span>
+  <span class="c1">// display filter — they no longer gate model-facing behavior.</span>
+  <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">briefToolModule</span><span class="p">?.</span><span class="nf">isBriefEnabled</span><span class="p">())</span> <span class="k">return</span> <span class="kc">null</span>
+  <span class="c1">// When proactive is active, getProactiveSection() already appends the</span>
+  <span class="c1">// section inline. Skip here to avoid duplicating it in the system prompt.</span>
+  <span class="k">if </span><span class="p">(</span>
+    <span class="p">(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">PROACTIVE</span><span class="dl">'</span><span class="p">)</span> <span class="o">||</span> <span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">KAIROS</span><span class="dl">'</span><span class="p">))</span> <span class="o">&amp;&amp;</span>
+    <span class="nx">proactiveModule</span><span class="p">?.</span><span class="nf">isProactiveActive</span><span class="p">()</span>
+  <span class="p">)</span>
+    <span class="k">return</span> <span class="kc">null</span>
+  <span class="k">return</span> <span class="nx">BRIEF_PROACTIVE_SECTION</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>最后注入的prompt大概是这样的</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">const</span> <span class="nx">BRIEF_PROACTIVE_SECTION</span> <span class="o">=</span> <span class="s2">`## Talking to the user
+
+</span><span class="p">${</span><span class="nx">BRIEF_TOOL_NAME</span><span class="p">}</span><span class="s2"> is where your replies go. Text outside it is visible if the user expands the detail view, but most won't — assume unread. Anything you want them to actually see goes through </span><span class="p">${</span><span class="nx">BRIEF_TOOL_NAME</span><span class="p">}</span><span class="s2">. The failure mode: the real answer lives in plain text while </span><span class="p">${</span><span class="nx">BRIEF_TOOL_NAME</span><span class="p">}</span><span class="s2"> just says "done!" — they see "done!" and miss everything.
+
+So: every time the user says something, the reply they actually read comes through </span><span class="p">${</span><span class="nx">BRIEF_TOOL_NAME</span><span class="p">}</span><span class="s2">. Even for "hi". Even for "thanks".
+
+If you can answer right away, send the answer. If you need to go look — run a command, read files, check something — ack first in one line ("On it — checking the test output"), then work, then send the result. Without the ack they're staring at a spinner.
+
+For longer work: ack → work → result. Between those, send a checkpoint when something useful happened — a decision you made, a surprise you hit, a phase boundary. Skip the filler ("running tests...") — a checkpoint earns its place by carrying information.
+
+Keep messages tight — the decision, the file:line, the PR number. Second person always ("your config"), never third.`</span>
+</code></pre></div></div> <p>这段指令直接改变模型的输出行为：</p> <ul> <li>所有用户可见的回复必须通过 BriefTool 输出</li> <li>先 ack，再工作，再发结果</li> <li>长任务中间发 checkpoint（有信息量的进展更新）</li> <li>跳过 filler（”running tests…“）</li> <li>简洁：只保留决策、file:line、PR 编号</li> </ul> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/colpali-multimodal-rag-qa/">掌握 ColPali 多模态 RAG 需要回答的 8 个问题</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/proposition-chunking-summary/">Proposition Chunking 命题化切分总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/query-transformations-summary/">Query Transformations 查询转换技术总结</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "about",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "nav-repositories",
+          title: "repositories",
+          description: "Edit the `_data/repositories.yml` and change the `github_users` and `github_repos` lists to include your own GitHub profile and repositories.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/repositories/";
+          },
+        },{id: "post-二叉树刷题总结",
+        
+          title: "二叉树刷题总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/";
+          
+        },
+      },{id: "post-rag-技术体系化分类-从-pipeline-阶段到失败模式",
+        
+          title: "RAG 技术体系化分类——从 Pipeline 阶段到失败模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/RAG-techniques-pipeline-categorization/";
+          
+        },
+      },{id: "post-memorag-记忆增强型-rag-总结",
+        
+          title: "MemoRAG 记忆增强型 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/memorag-summary/";
+          
+        },
+      },{id: "post-microsoft-graphrag-基于知识图谱的-rag-总结",
+        
+          title: "Microsoft GraphRAG 基于知识图谱的 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/microsoft-graphrag-summary/";
+          
+        },
+      },{id: "post-multimodal-rag-with-captioning-图像描述型多模态-rag-总结",
+        
+          title: "Multimodal RAG with Captioning 图像描述型多模态 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/multimodal-rag-with-captioning-summary/";
+          
+        },
+      },{id: "post-掌握-colpali-多模态-rag-需要回答的-8-个问题",
+        
+          title: "掌握 ColPali 多模态 RAG 需要回答的 8 个问题",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/colpali-multimodal-rag-qa/";
+          
+        },
+      },{id: "post-proposition-chunking-命题化切分总结",
+        
+          title: "Proposition Chunking 命题化切分总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/proposition-chunking-summary/";
+          
+        },
+      },{id: "post-query-transformations-查询转换技术总结",
+        
+          title: "Query Transformations 查询转换技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/query-transformations-summary/";
+          
+        },
+      },{id: "post-raptor-技术总结",
+        
+          title: "RAPTOR 技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/raptor-summary/";
+          
+        },
+      },{id: "post-relevant-segment-extraction-rse-学习笔记-从片段到段落",
+        
+          title: "Relevant Segment Extraction (RSE) 学习笔记 —— 从片段到段落",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/relevant-segment-extraction/";
+          
+        },
+      },{id: "post-reranking-with-llamaindex-学习笔记-llm-与-cross-encoder-重排",
+        
+          title: "Reranking with LlamaIndex 学习笔记 —— LLM 与 Cross-Encoder 重排",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/reranking-with-llamaindex/";
+          
+        },
+      },{id: "post-rag-with-feedback-loop-学习笔记-从机制到隐患",
+        
+          title: "RAG with Feedback Loop 学习笔记 —— 从机制到隐患",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rag-feedback-loop/";
+          
+        },
+      },{id: "post-self-rag-学习笔记-从论文思想到代码实现",
+        
+          title: "Self-RAG 学习笔记 —— 从论文思想到代码实现",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/self-rag/";
+          
+        },
+      },{id: "post-claude-code学习13-memory",
+        
+          title: "Claude code学习13 Memory",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B013/";
+          
+        },
+      },{id: "post-claude-code学习12-fileedittool",
+        
+          title: "Claude code学习12 FileEditTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B012/";
+          
+        },
+      },{id: "post-claude-code学习11-bashtool",
+        
+          title: "Claude code学习11 BashTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B011/";
+          
+        },
+      },{id: "post-claude-code学习10-permission-与-hooks-系统",
+        
+          title: "Claude code学习10 Permission 与 Hooks 系统",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B010/";
+          
+        },
+      },{id: "post-claude-code学习9-agent-loop",
+        
+          title: "Claude code学习9 Agent loop",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B09/";
+          
+        },
+      },{id: "post-claude-code学习8-system-reminder-动态信息是如何入prompt的",
+        
+          title: "Claude code学习8 system-reminder，动态信息是如何入prompt的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B08/";
+          
+        },
+      },{id: "post-claude-code学习7-权限模式",
+        
+          title: "Claude code学习7 权限模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B07/";
+          
+        },
+      },{id: "post-claude-code学习6-动态prompt的组装2",
+        
+          title: "Claude code学习6 动态prompt的组装2",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B06/";
+          
+        },
+      },{id: "post-claude-code学习5-动态prompt的组装1",
+        
+          title: "Claude code学习5 动态prompt的组装1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B05/";
+          
+        },
+      },{id: "post-claude-code学习4-静态prompt里面有什么以及claude-code启动时做了些什么",
+        
+          title: "Claude code学习4 静态prompt里面有什么以及Claude code启动时做了些什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B04/";
+          
+        },
+      },{id: "post-claude-code学习3-为什么claude-code工程化设计是这样的",
+        
+          title: "Claude code学习3 为什么Claude code工程化设计是这样的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/";
+          
+        },
+      },{id: "post-claude-code学习2-claude-code的上下文管理",
+        
+          title: "Claude code学习2 Claude code的上下文管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02/";
+          
+        },
+      },{id: "post-claude-code学习1-我们要从这个项目里学到什么",
+        
+          title: "Claude code学习1 我们要从这个项目里学到什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B01/";
+          
+        },
+      },{id: "post-learn-claude-code项目学习",
+        
+          title: "learn claude code项目学习",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/learn-claude-code%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/";
+          
+        },
+      },{id: "post-如何理解transformer",
+        
+          title: "如何理解transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformer-a/";
+          
+        },
+      },{id: "post-旋转矩阵的理解",
+        
+          title: "旋转矩阵的理解",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformation/";
+          
+        },
+      },{id: "post-cs231a-相机模型笔记",
+        
+          title: "CS231A 相机模型笔记",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cs231a-1/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv2/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv1/";
+          
+        },
+      },{id: "post-linux权限",
+        
+          title: "Linux权限",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP3/";
+          
+        },
+      },{id: "post-linux命令格式",
+        
+          title: "Linux命令格式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP2/";
+          
+        },
+      },{id: "post-excel常用操作",
+        
+          title: "Excel常用操作",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/excel/";
+          
+        },
+      },{id: "post-linux文件路径",
+        
+          title: "Linux文件路径",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP1/";
+          
+        },
+      },{id: "post-常见linux命令和shell脚本",
+        
+          title: "常见Linux命令和shell脚本",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/shellLinux/";
+          
+        },
+      },{id: "post-micropytorch",
+        
+          title: "microPytorch",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/.microPYtorch/";
+          
+        },
+      },{id: "post-c-vector",
+        
+          title: "C++ Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-c-template",
+        
+          title: "C++ Template",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppTemplate/";
+          
+        },
+      },{id: "post-pandas库的基本使用",
+        
+          title: "pandas库的基本使用",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/pandas1/";
+          
+        },
+      },{id: "post-c-中的static和const-1",
+        
+          title: "C++中的static和const 1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppStaticandConst/";
+          
+        },
+      },{id: "post-c-的内外部连接",
+        
+          title: "C++的内外部连接",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppLink/";
+          
+        },
+      },{id: "post-用c-实现内存池1",
+        
+          title: "用C++实现内存池1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo_pool/";
+          
+        },
+      },{id: "post-c-的内存管理",
+        
+          title: "C++的内存管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo/";
+          
+        },
+      },{id: "post-每日一题2296-设计一个文本编辑器",
+        
+          title: "每日一题2296. 设计一个文本编辑器",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LC/";
+          
+        },
+      },{id: "post-c-中的vector",
+        
+          title: "C++中的Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-transformer",
+        
+          title: "Transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transfomer/";
+          
+        },
+      },{id: "post-深度学习和机器学习中的重要概念",
+        
+          title: "深度学习和机器学习中的重要概念",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/MLfun/";
+          
+        },
+      },{id: "post-attention注意力机制-修正补充版",
+        
+          title: "Attention注意力机制（修正补充版）",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention2/";
+          
+        },
+      },{id: "post-attention注意力机制",
+        
+          title: "Attention注意力机制",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention/";
+          
+        },
+      },{id: "post-unet网络",
+        
+          title: "Unet网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Unet/";
+          
+        },
+      },{id: "post-seq2seq的模型-构建以及损失函数",
+        
+          title: "Seq2Seq的模型，构建以及损失函数",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Seq2Seq-1/";
+          
+        },
+      },{id: "post-text-generation",
+        
+          title: "Text Generation",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Text-Generation/";
+          
+        },
+      },{id: "post-rnn的优化",
+        
+          title: "RNN的优化",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/RNN%E7%9A%84%E4%BC%98%E5%8C%96/";
+          
+        },
+      },{id: "post-lstm长短记忆网络",
+        
+          title: "LSTM长短记忆网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LSTM%E9%95%BF%E7%9F%AD%E8%AE%B0%E5%BF%86%E7%BD%91%E7%BB%9C/";
+          
+        },
+      },{id: "post-simple-rnn",
+        
+          title: "Simple RNN",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Simple-RNN/";
+          
+        },
+      },{id: "post-linux内核全注释阅读-linux内核体系结构1",
+        
+          title: "Linux内核全注释阅读 Linux内核体系结构1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Linux%E5%86%85%E6%A0%B8%E5%85%A8%E6%B3%A8%E9%87%8A%E9%98%85%E8%AF%BB-Linux%E5%86%85%E6%A0%B8%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%841/";
+          
+        },
+      },{id: "post-nlp的数据处理-文本处理以及词嵌套",
+        
+          title: "NLP的数据处理 文本处理以及词嵌套",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/NLP%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86-%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%BB%A5%E5%8F%8A%E8%AF%8D%E5%B5%8C%E5%A5%97/";
+          
+        },
+      },{id: "post-deepseek-r1论文解读",
+        
+          title: "DeepSeek R1论文解读",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/DeepSeek-R1%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/";
+          
+        },
+      },{id: "post-deepseek蒸馏模型的本地部署",
+        
+          title: "Deepseek蒸馏模型的本地部署",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Deepseek%E8%92%B8%E9%A6%8F%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/";
+          
+        },
+      },{id: "post-测试博客",
+        
+          title: "测试博客",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Test/";
+          
+        },
+      },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
+        
+          title: 'Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "We’re sharing updates across our Gemini family of models and a glimpse of Project Astra, our vision for the future of AI assistants.",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/", "_blank");
+          
+        },
+      },{id: "post-displaying-external-posts-on-your-al-folio-blog",
+        
+          title: 'Displaying External Posts on Your al-folio Blog <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2", "_blank");
+          
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/Mr-coldskin7", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/feed.xml", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>

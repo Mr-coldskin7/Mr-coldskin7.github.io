@@ -1,0 +1,1258 @@
+<!DOCTYPE html> <html lang="zh"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Claude code学习5 动态prompt的组装1 | leesanyee </title> <meta name="author" content="Lee SanYee"> <meta name="description" content="LeeSanYee 的技术博客，记录 ML/NLP、C++、Linux 等方向的学习笔记与思考。 "> <meta name="keywords" content="blog, ml, nlp, cpp, linux"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://mr-coldskin7.github.io/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B05/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Claude code学习5 动态prompt的组装1</h1> <p class="post-meta"> Created on June 13, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/agent"> <i class="fa-solid fa-hashtag fa-sm"></i> agent</a>   <a href="/blog/tag/claude-code"> <i class="fa-solid fa-hashtag fa-sm"></i> claude-code</a>   <a href="/blog/tag/prompt-engineering"> <i class="fa-solid fa-hashtag fa-sm"></i> prompt-engineering</a>   ·   <a href="/blog/category/agent"> <i class="fa-solid fa-tag fa-sm"></i> agent</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h2 id="动态prompt的组装">动态prompt的组装</h2> <p>前面的静态prompt，由于KV cache的最大利用化，把动态变化的prompt放在了最后面</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">dynamicSections</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">session_guidance</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
+      <span class="nf">getSessionSpecificGuidanceSection</span><span class="p">(</span><span class="nx">enabledTools</span><span class="p">,</span> <span class="nx">skillToolCommands</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">memory</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">loadMemoryPrompt</span><span class="p">()),</span>
+    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">ant_model_override</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
+      <span class="nf">getAntModelOverrideSection</span><span class="p">(),</span>
+    <span class="p">),</span>
+    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">env_info_simple</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
+      <span class="nf">computeSimpleEnvInfo</span><span class="p">(</span><span class="nx">model</span><span class="p">,</span> <span class="nx">additionalWorkingDirectories</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">language</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
+      <span class="nf">getLanguageSection</span><span class="p">(</span><span class="nx">settings</span><span class="p">.</span><span class="nx">language</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">output_style</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span>
+      <span class="nf">getOutputStyleSection</span><span class="p">(</span><span class="nx">outputStyleConfig</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1">// When delta enabled, instructions are announced via persisted</span>
+    <span class="c1">// mcp_instructions_delta attachments (attachments.ts) instead of this</span>
+    <span class="c1">// per-turn recompute, which busts the prompt cache on late MCP connect.</span>
+    <span class="c1">// Gate check inside compute (not selecting between section variants)</span>
+    <span class="c1">// so a mid-session gate flip doesn't read a stale cached value.</span>
+    <span class="nc">DANGEROUS_uncachedSystemPromptSection</span><span class="p">(</span>
+      <span class="dl">'</span><span class="s1">mcp_instructions</span><span class="dl">'</span><span class="p">,</span>
+      <span class="p">()</span> <span class="o">=&gt;</span>
+        <span class="nf">isMcpInstructionsDeltaEnabled</span><span class="p">()</span>
+          <span class="p">?</span> <span class="kc">null</span>
+          <span class="p">:</span> <span class="nf">getMcpInstructionsSection</span><span class="p">(</span><span class="nx">mcpClients</span><span class="p">),</span>
+      <span class="dl">'</span><span class="s1">MCP servers connect/disconnect between turns</span><span class="dl">'</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">scratchpad</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getScratchpadInstructions</span><span class="p">()),</span>
+    <span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">frc</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getFunctionResultClearingSection</span><span class="p">(</span><span class="nx">model</span><span class="p">)),</span>
+    <span class="nf">systemPromptSection</span><span class="p">(</span>
+      <span class="dl">'</span><span class="s1">summarize_tool_results</span><span class="dl">'</span><span class="p">,</span>
+      <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">SUMMARIZE_TOOL_RESULTS_SECTION</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="c1">// Numeric length anchors — research shows ~1.2% output token reduction vs</span>
+    <span class="c1">// qualitative "be concise". Ant-only to measure quality impact first.</span>
+    <span class="p">...(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">USER_TYPE</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">ant</span><span class="dl">'</span>
+      <span class="p">?</span> <span class="p">[</span>
+          <span class="nf">systemPromptSection</span><span class="p">(</span>
+            <span class="dl">'</span><span class="s1">numeric_length_anchors</span><span class="dl">'</span><span class="p">,</span>
+            <span class="p">()</span> <span class="o">=&gt;</span>
+              <span class="dl">'</span><span class="s1">Length limits: keep text between tool calls to </span><span class="se">\</span><span class="s1">u226425 words. Keep final responses to </span><span class="se">\</span><span class="s1">u2264100 words unless the task requires more detail.</span><span class="dl">'</span><span class="p">,</span>
+          <span class="p">),</span>
+        <span class="p">]</span>
+      <span class="p">:</span> <span class="p">[]),</span>
+    <span class="p">...(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">TOKEN_BUDGET</span><span class="dl">'</span><span class="p">)</span>
+      <span class="p">?</span> <span class="p">[</span>
+          <span class="c1">// Cached unconditionally — the "When the user specifies..." phrasing</span>
+          <span class="c1">// makes it a no-op with no budget active. Was DANGEROUS_uncached</span>
+          <span class="c1">// (toggled on getCurrentTurnTokenBudget()), busting ~20K tokens per</span>
+          <span class="c1">// budget flip. Not moved to a tail attachment: first-response and</span>
+          <span class="c1">// budget-continuation paths don't see attachments (#21577).</span>
+          <span class="nf">systemPromptSection</span><span class="p">(</span>
+            <span class="dl">'</span><span class="s1">token_budget</span><span class="dl">'</span><span class="p">,</span>
+            <span class="p">()</span> <span class="o">=&gt;</span>
+              <span class="dl">'</span><span class="s1">When the user specifies a token target (e.g., "+500k", "spend 2M tokens", "use 1B tokens"), your output token count will be shown each turn. Keep working until you approach the target </span><span class="se">\</span><span class="s1">u2014 plan your work to fill it productively. The target is a hard minimum, not a suggestion. If you stop early, the system will automatically continue you.</span><span class="dl">'</span><span class="p">,</span>
+          <span class="p">),</span>
+        <span class="p">]</span>
+      <span class="p">:</span> <span class="p">[]),</span>
+    <span class="p">...(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">KAIROS</span><span class="dl">'</span><span class="p">)</span> <span class="o">||</span> <span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">KAIROS_BRIEF</span><span class="dl">'</span><span class="p">)</span>
+      <span class="p">?</span> <span class="p">[</span><span class="nf">systemPromptSection</span><span class="p">(</span><span class="dl">'</span><span class="s1">brief</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">getBriefSection</span><span class="p">())]</span>
+      <span class="p">:</span> <span class="p">[]),</span>
+  <span class="p">]</span>
+</code></pre></div></div> <p>这里看到有两种类型的prompt，一种是</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * Create a memoized system prompt section.
+ * Computed once, cached until /clear or /compact.
+ */</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">systemPromptSection</span><span class="p">(</span>
+  <span class="nx">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span>
+  <span class="nx">compute</span><span class="p">:</span> <span class="nx">ComputeFn</span><span class="p">,</span>
+<span class="p">):</span> <span class="nx">SystemPromptSection</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">{</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">compute</span><span class="p">,</span> <span class="na">cacheBreak</span><span class="p">:</span> <span class="kc">false</span> <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>另一种是</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * Create a volatile system prompt section that recomputes every turn.
+ * This WILL break the prompt cache when the value changes.
+ * Requires a reason explaining why cache-breaking is necessary.
+ */</span>
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">DANGEROUS_uncachedSystemPromptSection</span><span class="p">(</span>
+  <span class="nx">name</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span>
+  <span class="nx">compute</span><span class="p">:</span> <span class="nx">ComputeFn</span><span class="p">,</span>
+  <span class="nx">_reason</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span>
+<span class="p">):</span> <span class="nx">SystemPromptSection</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">{</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">compute</span><span class="p">,</span> <span class="na">cacheBreak</span><span class="p">:</span> <span class="kc">true</span> <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>二者也可以从注释中看出二者的生命周期的区别，一个是除了/compact和/clear之外，其他任何时候都会被缓存，一个是每次都会被计算的 之后将运行等在这里进行执行</p> <h3 id="session_guidance">session_guidance</h3> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">resolveSystemPromptSections</span><span class="p">(</span>
+  <span class="nx">sections</span><span class="p">:</span> <span class="nx">SystemPromptSection</span><span class="p">[],</span>
+<span class="p">):</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="p">(</span><span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span><span class="p">)[]</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">cache</span> <span class="o">=</span> <span class="nf">getSystemPromptSectionCache</span><span class="p">()</span>
+
+  <span class="k">return</span> <span class="nb">Promise</span><span class="p">.</span><span class="nf">all</span><span class="p">(</span>
+    <span class="nx">sections</span><span class="p">.</span><span class="nf">map</span><span class="p">(</span><span class="k">async</span> <span class="nx">s</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">s</span><span class="p">.</span><span class="nx">cacheBreak</span> <span class="o">&amp;&amp;</span> <span class="nx">cache</span><span class="p">.</span><span class="nf">has</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">name</span><span class="p">))</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">cache</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="o">??</span> <span class="kc">null</span>
+      <span class="p">}</span>
+      <span class="kd">const</span> <span class="nx">value</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">s</span><span class="p">.</span><span class="nf">compute</span><span class="p">()</span>
+      <span class="nf">setSystemPromptSectionCacheEntry</span><span class="p">(</span><span class="nx">s</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span>
+      <span class="k">return</span> <span class="nx">value</span>
+    <span class="p">}),</span>
+  <span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>在组装动态prompt的时候，第一个组装的是类似与工具一类的prompt 主要逻辑是这个函数</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nf">getSessionSpecificGuidanceSection</span><span class="p">(</span>
+  <span class="nx">enabledTools</span><span class="p">:</span> <span class="nb">Set</span><span class="o">&lt;</span><span class="kr">string</span><span class="o">&gt;</span><span class="p">,</span>
+  <span class="nx">skillToolCommands</span><span class="p">:</span> <span class="nx">Command</span><span class="p">[],</span>
+<span class="p">):</span> <span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">hasAskUserQuestionTool</span> <span class="o">=</span> <span class="nx">enabledTools</span><span class="p">.</span><span class="nf">has</span><span class="p">(</span><span class="nx">ASK_USER_QUESTION_TOOL_NAME</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">hasSkills</span> <span class="o">=</span>
+    <span class="nx">skillToolCommands</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">enabledTools</span><span class="p">.</span><span class="nf">has</span><span class="p">(</span><span class="nx">SKILL_TOOL_NAME</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">hasAgentTool</span> <span class="o">=</span> <span class="nx">enabledTools</span><span class="p">.</span><span class="nf">has</span><span class="p">(</span><span class="nx">AGENT_TOOL_NAME</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">searchTools</span> <span class="o">=</span> <span class="nf">hasEmbeddedSearchTools</span><span class="p">()</span>
+    <span class="p">?</span> <span class="s2">`</span><span class="se">\`</span><span class="s2">find</span><span class="se">\`</span><span class="s2"> or </span><span class="se">\`</span><span class="s2">grep</span><span class="se">\`</span><span class="s2"> via the </span><span class="p">${</span><span class="nx">BASH_TOOL_NAME</span><span class="p">}</span><span class="s2"> tool`</span>
+    <span class="p">:</span> <span class="s2">`the </span><span class="p">${</span><span class="nx">GLOB_TOOL_NAME</span><span class="p">}</span><span class="s2"> or </span><span class="p">${</span><span class="nx">GREP_TOOL_NAME</span><span class="p">}</span><span class="s2">`</span>
+
+  <span class="kd">const</span> <span class="nx">items</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="nx">hasAskUserQuestionTool</span>
+      <span class="p">?</span> <span class="s2">`If you do not understand why the user has denied a tool call, use the </span><span class="p">${</span><span class="nx">ASK_USER_QUESTION_TOOL_NAME</span><span class="p">}</span><span class="s2"> to ask them.`</span>
+      <span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nf">getIsNonInteractiveSession</span><span class="p">()</span>
+      <span class="p">?</span> <span class="kc">null</span>
+      <span class="p">:</span> <span class="s2">`If you need the user to run a shell command themselves (e.g., an interactive login like </span><span class="se">\`</span><span class="s2">gcloud auth login</span><span class="se">\`</span><span class="s2">), suggest they type </span><span class="se">\`</span><span class="s2">! &lt;command&gt;</span><span class="se">\`</span><span class="s2"> in the prompt — the </span><span class="se">\`</span><span class="s2">!</span><span class="se">\`</span><span class="s2"> prefix runs the command in this session so its output lands directly in the conversation.`</span><span class="p">,</span>
+    <span class="c1">// isForkSubagentEnabled() reads getIsNonInteractiveSession() — must be</span>
+    <span class="c1">// post-boundary or it fragments the static prefix on session type.</span>
+    <span class="nx">hasAgentTool</span> <span class="p">?</span> <span class="nf">getAgentToolSection</span><span class="p">()</span> <span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="p">...(</span><span class="nx">hasAgentTool</span> <span class="o">&amp;&amp;</span>
+    <span class="nf">areExplorePlanAgentsEnabled</span><span class="p">()</span> <span class="o">&amp;&amp;</span>
+    <span class="o">!</span><span class="nf">isForkSubagentEnabled</span><span class="p">()</span>
+      <span class="p">?</span> <span class="p">[</span>
+          <span class="s2">`For simple, directed codebase searches (e.g. for a specific file/class/function) use </span><span class="p">${</span><span class="nx">searchTools</span><span class="p">}</span><span class="s2"> directly.`</span><span class="p">,</span>
+          <span class="s2">`For broader codebase exploration and deep research, use the </span><span class="p">${</span><span class="nx">AGENT_TOOL_NAME</span><span class="p">}</span><span class="s2"> tool with subagent_type=</span><span class="p">${</span><span class="nx">EXPLORE_AGENT</span><span class="p">.</span><span class="nx">agentType</span><span class="p">}</span><span class="s2">. This is slower than using </span><span class="p">${</span><span class="nx">searchTools</span><span class="p">}</span><span class="s2"> directly, so use this only when a simple, directed search proves to be insufficient or when your task will clearly require more than </span><span class="p">${</span><span class="nx">EXPLORE_AGENT_MIN_QUERIES</span><span class="p">}</span><span class="s2"> queries.`</span><span class="p">,</span>
+        <span class="p">]</span>
+      <span class="p">:</span> <span class="p">[]),</span>
+    <span class="nx">hasSkills</span>
+      <span class="p">?</span> <span class="s2">`/&lt;skill-name&gt; (e.g., /commit) is shorthand for users to invoke a user-invocable skill. When executed, the skill gets expanded to a full prompt. Use the </span><span class="p">${</span><span class="nx">SKILL_TOOL_NAME</span><span class="p">}</span><span class="s2"> tool to execute them. IMPORTANT: Only use </span><span class="p">${</span><span class="nx">SKILL_TOOL_NAME</span><span class="p">}</span><span class="s2"> for skills listed in its user-invocable skills section - do not guess or use built-in CLI commands.`</span>
+      <span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nx">DISCOVER_SKILLS_TOOL_NAME</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span>
+    <span class="nx">hasSkills</span> <span class="o">&amp;&amp;</span>
+    <span class="nx">enabledTools</span><span class="p">.</span><span class="nf">has</span><span class="p">(</span><span class="nx">DISCOVER_SKILLS_TOOL_NAME</span><span class="p">)</span>
+      <span class="p">?</span> <span class="nf">getDiscoverSkillsGuidance</span><span class="p">()</span>
+      <span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="nx">hasAgentTool</span> <span class="o">&amp;&amp;</span>
+    <span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">VERIFICATION_AGENT</span><span class="dl">'</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+    <span class="c1">// 3P default: false — verification agent is ant-only A/B</span>
+    <span class="nf">getFeatureValue_CACHED_MAY_BE_STALE</span><span class="p">(</span><span class="dl">'</span><span class="s1">tengu_hive_evidence</span><span class="dl">'</span><span class="p">,</span> <span class="kc">false</span><span class="p">)</span>
+      <span class="p">?</span> <span class="s2">`The contract: when non-trivial implementation happens on your turn, independent adversarial verification must happen before you report completion \u2014 regardless of who did the implementing (you directly, a fork you spawned, or a subagent). You are the one reporting to the user; you own the gate. Non-trivial means: 3+ file edits, backend/API changes, or infrastructure changes. Spawn the </span><span class="p">${</span><span class="nx">AGENT_TOOL_NAME</span><span class="p">}</span><span class="s2"> tool with subagent_type="</span><span class="p">${</span><span class="nx">VERIFICATION_AGENT_TYPE</span><span class="p">}</span><span class="s2">". Your own checks, caveats, and a fork's self-checks do NOT substitute \u2014 only the verifier assigns a verdict; you cannot self-assign PARTIAL. Pass the original user request, all files changed (by anyone), the approach, and the plan file path if applicable. Flag concerns if you have them but do NOT share test results or claim things work. On FAIL: fix, resume the verifier with its findings plus your fix, repeat until PASS. On PASS: spot-check it \u2014 re-run 2-3 commands from its report, confirm every PASS has a Command run block with output that matches your re-run. If any PASS lacks a command block or diverges, resume the verifier with the specifics. On PARTIAL (from the verifier): report what passed and what could not be verified.`</span>
+      <span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+  <span class="p">].</span><span class="nf">filter</span><span class="p">(</span><span class="nx">item</span> <span class="o">=&gt;</span> <span class="nx">item</span> <span class="o">!==</span> <span class="kc">null</span><span class="p">)</span>
+
+  <span class="k">if </span><span class="p">(</span><span class="nx">items</span><span class="p">.</span><span class="nx">length</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="kc">null</span>
+  <span class="k">return</span> <span class="p">[</span><span class="dl">'</span><span class="s1"># Session-specific guidance</span><span class="dl">'</span><span class="p">,</span> <span class="p">...</span><span class="nf">prependBullets</span><span class="p">(</span><span class="nx">items</span><span class="p">)].</span><span class="nf">join</span><span class="p">(</span><span class="dl">'</span><span class="se">\n</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>这里主要处理了几个工具的关系 第一个就是<code class="language-plaintext highlighter-rouge">hasAskUserQuestionTool</code>，如果有的话模型可以主动向用户提问 prompt引导模型去这么做 第二个<code class="language-plaintext highlighter-rouge">getIsNonInteractiveSession()</code>，这个函数会判断当前是否是交互式会话，如果是的话，模型将不能进行交互式的操作，只能进行非交互式的操作，比如执行命令，或者调用工具 第三个<code class="language-plaintext highlighter-rouge">hasAgentTool</code>，这个主要是关于子agent fork的，会告诉模型怎么去fork一个subagent</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c1">// isForkSubagentEnabled() reads getIsNonInteractiveSession() — must be</span>
+    <span class="c1">// post-boundary or it fragments the static prefix on session type.</span>
+<span class="kd">function</span> <span class="nf">getAgentToolSection</span><span class="p">():</span> <span class="kr">string</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="nf">isForkSubagentEnabled</span><span class="p">()</span>
+    <span class="p">?</span> <span class="s2">`Calling </span><span class="p">${</span><span class="nx">AGENT_TOOL_NAME</span><span class="p">}</span><span class="s2"> without a subagent_type creates a fork, which runs in the background and keeps its tool output out of your context \u2014 so you can keep chatting with the user while it works. Reach for it when research or multi-step implementation work would otherwise fill your context with raw output you won't need again. **If you ARE the fork** \u2014 execute directly; do not re-delegate.`</span>
+    <span class="p">:</span> <span class="s2">`Use the </span><span class="p">${</span><span class="nx">AGENT_TOOL_NAME</span><span class="p">}</span><span class="s2"> tool with specialized agents when the task at hand matches the agent's description. Subagents are valuable for parallelizing independent queries or for protecting the main context window from excessive results, but they should not be used excessively when not needed. Importantly, avoid duplicating work that subagents are already doing - if you delegate research to a subagent, do not also perform the same searches yourself.`</span>
+<span class="p">}</span>
+</code></pre></div></div> <p><code class="language-plaintext highlighter-rouge">areExplorePlanAgentsEnabled()</code>但没有subagent的时候，会引导在较为复杂的任务上使用这个ExplorePlanAgents <code class="language-plaintext highlighter-rouge">hasSkills</code>故名思意，就是有关于skill的相关配置，引导llm可以使用skill 总的来说，这里都是引导并且告诉llm什么工具可以用，怎么用的</p> <h3 id="memory">memory</h3> <p><code class="language-plaintext highlighter-rouge">systemPromptSection('memory', () =&gt; loadMemoryPrompt()),</code>这是 Claude Code 的记忆系统加载器，负责把用户的记忆文件注入到 system prompt 里</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * Load the unified memory prompt for inclusion in the system prompt.
+ * Dispatches based on which memory systems are enabled:
+ *   - auto + team: combined prompt (both directories)
+ *   - auto only: memory lines (single directory)
+ * Team memory requires auto memory (enforced by isTeamMemoryEnabled), so
+ * there is no team-only branch.
+ *
+ * Returns null when auto memory is disabled.
+ */</span>
+<span class="k">export</span> <span class="k">async</span> <span class="kd">function</span> <span class="nf">loadMemoryPrompt</span><span class="p">():</span> <span class="nb">Promise</span><span class="o">&lt;</span><span class="kr">string</span> <span class="o">|</span> <span class="kc">null</span><span class="o">&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">autoEnabled</span> <span class="o">=</span> <span class="nf">isAutoMemoryEnabled</span><span class="p">()</span>
+
+  <span class="kd">const</span> <span class="nx">skipIndex</span> <span class="o">=</span> <span class="nf">getFeatureValue_CACHED_MAY_BE_STALE</span><span class="p">(</span>
+    <span class="dl">'</span><span class="s1">tengu_moth_copse</span><span class="dl">'</span><span class="p">,</span>
+    <span class="kc">false</span><span class="p">,</span>
+  <span class="p">)</span>
+
+  <span class="c1">// KAIROS daily-log mode takes precedence over TEAMMEM: the append-only</span>
+  <span class="c1">// log paradigm does not compose with team sync (which expects a shared</span>
+  <span class="c1">// MEMORY.md that both sides read + write). Gating on `autoEnabled` here</span>
+  <span class="c1">// means the !autoEnabled case falls through to the tengu_memdir_disabled</span>
+  <span class="c1">// telemetry block below, matching the non-KAIROS path.</span>
+  <span class="k">if </span><span class="p">(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">KAIROS</span><span class="dl">'</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="nx">autoEnabled</span> <span class="o">&amp;&amp;</span> <span class="nf">getKairosActive</span><span class="p">())</span> <span class="p">{</span>
+    <span class="nf">logMemoryDirCounts</span><span class="p">(</span><span class="nf">getAutoMemPath</span><span class="p">(),</span> <span class="p">{</span>
+      <span class="na">memory_type</span><span class="p">:</span>
+        <span class="dl">'</span><span class="s1">auto</span><span class="dl">'</span> <span class="kd">as </span><span class="nx">AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="nf">buildAssistantDailyLogPrompt</span><span class="p">(</span><span class="nx">skipIndex</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="c1">// Cowork injects memory-policy text via env var; thread into all builders.</span>
+  <span class="kd">const</span> <span class="nx">coworkExtraGuidelines</span> <span class="o">=</span>
+    <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CLAUDE_COWORK_MEMORY_EXTRA_GUIDELINES</span>
+  <span class="kd">const</span> <span class="nx">extraGuidelines</span> <span class="o">=</span>
+    <span class="nx">coworkExtraGuidelines</span> <span class="o">&amp;&amp;</span> <span class="nx">coworkExtraGuidelines</span><span class="p">.</span><span class="nf">trim</span><span class="p">().</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span>
+      <span class="p">?</span> <span class="p">[</span><span class="nx">coworkExtraGuidelines</span><span class="p">]</span>
+      <span class="p">:</span> <span class="kc">undefined</span>
+
+  <span class="k">if </span><span class="p">(</span><span class="nf">feature</span><span class="p">(</span><span class="dl">'</span><span class="s1">TEAMMEM</span><span class="dl">'</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">if </span><span class="p">(</span><span class="nx">teamMemPaths</span><span class="o">!</span><span class="p">.</span><span class="nf">isTeamMemoryEnabled</span><span class="p">())</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">autoDir</span> <span class="o">=</span> <span class="nf">getAutoMemPath</span><span class="p">()</span>
+      <span class="kd">const</span> <span class="nx">teamDir</span> <span class="o">=</span> <span class="nx">teamMemPaths</span><span class="o">!</span><span class="p">.</span><span class="nf">getTeamMemPath</span><span class="p">()</span>
+      <span class="c1">// Harness guarantees these directories exist so the model can write</span>
+      <span class="c1">// without checking. The prompt text reflects this ("already exists").</span>
+      <span class="c1">// Only creating teamDir is sufficient: getTeamMemPath() is defined as</span>
+      <span class="c1">// join(getAutoMemPath(), 'team'), so recursive mkdir of the team dir</span>
+      <span class="c1">// creates the auto dir as a side effect. If the team dir ever moves</span>
+      <span class="c1">// out from under the auto dir, add a second ensureMemoryDirExists call</span>
+      <span class="c1">// for autoDir here.</span>
+      <span class="k">await</span> <span class="nf">ensureMemoryDirExists</span><span class="p">(</span><span class="nx">teamDir</span><span class="p">)</span>
+      <span class="nf">logMemoryDirCounts</span><span class="p">(</span><span class="nx">autoDir</span><span class="p">,</span> <span class="p">{</span>
+        <span class="na">memory_type</span><span class="p">:</span>
+          <span class="dl">'</span><span class="s1">auto</span><span class="dl">'</span> <span class="kd">as </span><span class="nx">AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS</span><span class="p">,</span>
+      <span class="p">})</span>
+      <span class="nf">logMemoryDirCounts</span><span class="p">(</span><span class="nx">teamDir</span><span class="p">,</span> <span class="p">{</span>
+        <span class="na">memory_type</span><span class="p">:</span>
+          <span class="dl">'</span><span class="s1">team</span><span class="dl">'</span> <span class="kd">as </span><span class="nx">AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS</span><span class="p">,</span>
+      <span class="p">})</span>
+      <span class="k">return</span> <span class="nx">teamMemPrompts</span><span class="o">!</span><span class="p">.</span><span class="nf">buildCombinedMemoryPrompt</span><span class="p">(</span>
+        <span class="nx">extraGuidelines</span><span class="p">,</span>
+        <span class="nx">skipIndex</span><span class="p">,</span>
+      <span class="p">)</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">if </span><span class="p">(</span><span class="nx">autoEnabled</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">autoDir</span> <span class="o">=</span> <span class="nf">getAutoMemPath</span><span class="p">()</span>
+    <span class="c1">// Harness guarantees the directory exists so the model can write without</span>
+    <span class="c1">// checking. The prompt text reflects this ("already exists").</span>
+    <span class="k">await</span> <span class="nf">ensureMemoryDirExists</span><span class="p">(</span><span class="nx">autoDir</span><span class="p">)</span>
+    <span class="nf">logMemoryDirCounts</span><span class="p">(</span><span class="nx">autoDir</span><span class="p">,</span> <span class="p">{</span>
+      <span class="na">memory_type</span><span class="p">:</span>
+        <span class="dl">'</span><span class="s1">auto</span><span class="dl">'</span> <span class="kd">as </span><span class="nx">AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS</span><span class="p">,</span>
+    <span class="p">})</span>
+    <span class="k">return</span> <span class="nf">buildMemoryLines</span><span class="p">(</span>
+      <span class="dl">'</span><span class="s1">auto memory</span><span class="dl">'</span><span class="p">,</span>
+      <span class="nx">autoDir</span><span class="p">,</span>
+      <span class="nx">extraGuidelines</span><span class="p">,</span>
+      <span class="nx">skipIndex</span><span class="p">,</span>
+    <span class="p">).</span><span class="nf">join</span><span class="p">(</span><span class="dl">'</span><span class="se">\n</span><span class="dl">'</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="nf">logEvent</span><span class="p">(</span><span class="dl">'</span><span class="s1">tengu_memdir_disabled</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+    <span class="na">disabled_by_env_var</span><span class="p">:</span> <span class="nf">isEnvTruthy</span><span class="p">(</span>
+      <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CLAUDE_CODE_DISABLE_AUTO_MEMORY</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="na">disabled_by_setting</span><span class="p">:</span>
+      <span class="o">!</span><span class="nf">isEnvTruthy</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CLAUDE_CODE_DISABLE_AUTO_MEMORY</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+      <span class="nf">getInitialSettings</span><span class="p">().</span><span class="nx">autoMemoryEnabled</span> <span class="o">===</span> <span class="kc">false</span><span class="p">,</span>
+  <span class="p">})</span>
+  <span class="c1">// Gate on the GB flag directly, not isTeamMemoryEnabled() — that function</span>
+  <span class="c1">// checks isAutoMemoryEnabled() first, which is definitionally false in this</span>
+  <span class="c1">// branch. We want "was this user in the team-memory cohort at all."</span>
+  <span class="k">if </span><span class="p">(</span><span class="nf">getFeatureValue_CACHED_MAY_BE_STALE</span><span class="p">(</span><span class="dl">'</span><span class="s1">tengu_herring_clock</span><span class="dl">'</span><span class="p">,</span> <span class="kc">false</span><span class="p">))</span> <span class="p">{</span>
+    <span class="nf">logEvent</span><span class="p">(</span><span class="dl">'</span><span class="s1">tengu_team_memdir_disabled</span><span class="dl">'</span><span class="p">,</span> <span class="p">{})</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="kc">null</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>他有三种记忆模式，分别是<code class="language-plaintext highlighter-rouge">Auto Memory（标准个人模式）</code>、<code class="language-plaintext highlighter-rouge">Team Memory（团队模式）</code>和<code class="language-plaintext highlighter-rouge">Kairos Daily Log（Kairos 日志模式）</code></p> <h4 id="auto-memory">Auto memory</h4> <p>CLAUDE.md 更像“长期指令/规则” AutoMem / TeamMem 更像“长期知识库” 这里的设计可以参考一下b站这位up讲的视频</p> <iframe src="https://player.bilibili.com/player.html?bvid=BV1ZA93BtEKW&amp;page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" width="100%" height="500"></iframe> <p>落盘（本地和持久化）、更新和维护 =&gt; 写入 总的来说这些md文件都有一个frontmatter，用来方便做渐进式披露 目录结构</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">~</span><span class="sr">/.claude/</span><span class="nx">projects</span><span class="o">/&lt;</span><span class="nx">sanitized</span><span class="o">-</span><span class="nx">git</span><span class="o">-</span><span class="nx">root</span><span class="o">&gt;</span><span class="sr">/memory/</span>
+<span class="err">├──</span> <span class="nx">MEMORY</span><span class="p">.</span><span class="nx">md</span>                  <span class="err">←</span> <span class="nx">索引文件</span><span class="err">（</span><span class="nx">每次对话都加载到上下文</span><span class="err">）</span>
+<span class="err">├──</span> <span class="nx">user_role</span><span class="p">.</span><span class="nx">md</span>               <span class="err">←</span> <span class="nx">记忆文件</span><span class="err">：</span><span class="nx">带</span> <span class="nx">YAML</span> <span class="nx">frontmatter</span>
+<span class="err">├──</span> <span class="nx">feedback_testing</span><span class="p">.</span><span class="nx">md</span>
+<span class="err">├──</span> <span class="nx">project_auth_rewrite</span><span class="p">.</span><span class="nx">md</span>
+<span class="err">└──</span> <span class="nx">reference_linear_ingest</span><span class="p">.</span><span class="nx">md</span>
+</code></pre></div></div> <p>再来讲讲几种记忆的分类：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- src/utils/claudemd.ts
+    - src/utils/memory/types.ts：
+        - Managed：系统级托管规则
+        - User：用户级 ~/.claude/CLAUDE.md
+        - Project：仓库内 CLAUDE.md、.claude/CLAUDE.md、.claude/rules/*.md
+        - Local：私有项目级 CLAUDE.local.md
+        - AutoMem：自动记忆目录的 MEMORY.md
+        - TeamMem：团队共享记忆目录的 MEMORY.md
+</code></pre></div></div> <p>内容语义分类（taxonomy，<code class="language-plaintext highlighter-rouge">AutoMemory</code>）: user/feedback/project/references</p> <h5 id="types_section_individual">TYPES_SECTION_INDIVIDUAL</h5> <h6 id="user">user</h6> <p><code class="language-plaintext highlighter-rouge">user_role</code>主要讲的是用户是谁，本质上是帮助模型来判断什么样的输出是好的，例如你是一个没有接触过编程的小白，那去讲一些太过细节的问题以及内容就是不太适合的，毕竟看不懂；如果你是一个大牛，想要得到的答案肯定跟小白不一样，本质是让模型输出更符合你的意图的一个辅助性工具</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~\Claude-Code\src\memdir\memoryTypes.ts
+  '&lt;type&gt;',
+  '    &lt;name&gt;user&lt;/name&gt;',
+  '    &lt;scope&gt;always private&lt;/scope&gt;',
+  "    &lt;description&gt;Contain information about the user's role, goals, responsibilities, and knowledge. Great user memories help you tailor your future behavior to the user's preferences and perspective. Your goal in reading and writing these memories is to build up an understanding of who the user is and how you can be most helpful to them specifically. For example, you should collaborate with a senior software engineer differently than a student who is coding for the very first time. Keep in mind, that the aim here is to be helpful to the user. Avoid writing memories about the user that could be viewed as a negative judgement or that are not relevant to the work you're trying to accomplish together.&lt;/description&gt;",
+  "    &lt;when_to_save&gt;When you learn any details about the user's role, preferences, responsibilities, or knowledge&lt;/when_to_save&gt;",
+  "    &lt;how_to_use&gt;When your work should be informed by the user's profile or perspective. For example, if the user is asking you to explain a part of the code, you should answer that question in a way that is tailored to the specific details that they will find most valuable or that helps them build their mental model in relation to domain knowledge they already have.&lt;/how_to_use&gt;",
+  '    &lt;examples&gt;',
+  "    user: I'm a data scientist investigating what logging we have in place",
+  '    assistant: [saves private user memory: user is a data scientist, currently focused on observability/logging]',
+  '',
+  "    user: I've been writing Go for ten years but this is my first time touching the React side of this repo",
+  "    assistant: [saves private user memory: deep Go expertise, new to React and this project's frontend — frame frontend explanations in terms of backend analogues]",
+  '    &lt;/examples&gt;',
+  '&lt;/type&gt;',
+</code></pre></div></div> <h6 id="feedback">feedback</h6> <p><code class="language-plaintext highlighter-rouge">feedback_testing</code>是最“行为约束型”的 memory，关注“你以后应该怎么做”，并且是而非个人风格偏好，保存为团队，对于这个项目的整体feedback，例如我有一个项目需要测试的时候启动conda环境中的一个固定环境，而非默认的python编译器，就应当是记在feedback_testing中的一段内容，因为这个环境是项目运行环境，不以我个人偏好而改变 feedback 不只记录负反馈，也记录正反馈。“不要 mock DB” 是 feedback，“这个 bundled PR 方式对” 也是 feedback 为什么要有解释呢：因为这类记忆不是像代码一样的静态事实，而是可迁移规则。没有 Why，模型以后只能机械套用；有了 Why，它才知道边界条件。这也是 frontmatter 示例里专门强调 feedback/project 正文结构的原因：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~\Claude-Code\src\memdir\memoryTypes.ts
+  '&lt;type&gt;',
+  '    &lt;name&gt;feedback&lt;/name&gt;',
+  '    &lt;scope&gt;default to private. Save as team only when the guidance is clearly a project-wide convention that every contributor should follow (e.g., a testing policy, a build invariant), not a personal style preference.&lt;/scope&gt;',
+  "    &lt;description&gt;Guidance the user has given you about how to approach work — both what to avoid and what to keep doing. These are a very important type of memory to read and write as they allow you to remain coherent and responsive to the way you should approach work in the project. Record from failure AND success: if you only save corrections, you will avoid past mistakes but drift away from approaches the user has already validated, and may grow overly cautious. Before saving a private feedback memory, check that it doesn't contradict a team feedback memory — if it does, either don't save it or note the override explicitly.&lt;/description&gt;",
+  '    &lt;when_to_save&gt;Any time the user corrects your approach ("no not that", "don\'t", "stop doing X") OR confirms a non-obvious approach worked ("yes exactly", "perfect, keep doing that", accepting an unusual choice without pushback). Corrections are easy to notice; confirmations are quieter — watch for them. In both cases, save what is applicable to future conversations, especially if surprising or not obvious from the code. Include *why* so you can judge edge cases later.&lt;/when_to_save&gt;',
+  '    &lt;how_to_use&gt;Let these memories guide your behavior so that the user and other users in the project do not need to offer the same guidance twice.&lt;/how_to_use&gt;',
+  '    &lt;body_structure&gt;Lead with the rule itself, then a **Why:** line (the reason the user gave — often a past incident or strong preference) and a **How to apply:** line (when/where this guidance kicks in). Knowing *why* lets you judge edge cases instead of blindly following the rule.&lt;/body_structure&gt;',
+  '    &lt;examples&gt;',
+  "    user: don't mock the database in these tests — we got burned last quarter when mocked tests passed but the prod migration failed",
+  '    assistant: [saves team feedback memory: integration tests must hit a real database, not mocks. Reason: prior incident where mock/prod divergence masked a broken migration. Team scope: this is a project testing policy, not a personal preference]',
+  '',
+  '    user: stop summarizing what you just did at the end of every response, I can read the diff',
+  "    assistant: [saves private feedback memory: this user wants terse responses with no trailing summaries. Private because it's a communication preference, not a project convention]",
+  '',
+  "    user: yeah the single bundled PR was the right call here, splitting this one would've just been churn",
+  '    assistant: [saves private feedback memory: for refactors in this area, user prefers one bundled PR over many small ones. Confirmed after I chose this approach — a validated judgment call, not a correction]',
+  '    &lt;/examples&gt;',
+  '&lt;/type&gt;',
+  '&lt;type&gt;',
+</code></pre></div></div> <h6 id="project">project</h6> <p>对于项目来说，如果我们要去存一个专门的记忆去记所谓的项目细节例如代码这是不太可能的 第一 对于项目来说，代码就在那里，特地存起来是多此一举 第二 代码会变，一旦上下文被你的memory污染误导那效果确实不好 所以类 memory 的核心是“非代码可推导”，所以 project 并不是“项目知识大杂烩”，而是“代码外的项目现实”。 project 往往在 recall 阶段最有价值，因为用户问“为什么要改这个”“最近这个方向的约束是什么”时，代码本身不足以回答。</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  '&lt;type&gt;',
+  '    &lt;name&gt;project&lt;/name&gt;',
+  '    &lt;scope&gt;private or team, but strongly bias toward team&lt;/scope&gt;',
+  '    &lt;description&gt;Information that you learn about ongoing work, goals, initiatives, bugs, or incidents within the project that is not otherwise derivable from the code or git history. Project memories help you understand the broader context and motivation behind the work users are working on within this working directory.&lt;/description&gt;',
+  '    &lt;when_to_save&gt;When you learn who is doing what, why, or by when. These states change relatively quickly so try to keep your understanding of this up to date. Always convert relative dates in user messages to absolute dates when saving (e.g., "Thursday" → "2026-03-05"), so the memory remains interpretable after time passes.&lt;/when_to_save&gt;',
+  "    &lt;how_to_use&gt;Use these memories to more fully understand the details and nuance behind the user's request, anticipate coordination issues across users, make better informed suggestions.&lt;/how_to_use&gt;",
+  '    &lt;body_structure&gt;Lead with the fact or decision, then a **Why:** line (the motivation — often a constraint, deadline, or stakeholder ask) and a **How to apply:** line (how this should shape your suggestions). Project memories decay fast, so the why helps future-you judge whether the memory is still load-bearing.&lt;/body_structure&gt;',
+  '    &lt;examples&gt;',
+  "    user: we're freezing all non-critical merges after Thursday — mobile team is cutting a release branch",
+  '    assistant: [saves team project memory: merge freeze begins 2026-03-05 for mobile release cut. Flag any non-critical PR work scheduled after that date]',
+  '',
+  "    user: the reason we're ripping out the old auth middleware is that legal flagged it for storing session tokens in a way that doesn't meet the new compliance requirements",
+  '    assistant: [saves team project memory: auth middleware rewrite is driven by legal/compliance requirements around session token storage, not tech-debt cleanup — scope decisions should favor compliance over ergonomics]',
+  '    &lt;/examples&gt;',
+  '&lt;/type&gt;',
+</code></pre></div></div> <h6 id="reference">reference</h6> <p>reference: 不是存事实本身，而是存“去哪找事实”。</p> <ul> <li>典型内容： <ul> <li>某个 Linear project 是什么</li> <li>哪个 Grafana dashboard 看什么</li> <li>哪个 Slack channel 存什么信息 <div class="language-plaintext highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>  '&lt;type&gt;',
+  '    &lt;name&gt;reference&lt;/name&gt;',
+  '    &lt;description&gt;Stores pointers to where information can be found in external systems. These memories allow you to remember where to look to find up-to-date information outside of the project directory.&lt;/description&gt;',
+  '    &lt;when_to_save&gt;When you learn about resources in external systems and their purpose. For example, that bugs are tracked in a specific project in Linear or that feedback can be found in a specific Slack channel.&lt;/when_to_save&gt;',
+  '    &lt;how_to_use&gt;When the user references an external system or information that may be in an external system.&lt;/how_to_use&gt;',
+  '    &lt;examples&gt;',
+  '    user: check the Linear project "INGEST" if you want context on these tickets, that\'s where we track all pipeline bugs',
+  '    assistant: [saves reference memory: pipeline bugs are tracked in Linear project "INGEST"]',
+  '',
+  "    user: the Grafana board at grafana.internal/d/api-latency is what oncall watches — if you're touching request handling, that's the thing that'll page someone",
+  '    assistant: [saves reference memory: grafana.internal/d/api-latency is the oncall latency dashboard — check it when editing request-path code]',
+  '    &lt;/examples&gt;',
+  '&lt;/type&gt;',
+</code></pre></div> </div> <h6 id="prompt组装">prompt组装</h6> <p>指令层次结构</p> </li> </ul> </li> </ul> <p>buildMemoryLines 拼装出的完整指令结构：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># auto memory                           ← 标题
+                                        ← 1. 总体定位
+You have a persistent, file-based...    ← "你应该逐步建立记忆"
+                                        ← 2. 显式触发规则
+If the user explicitly asks...           ← 用户说"记住这个" → 立即保存
+                                        ← 3. 类型分类
+## Types of memory                       ← 四类型定义（带示例）
+                                        ← 4. 禁止保存
+## What NOT to save                      ← 代码/git/CLAUDE.md 等排除项
+                                        ← 5. 写入方法
+## How to save memories                  ← 两步写入流程
+                                        ← 6. 读取时机
+## When to access memories               ← 何时读、何时忽略
+                                        ← 7. 读取验证
+## Before recommending from memory       ← 验证记忆中的具体引用是否还存在
+                                        ← 8. 与其他持久化机制的边界
+## Memory and other forms of persistence ← Plan vs Task vs Memory 的分工
+                                        ← 9. 搜索历史
+## Searching past context               ← grep 记忆目录和会话记录
+</code></pre></div></div> <p>下面是拼装的代码</p> <div class="language-ts highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="kd">const</span> <span class="nx">MEMORY_FRONTMATTER_EXAMPLE</span><span class="p">:</span> <span class="k">readonly</span> <span class="kr">string</span><span class="p">[]</span> <span class="o">=</span> <span class="p">[</span>
+  <span class="dl">'</span><span class="s1">```markdown</span><span class="dl">'</span><span class="p">,</span>
+  <span class="dl">'</span><span class="s1">---</span><span class="dl">'</span><span class="p">,</span>
+  <span class="dl">'</span><span class="s1">name: </span><span class="dl">'</span><span class="p">,</span>
+  <span class="dl">'</span><span class="s1">description: </span><span class="dl">'</span><span class="p">,</span>
+  <span class="s2">`type: }`</span><span class="p">,</span>
+  <span class="dl">'</span><span class="s1">---</span><span class="dl">'</span><span class="p">,</span>
+  <span class="dl">''</span><span class="p">,</span>
+  <span class="dl">''</span><span class="p">,</span>
+  <span class="dl">'</span><span class="s1">```</span><span class="dl">'</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="k">export</span> <span class="kd">function</span> <span class="nf">buildMemoryLines</span><span class="p">(</span>
+  <span class="nx">displayName</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span>
+  <span class="nx">memoryDir</span><span class="p">:</span> <span class="kr">string</span><span class="p">,</span>
+  <span class="nx">extraGuidelines</span><span class="p">?:</span> <span class="kr">string</span><span class="p">[],</span>
+  <span class="nx">skipIndex</span> <span class="o">=</span> <span class="kc">false</span><span class="p">,</span>
+<span class="p">):</span> <span class="kr">string</span><span class="p">[]</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">howToSave</span> <span class="o">=</span> <span class="nx">skipIndex</span>
+    <span class="p">?</span> <span class="p">[</span>
+        <span class="dl">'</span><span class="s1">## How to save memories</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">''</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">Write each memory to its own file (e.g., `user_role.md`, `feedback_testing.md`) using this frontmatter format:</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">''</span><span class="p">,</span>
+        <span class="p">...</span><span class="nx">MEMORY_FRONTMATTER_EXAMPLE</span><span class="p">,</span>
+        <span class="dl">''</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">- Keep the name, description, and type fields in memory files up-to-date with the content</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">- Organize memory semantically by topic, not chronologically</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">- Update or remove memories that turn out to be wrong or outdated</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">- Do not write duplicate memories. First check if there is an existing memory you can update before writing a new one.</span><span class="dl">'</span><span class="p">,</span>
+      <span class="p">]</span>
+    <span class="p">:</span> <span class="p">[</span>
+        <span class="dl">'</span><span class="s1">## How to save memories</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">''</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">Saving a memory is a two-step process:</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">''</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">**Step 1** — write the memory to its own file (e.g., `user_role.md`, `feedback_testing.md`) using this frontmatter format:</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">''</span><span class="p">,</span>
+        <span class="p">...</span><span class="nx">MEMORY_FRONTMATTER_EXAMPLE</span><span class="p">,</span>
+        <span class="dl">''</span><span class="p">,</span>
+        <span class="s2">`**Step 2** — add a pointer to that file in </span><span class="se">\`</span><span class="p">${</span><span class="nx">ENTRYPOINT_NAME</span><span class="p">}</span><span class="se">\`</span><span class="s2">. </span><span class="se">\`</span><span class="p">${</span><span class="nx">ENTRYPOINT_NAME</span><span class="p">}</span><span class="se">\`</span><span class="s2"> is an index, not a memory — each entry should be one line, under ~150 characters: </span><span class="se">\`</span><span class="s2">- [Title](file.md) — one-line hook</span><span class="se">\`</span><span class="s2">. It has no frontmatter. Never write memory content directly into </span><span class="se">\`</span><span class="p">${</span><span class="nx">ENTRYPOINT_NAME</span><span class="p">}</span><span class="se">\`</span><span class="s2">.`</span><span class="p">,</span>
+        <span class="dl">''</span><span class="p">,</span>
+        <span class="s2">`- </span><span class="se">\`</span><span class="p">${</span><span class="nx">ENTRYPOINT_NAME</span><span class="p">}</span><span class="se">\`</span><span class="s2"> is always loaded into your conversation context — lines after </span><span class="p">${</span><span class="nx">MAX_ENTRYPOINT_LINES</span><span class="p">}</span><span class="s2"> will be truncated, so keep the index concise`</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">- Keep the name, description, and type fields in memory files up-to-date with the content</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">- Organize memory semantically by topic, not chronologically</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">- Update or remove memories that turn out to be wrong or outdated</span><span class="dl">'</span><span class="p">,</span>
+        <span class="dl">'</span><span class="s1">- Do not write duplicate memories. First check if there is an existing memory you can update before writing a new one.</span><span class="dl">'</span><span class="p">,</span>
+      <span class="p">]</span>
+
+  <span class="kd">const</span> <span class="nx">lines</span><span class="p">:</span> <span class="kr">string</span><span class="p">[]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">`# </span><span class="p">${</span><span class="nx">displayName</span><span class="p">}</span><span class="s2">`</span><span class="p">,</span>
+    <span class="dl">''</span><span class="p">,</span>
+    <span class="s2">`You have a persistent, file-based memory system at </span><span class="se">\`</span><span class="p">${</span><span class="nx">memoryDir</span><span class="p">}</span><span class="se">\`</span><span class="s2">. </span><span class="p">${</span><span class="nx">DIR_EXISTS_GUIDANCE</span><span class="p">}</span><span class="s2">`</span><span class="p">,</span>
+    <span class="dl">''</span><span class="p">,</span>
+    <span class="dl">"</span><span class="s2">You should build up this memory system over time so that future conversations can have a complete picture of who the user is, how they'd like to collaborate with you, what behaviors to avoid or repeat, and the context behind the work the user gives you.</span><span class="dl">"</span><span class="p">,</span>
+    <span class="dl">''</span><span class="p">,</span>
+    <span class="dl">'</span><span class="s1">If the user explicitly asks you to remember something, save it immediately as whichever type fits best. If they ask you to forget something, find and remove the relevant entry.</span><span class="dl">'</span><span class="p">,</span>
+    <span class="dl">''</span><span class="p">,</span>
+    <span class="p">...</span><span class="nx">TYPES_SECTION_INDIVIDUAL</span><span class="p">,</span>
+    <span class="p">...</span><span class="nx">WHAT_NOT_TO_SAVE_SECTION</span><span class="p">,</span>
+    <span class="dl">''</span><span class="p">,</span>
+    <span class="p">...</span><span class="nx">howToSave</span><span class="p">,</span>
+    <span class="dl">''</span><span class="p">,</span>
+    <span class="p">...</span><span class="nx">WHEN_TO_ACCESS_SECTION</span><span class="p">,</span>
+    <span class="dl">''</span><span class="p">,</span>
+    <span class="p">...</span><span class="nx">TRUSTING_RECALL_SECTION</span><span class="p">,</span>
+    <span class="dl">''</span><span class="p">,</span>
+    <span class="dl">'</span><span class="s1">## Memory and other forms of persistence</span><span class="dl">'</span><span class="p">,</span>
+    <span class="dl">'</span><span class="s1">Memory is one of several persistence mechanisms available to you as you assist the user in a given conversation. The distinction is often that memory can be recalled in future conversations and should not be used for persisting information that is only useful within the scope of the current conversation.</span><span class="dl">'</span><span class="p">,</span>
+    <span class="dl">'</span><span class="s1">- When to use or update a plan instead of memory: If you are about to start a non-trivial implementation task and would like to reach alignment with the user on your approach you should use a Plan rather than saving this information to memory. Similarly, if you already have a plan within the conversation and you have changed your approach persist that change by updating the plan rather than saving a memory.</span><span class="dl">'</span><span class="p">,</span>
+    <span class="dl">'</span><span class="s1">- When to use or update tasks instead of memory: When you need to break your work in current conversation into discrete steps or keep track of your progress use tasks instead of saving to memory. Tasks are great for persisting information about the work that needs to be done in the current conversation, but memory should be reserved for information that will be useful in future conversations.</span><span class="dl">'</span><span class="p">,</span>
+    <span class="dl">''</span><span class="p">,</span>
+    <span class="p">...(</span><span class="nx">extraGuidelines</span> <span class="o">??</span> <span class="p">[]),</span>
+    <span class="dl">''</span><span class="p">,</span>
+  <span class="p">]</span>
+
+  <span class="nx">lines</span><span class="p">.</span><span class="nf">push</span><span class="p">(...</span><span class="nf">buildSearchingPastContextSection</span><span class="p">(</span><span class="nx">memoryDir</span><span class="p">))</span>
+
+  <span class="k">return</span> <span class="nx">lines</span>
+<span class="p">}</span>
+</code></pre></div></div> <p>buildMemoryLines 本质上是一份精心编排的 system prompt，每个 section 都经过 eval 验证（注释里多次提到 eval case 编号）。它不是一次性写好的——是通过 A/B 测试逐步迭代出来的：</p> <ul> <li>H1（验证函数/文件引用）：0/2 → 3/3</li> <li>H5（读取端噪声拒绝）：0/2 → 3/3</li> <li>H6（忽略指令污染）：1/3 → 解决</li> <li>位置敏感：同一个指令放在不同 section 效果不同（H1 放在”When to access”里 0/3，独立成 section 3/3）</li> </ul> <ol> <li>WHAT_NOT_TO_SAVE_SECTION —— 不写什么</li> </ol> <p>文件：memoryTypes.ts:183-195</p> <p>硬排除列表，即使用户明确要求也保存：</p> <p>❌ 代码模式、架构、文件路径、项目结构 → 能从代码推导 ❌ Git 历史、最近改动 → git log 是权威来源 ❌ 调试方案、修复方法 → 修复在代码里，上下文在 commit 里 ❌ CLAUDE.md 已有的内容 → 重复 ❌ 临时任务状态 → 会话结束就失效</p> <p>最后一句是关键防线：</p> <p>▎ ‘These exclusions apply even when the user explicitly asks you to save. ▎ If they ask you to save a PR list or activity summary, ask what was ▎ surprising or non-obvious about it — that is the part worth keeping.’</p> <p>用户说”保存这周的 PR 列表” → Claude 不应该照做，而是问”其中有什么出乎意料或非显而易见的部分”——那才是值得保存的。</p> <hr> <ol> <li>howToSave —— 怎么写</li> </ol> <p>由 buildMemoryLines 根据 skipIndex 动态生成两种版本：</p> <p>标准模式（两步）： Step 1: 写记忆文件（带 frontmatter: name/description/type） Step 2: 在 MEMORY.md 添加一行索引指针 格式: <code class="language-plaintext highlighter-rouge">- [Title](file.md) — one-line hook</code>（&lt;150 字符）</p> <p>简化模式（skipIndex = true，跳过索引）： 直接写记忆文件，不维护 MEMORY.md</p> <p>两种模式共有的规则：</p> <ul> <li>name/description/type 保持与内容一致</li> <li>按主题组织，不按时间</li> <li>过时的记忆更新或删除</li> <li>写之前先检查是否已有可更新的记忆（防重复）</li> </ul> <hr> <ol> <li>WHEN_TO_ACCESS_SECTION —— 何时读</li> </ol> <p>文件：memoryTypes.ts:216-222</p> <p>’- When memories seem relevant, or the user references prior-conversation work.’, ‘- You MUST access memory when the user explicitly asks you to check, recall, or remember.’, ‘- If the user says to <em>ignore</em> or <em>not use</em> memory: proceed as if MEMORY.md were empty. Do not apply remembered facts, cite, compare against, or mention memory content.’, MEMORY_DRIFT_CAVEAT,</p> <p>三条规则对应三种场景：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌──────────────────────┬─────────────────────────────────┐
+│       用户行为       │           Claude 响应           │
+├──────────────────────┼─────────────────────────────────┤
+│ 正常对话，上下文相关 │ 主动读取记忆                    │
+├──────────────────────┼─────────────────────────────────┤
+│ "查一下记忆"         │ 必须读取                        │
+├──────────────────────┼─────────────────────────────────┤
+│ "忽略关于 X 的记忆"  │ 当作 MEMORY.md 是空的，完全不提 │
+└──────────────────────┴─────────────────────────────────┘
+</code></pre></div></div> <p>MEMORY_DRIFT_CAVEAT 是读取端的防御：</p> <p>▎ 记忆可能过时。把记忆当作某个时间点的事实。回答前验证记忆是否仍然正确。 ▎ 如果记忆与当前信息冲突，信任当前观察——并更新或删除过时的记忆。</p> <hr> <ol> <li>TRUSTING_RECALL_SECTION —— 读完怎么用</li> </ol> <p>文件：memoryTypes.ts:240-256</p> <p>标题故意用了行动导向的措辞（Before recommending from memory 而不是抽象的 Trusting what you recall），因为 eval 证明标题的措辞影响执行率。</p> <p>‘A memory that names a specific function, file, or flag is a claim that it existed <em>when the memory was written</em>. It may have been renamed, removed, or never merged. Before recommending it:’</p> <p>’- If the memory names a file path: check the file exists.’, ‘- If the memory names a function or flag: grep for it.’, ‘- If the user is about to act on your recommendation: verify first.’,</p> <p>核心原则：</p> <p>▎ “The memory says X exists” is not the same as “X exists now.”</p> <p>对于快照型记忆（活动日志、架构快照）：</p> <p>▎ 如果用户问的是最近或当前状态，优先用 git log 或读代码， ▎ 而不是回忆快照。</p> <hr> <p>五个 Section 的逻辑链</p> <p>TYPES_SECTION → 记忆的”数据模型”（存什么、什么结构） WHAT_NOT_TO_SAVE → 过滤器（什么不该进模型） howToSave → 写入协议（怎么持久化） WHEN_TO_ACCESS → 读取策略（什么时候读、什么时候不读） TRUSTING_RECALL → 使用策略（读完之后怎么用、怎么验证）</p> <p>这条链从写入到读取到使用，形成完整闭环。每个环节都有 eval 验证过的具体指令，不是泛泛而谈的”请使用记忆系统”。</p> <h4 id="模式二team-memory团队记忆模式">模式二：Team Memory（团队记忆模式）</h4> <p>本质</p> <p>私有 + 共享双目录系统，通过 Anthropic 服务器 API 在团队成员间同步。</p> <p>目录结构</p> <p>~/.claude/projects/<sanitized-git-root>/memory/ ├── MEMORY.md ← 个人索引 ├── user_role.md ← 个人记忆（private） ├── feedback_style.md ← 个人反馈（private） └── team/ ← 团队共享目录 ├── MEMORY.md ← 团队索引 ├── feedback_policy.md ← 团队约定（team） ├── project_freeze.md ← 项目状态（team） └── reference_linear.md← 外部指针（team）</sanitized-git-root></p> <p>scope 分配规则</p> <p>每个记忆类型有明确的 private/team 倾向（memoryTypes.ts:37-106）：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌───────────┬───────────────────────────┬────────────────────────────┐
+│   类型    │           scope           │            理由            │
+├───────────┼───────────────────────────┼────────────────────────────┤
+│ user      │ always private            │ 个人信息永远不共享         │
+├───────────┼───────────────────────────┼────────────────────────────┤
+│ feedback  │ default private           │ 个人风格偏好 vs 项目级约定 │
+├───────────┼───────────────────────────┼────────────────────────────┤
+│ project   │ strongly bias toward team │ 项目状态通常是团队共享的   │
+├───────────┼───────────────────────────┼────────────────────────────┤
+│ reference │ usually team              │ 外部系统指针对所有人生效   │
+└───────────┴───────────────────────────┴────────────────────────────┘
+├───────────┼───────────────────────────┼────────────────────────────┤
+│ user      │ always private            │ 个人信息永远不共享         │
+├───────────┼───────────────────────────┼────────────────────────────┤
+│ feedback  │ default private           │ 个人风格偏好 vs 项目级约定 │
+├───────────┼───────────────────────────┼────────────────────────────┤
+│ project   │ strongly bias toward team │ 项目状态通常是团队共享的   │
+├───────────┼───────────────────────────┼────────────────────────────┤
+│ reference │ usually team              │ 外部系统指针对所有人生效   │
+└───────────┴───────────────────────────┴────────────────────────────┘
+</code></pre></div></div> <p>模型在写入时需要判断 scope，选择写到 memory/ 还是 memory/team/。</p> <p>同步机制</p> <p>不是 git，不是共享挂载——是 Anthropic 服务器 API：</p> <p>API 端点： GET /api/claude_code/team_memory?repo={owner/repo} ← 拉取全部 GET /api/claude_code/team_memory?repo={owner/repo}&amp;view=hashes ← 仅校验和 PUT /api/claude_code/team_memory?repo={owner/repo} ← 推送变更</p> <p>同步流程：</p> <ol> <li>Pull first — 从服务器拉取，写入本地 team/ 目录（服务器优先）</li> <li>Push second — 计算 delta（本地 SHA-256 与服务器校验和不同的 key），只上传变更部分</li> </ol> <p>冲突解决：</p> <ul> <li>使用 ETag 条件请求（If-Match）</li> <li>412 Precondition Failed → 刷新校验和，重试最多 2 次</li> <li>本地胜出 — 同一 key 双方都改了，本地版本覆盖</li> </ul> <p>实时同步：</p> <ul> <li>fs.watch({ recursive: true }) 监听 team/ 目录</li> <li>2 秒 debounce 后触发 push</li> <li>notifyTeamMemoryWrite() hook 在 FileWriteTool/FileEditTool 后触发（防止 fs.watch 漏事件）</li> </ul> <p>安全机制</p> <ol> <li>路径遍历防护（teamMemPaths.ts）：</li> </ol> <p>两轮验证：</p> <ul> <li>第一轮：字符串级 resolve() + startsWith(teamDir) 检查</li> <li>第二轮：realpath() 解析符号链接，确认真实路径仍在 team 目录内</li> </ul> <p>防攻击手段：</p> <ul> <li>空字节注入（\0）</li> <li>URL 编码遍历（%2e%2e%2f）</li> <li>Unicode 规范化攻击（NFKC 全角字符）</li> <li>反斜杠（Windows 路径分隔符）</li> <li>绝对路径</li> </ul> <ol> <li>密钥扫描（teamMemSecretGuard.ts）：</li> </ol> <ul> <li>写入时扫描：如果内容含密钥，直接阻止写入</li> <li>推送时扫描：含密钥的文件跳过上传</li> </ul> <ol> <li>配置安全：</li> </ol> <p>autoMemoryDirectory 在 settings.json 中配置时，projectSettings（.claude/settings.json）被故意排除——防止恶意仓库提交 settings.json 把记忆目录指向 ~/.ssh。</p> <h4 id="模式三assistant-daily-log助手日志模式">模式三：Assistant Daily-Log（助手日志模式）</h4> <p>本质</p> <p>追加写入的日志 + 异步蒸馏。适配长期运行的助手会话（KAIROS feature）。</p> <p>目录结构</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~/.claude/projects/&lt;sanitized-git-root&gt;/memory/
+├── MEMORY.md                    ← 蒸馏后的索引（/dream 维护）
+├── user_role.md                 ← 蒸馏后的主题文件
+├── feedback_testing.md
+└── logs/
+    └── 2026/
+        └── 06/
+            ├── 2026-06-14.md   ← 每日日志（append-only）
+            └── 2026-06-15.md
+</code></pre></div></div> <p>写入流程（append-only）</p> <p>模型只做一件事：往当天的日志文件追加带时间戳的条目。</p> <p>2026-06-15</p> <ul> <li>10:30 用户说他们团队用 Linear 跟踪 pipeline bug，项目名 INGEST</li> <li>11:15 用户纠正：不要用 npm，用 bun</li> <li>14:00 了解到 auth middleware 重写是因为法律合规要求</li> </ul> <p>关键设计：</p> <ul> <li>路径用模式 logs/YYYY/MM/YYYY-MM-DD.md 描述，不是今天的字面路径</li> <li>因为系统提示被 systemPromptSection 缓存，不会因日期变化而失效</li> <li>模型从 date_change attachment 推导当前日期</li> <li>MEMORY.md 仍然加载到上下文，但模型不直接编辑它</li> </ul> <p>蒸馏机制（/dream）</p> <p>/dream 是一个 4 阶段结构化 prompt（consolidationPrompt.ts）：</p> <p>Phase 1: Orient → ls 记忆目录，读 MEMORY.md，浏览现有主题文件</p> <p>Phase 2: Gather recent signal → 读日志文件（logs/YYYY/MM/YYYY-MM-DD.md） → 识别漂移的记忆 → 可选：grep JSONL 会话记录</p> <p>Phase 3: Consolidate → 写入或更新主题文件 → 合并新信号到现有文件（去重） → 相对日期转绝对日期（”昨天” → “2026-06-14”） → 删除被推翻的事实</p> <p>Phase 4: Prune and index → 更新 MEMORY.md，保持 200 行 / 25KB 以内 → 每条索引一行，&lt; 150 字符 → 删除过时指针，解决矛盾</p> <p>autoDream（自动蒸馏）</p> <p>autoDream 是后台自动运行 /dream 的机制（autoDream.ts）。5 层 gate：</p> <ol> <li>Feature gate → isAutoDreamEnabled()（settings.json 或 GrowthBook）</li> <li>Time gate → 距上次蒸馏 ≥ 24 小时</li> <li>Scan throttle → 至多每 10 分钟检查一次</li> <li>Session gate → 自上次蒸馏后 ≥ 5 个新会话</li> <li>Lock gate → 无其他进程在蒸馏（PID 锁文件）</li> </ol> <p>全部通过后：</p> <ol> <li>获取锁（.consolidate-lock，mtime = lastConsolidatedAt，body = PID）</li> <li>注册 DreamTask（UI 可见）</li> <li>运行 forked agent（受限工具访问）</li> <li>完成后在主会话注入 “Improved N memory files” 消息</li> </ol> <p>失败回滚：锁 mtime 回退到获取前的值，下次 turn 会重新尝试。</p> <p>日期翻转机制</p> <p>getDateChangeAttachments()（attachments.ts:1415-1444）：</p> <p>每 turn 检查： 当前日期 vs 上次发出的日期 ↓ 不同（跨午夜） → 发出 { type: ‘date_change’, newDate: ‘2026-06-16’ } → 渲染为：”The date has changed. Today’s date is now 2026-06-16.”</p> <p>为什么追加在尾部而不是头部：保留 prompt cache 前缀。如果清除头部的日期，整个对话会变成 cache_creation（~920K tokens），凌晨跨日的代价极大。尾部的 stale date 是缓存稳定性的刻意权衡。</p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/colpali-multimodal-rag-qa/">掌握 ColPali 多模态 RAG 需要回答的 8 个问题</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/proposition-chunking-summary/">Proposition Chunking 命题化切分总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/query-transformations-summary/">Query Transformations 查询转换技术总结</a> </li> </ul> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "about",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "nav-repositories",
+          title: "repositories",
+          description: "Edit the `_data/repositories.yml` and change the `github_users` and `github_repos` lists to include your own GitHub profile and repositories.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/repositories/";
+          },
+        },{id: "post-二叉树刷题总结",
+        
+          title: "二叉树刷题总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/";
+          
+        },
+      },{id: "post-rag-技术体系化分类-从-pipeline-阶段到失败模式",
+        
+          title: "RAG 技术体系化分类——从 Pipeline 阶段到失败模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/RAG-techniques-pipeline-categorization/";
+          
+        },
+      },{id: "post-memorag-记忆增强型-rag-总结",
+        
+          title: "MemoRAG 记忆增强型 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/memorag-summary/";
+          
+        },
+      },{id: "post-microsoft-graphrag-基于知识图谱的-rag-总结",
+        
+          title: "Microsoft GraphRAG 基于知识图谱的 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/microsoft-graphrag-summary/";
+          
+        },
+      },{id: "post-multimodal-rag-with-captioning-图像描述型多模态-rag-总结",
+        
+          title: "Multimodal RAG with Captioning 图像描述型多模态 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/multimodal-rag-with-captioning-summary/";
+          
+        },
+      },{id: "post-掌握-colpali-多模态-rag-需要回答的-8-个问题",
+        
+          title: "掌握 ColPali 多模态 RAG 需要回答的 8 个问题",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/colpali-multimodal-rag-qa/";
+          
+        },
+      },{id: "post-proposition-chunking-命题化切分总结",
+        
+          title: "Proposition Chunking 命题化切分总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/proposition-chunking-summary/";
+          
+        },
+      },{id: "post-query-transformations-查询转换技术总结",
+        
+          title: "Query Transformations 查询转换技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/query-transformations-summary/";
+          
+        },
+      },{id: "post-raptor-技术总结",
+        
+          title: "RAPTOR 技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/raptor-summary/";
+          
+        },
+      },{id: "post-relevant-segment-extraction-rse-学习笔记-从片段到段落",
+        
+          title: "Relevant Segment Extraction (RSE) 学习笔记 —— 从片段到段落",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/relevant-segment-extraction/";
+          
+        },
+      },{id: "post-reranking-with-llamaindex-学习笔记-llm-与-cross-encoder-重排",
+        
+          title: "Reranking with LlamaIndex 学习笔记 —— LLM 与 Cross-Encoder 重排",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/reranking-with-llamaindex/";
+          
+        },
+      },{id: "post-rag-with-feedback-loop-学习笔记-从机制到隐患",
+        
+          title: "RAG with Feedback Loop 学习笔记 —— 从机制到隐患",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rag-feedback-loop/";
+          
+        },
+      },{id: "post-self-rag-学习笔记-从论文思想到代码实现",
+        
+          title: "Self-RAG 学习笔记 —— 从论文思想到代码实现",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/self-rag/";
+          
+        },
+      },{id: "post-claude-code学习13-memory",
+        
+          title: "Claude code学习13 Memory",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B013/";
+          
+        },
+      },{id: "post-claude-code学习12-fileedittool",
+        
+          title: "Claude code学习12 FileEditTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B012/";
+          
+        },
+      },{id: "post-claude-code学习11-bashtool",
+        
+          title: "Claude code学习11 BashTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B011/";
+          
+        },
+      },{id: "post-claude-code学习10-permission-与-hooks-系统",
+        
+          title: "Claude code学习10 Permission 与 Hooks 系统",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B010/";
+          
+        },
+      },{id: "post-claude-code学习9-agent-loop",
+        
+          title: "Claude code学习9 Agent loop",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B09/";
+          
+        },
+      },{id: "post-claude-code学习8-system-reminder-动态信息是如何入prompt的",
+        
+          title: "Claude code学习8 system-reminder，动态信息是如何入prompt的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B08/";
+          
+        },
+      },{id: "post-claude-code学习7-权限模式",
+        
+          title: "Claude code学习7 权限模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B07/";
+          
+        },
+      },{id: "post-claude-code学习6-动态prompt的组装2",
+        
+          title: "Claude code学习6 动态prompt的组装2",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B06/";
+          
+        },
+      },{id: "post-claude-code学习5-动态prompt的组装1",
+        
+          title: "Claude code学习5 动态prompt的组装1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B05/";
+          
+        },
+      },{id: "post-claude-code学习4-静态prompt里面有什么以及claude-code启动时做了些什么",
+        
+          title: "Claude code学习4 静态prompt里面有什么以及Claude code启动时做了些什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B04/";
+          
+        },
+      },{id: "post-claude-code学习3-为什么claude-code工程化设计是这样的",
+        
+          title: "Claude code学习3 为什么Claude code工程化设计是这样的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/";
+          
+        },
+      },{id: "post-claude-code学习2-claude-code的上下文管理",
+        
+          title: "Claude code学习2 Claude code的上下文管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02/";
+          
+        },
+      },{id: "post-claude-code学习1-我们要从这个项目里学到什么",
+        
+          title: "Claude code学习1 我们要从这个项目里学到什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B01/";
+          
+        },
+      },{id: "post-learn-claude-code项目学习",
+        
+          title: "learn claude code项目学习",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/learn-claude-code%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/";
+          
+        },
+      },{id: "post-如何理解transformer",
+        
+          title: "如何理解transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformer-a/";
+          
+        },
+      },{id: "post-旋转矩阵的理解",
+        
+          title: "旋转矩阵的理解",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformation/";
+          
+        },
+      },{id: "post-cs231a-相机模型笔记",
+        
+          title: "CS231A 相机模型笔记",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cs231a-1/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv2/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv1/";
+          
+        },
+      },{id: "post-linux权限",
+        
+          title: "Linux权限",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP3/";
+          
+        },
+      },{id: "post-linux命令格式",
+        
+          title: "Linux命令格式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP2/";
+          
+        },
+      },{id: "post-excel常用操作",
+        
+          title: "Excel常用操作",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/excel/";
+          
+        },
+      },{id: "post-linux文件路径",
+        
+          title: "Linux文件路径",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP1/";
+          
+        },
+      },{id: "post-常见linux命令和shell脚本",
+        
+          title: "常见Linux命令和shell脚本",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/shellLinux/";
+          
+        },
+      },{id: "post-micropytorch",
+        
+          title: "microPytorch",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/.microPYtorch/";
+          
+        },
+      },{id: "post-c-vector",
+        
+          title: "C++ Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-c-template",
+        
+          title: "C++ Template",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppTemplate/";
+          
+        },
+      },{id: "post-pandas库的基本使用",
+        
+          title: "pandas库的基本使用",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/pandas1/";
+          
+        },
+      },{id: "post-c-中的static和const-1",
+        
+          title: "C++中的static和const 1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppStaticandConst/";
+          
+        },
+      },{id: "post-c-的内外部连接",
+        
+          title: "C++的内外部连接",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppLink/";
+          
+        },
+      },{id: "post-用c-实现内存池1",
+        
+          title: "用C++实现内存池1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo_pool/";
+          
+        },
+      },{id: "post-c-的内存管理",
+        
+          title: "C++的内存管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo/";
+          
+        },
+      },{id: "post-每日一题2296-设计一个文本编辑器",
+        
+          title: "每日一题2296. 设计一个文本编辑器",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LC/";
+          
+        },
+      },{id: "post-c-中的vector",
+        
+          title: "C++中的Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-transformer",
+        
+          title: "Transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transfomer/";
+          
+        },
+      },{id: "post-深度学习和机器学习中的重要概念",
+        
+          title: "深度学习和机器学习中的重要概念",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/MLfun/";
+          
+        },
+      },{id: "post-attention注意力机制-修正补充版",
+        
+          title: "Attention注意力机制（修正补充版）",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention2/";
+          
+        },
+      },{id: "post-attention注意力机制",
+        
+          title: "Attention注意力机制",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention/";
+          
+        },
+      },{id: "post-unet网络",
+        
+          title: "Unet网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Unet/";
+          
+        },
+      },{id: "post-seq2seq的模型-构建以及损失函数",
+        
+          title: "Seq2Seq的模型，构建以及损失函数",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Seq2Seq-1/";
+          
+        },
+      },{id: "post-text-generation",
+        
+          title: "Text Generation",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Text-Generation/";
+          
+        },
+      },{id: "post-rnn的优化",
+        
+          title: "RNN的优化",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/RNN%E7%9A%84%E4%BC%98%E5%8C%96/";
+          
+        },
+      },{id: "post-lstm长短记忆网络",
+        
+          title: "LSTM长短记忆网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LSTM%E9%95%BF%E7%9F%AD%E8%AE%B0%E5%BF%86%E7%BD%91%E7%BB%9C/";
+          
+        },
+      },{id: "post-simple-rnn",
+        
+          title: "Simple RNN",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Simple-RNN/";
+          
+        },
+      },{id: "post-linux内核全注释阅读-linux内核体系结构1",
+        
+          title: "Linux内核全注释阅读 Linux内核体系结构1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Linux%E5%86%85%E6%A0%B8%E5%85%A8%E6%B3%A8%E9%87%8A%E9%98%85%E8%AF%BB-Linux%E5%86%85%E6%A0%B8%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%841/";
+          
+        },
+      },{id: "post-nlp的数据处理-文本处理以及词嵌套",
+        
+          title: "NLP的数据处理 文本处理以及词嵌套",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/NLP%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86-%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%BB%A5%E5%8F%8A%E8%AF%8D%E5%B5%8C%E5%A5%97/";
+          
+        },
+      },{id: "post-deepseek-r1论文解读",
+        
+          title: "DeepSeek R1论文解读",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/DeepSeek-R1%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/";
+          
+        },
+      },{id: "post-deepseek蒸馏模型的本地部署",
+        
+          title: "Deepseek蒸馏模型的本地部署",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Deepseek%E8%92%B8%E9%A6%8F%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/";
+          
+        },
+      },{id: "post-测试博客",
+        
+          title: "测试博客",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Test/";
+          
+        },
+      },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
+        
+          title: 'Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "We’re sharing updates across our Gemini family of models and a glimpse of Project Astra, our vision for the future of AI assistants.",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/", "_blank");
+          
+        },
+      },{id: "post-displaying-external-posts-on-your-al-folio-blog",
+        
+          title: 'Displaying External Posts on Your al-folio Blog <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2", "_blank");
+          
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/Mr-coldskin7", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/feed.xml", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>
