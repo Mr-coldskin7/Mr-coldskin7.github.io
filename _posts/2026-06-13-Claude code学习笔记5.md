@@ -299,7 +299,7 @@ export async function loadMemoryPrompt(): Promise<string | null> {
 CLAUDE.md 更像“长期指令/规则”
 AutoMem / TeamMem 更像“长期知识库”
 这里的设计可以参考一下b站这位up讲的视频
-{% include embed/bilibili.html id='BV1ZA93BtEKW' %}
+<iframe src="https://player.bilibili.com/player.html?bvid=BV1ZA93BtEKW&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" width="100%" height="500"></iframe>
 落盘（本地和持久化）、更新和维护 => 写入
 总的来说这些md文件都有一个frontmatter，用来方便做渐进式披露
 目录结构
