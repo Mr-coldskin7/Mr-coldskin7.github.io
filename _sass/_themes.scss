@@ -228,27 +228,52 @@ h6 {
   font-family: "Times New Roman", Times, serif !important;
 }
 
-/* Pop-art halftone edge background */
+/* Pop-art halftone side gradients.
+   One "row" background layer holds the full horizontal sweep of dots —
+   big, solid dots at the screen edges shrinking and lightening dot-by-dot
+   toward the content column, where they melt into the page background.
+   The row repeats vertically to fill the viewport height. */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-image: radial-gradient(
-    circle,
-    var(--popart-dot-color) 1.5px,
-    transparent 2px
+
+  // (column center, dot radius, color alpha) from edge inward
+  $cols: (
+    (0.8vw, 8.5px, 1.0),
+    (2.2vw, 7.2px, 0.88),
+    (3.6vw, 6.0px, 0.75),
+    (5.0vw, 4.8px, 0.62),
+    (6.4vw, 3.6px, 0.5),
+    (7.8vw, 2.6px, 0.38),
+    (9.2vw, 1.7px, 0.26),
+    (10.6vw, 1.1px, 0.16)
   );
-  background-size: 12px 12px;
-  -webkit-mask-image: radial-gradient(
-    ellipse at center,
-    transparent 30%,
-    black 80%
-  );
-  mask-image: radial-gradient(
-    ellipse at center,
-    transparent 30%,
-    black 80%
-  );
+  $row-height: 20px;
+
+  $layers: ();
+  @each $c, $r, $a in $cols {
+    $dot: color-mix(in srgb, var(--popart-dot-color) #{$a * 100%}, transparent);
+    $layers: append(
+      $layers,
+      radial-gradient(circle at #{$c} 50%, $dot #{$r}, transparent #{calc($r + 0.5px)}),
+      comma
+    );
+    $layers: append(
+      $layers,
+      radial-gradient(
+        circle at #{calc(100vw - $c)} 50%,
+        $dot #{$r},
+        transparent #{calc($r + 0.5px)}
+      ),
+      comma
+    );
+  }
+
+  background-image: $layers;
+  background-size: 100% #{$row-height};
+  background-repeat: repeat-y;
+  background-position: 0 0;
 }
