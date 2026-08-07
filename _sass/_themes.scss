@@ -227,3 +227,28 @@ h5,
 h6 {
   font-family: "Times New Roman", Times, serif !important;
 }
+
+/* Pop-art halftone edge background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle,
+    var(--popart-dot-color) 1.5px,
+    transparent 2px
+  );
+  background-size: 12px 12px;
+  -webkit-mask-image: radial-gradient(
+    ellipse at center,
+    transparent 30%,
+    black 80%
+  );
+  mask-image: radial-gradient(
+    ellipse at center,
+    transparent 30%,
+    black 80%
+  );
+}
