@@ -6,7 +6,7 @@ subtitle: 记录 ML/NLP、C++、Linux 的学习笔记与思考。
 
 profile:
   align: right
-  image: ii.jpg # 头像图片，放到 /assets/img/ 下并在此填文件名即可
+  image: bb.jpg # 头像图片，放到 /assets/img/ 下并在此填文件名即可
 
 selected_papers: false # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
