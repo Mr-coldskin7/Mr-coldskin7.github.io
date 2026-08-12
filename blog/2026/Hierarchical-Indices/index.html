@@ -50,7 +50,7 @@
 </code></pre></div></div> <p><strong>流程</strong>：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>用户查询 → 扫夏摘要库 → 找到相关文档(页码) → 限定该页 → 扫chunk库 → 返回细节块
 </code></pre></div></div> <p>关键点：第二级用 <code class="language-plaintext highlighter-rouge">page_filter</code> <strong>按页码过滤</strong>，只从第一级命中的文档页里取 chunk。这样细节不会跑偏到别的章节。</p> <h2 id="对比-flat-index">对比 flat index</h2> <table> <thead> <tr> <th>维度</th> <th>Flat Index</th> <th>Hierarchical Index</th> </tr> </thead> <tbody> <tr> <td>索引</td> <td>一层，全 chunk</td> <td>两层：摘要 + chunk</td> </tr> <tr> <td>首次检索</td> <td>全局扫 chunk</td> <td>先扫摘要（数据量小）</td> </tr> <tr> <td>上下文</td> <td>chunk 孤立</td> <td>摘要提供文档级上下文</td> </tr> <tr> <td>效率</td> <td>大语料慢</td> <td>先粗筛，快</td> </tr> <tr> <td>适用</td> <td>小文档/小语料</td> <td>大文档/大语料</td> </tr> </tbody> </table> <h2 id="技术细节亮点">技术细节亮点</h2> <ul> <li> <strong>持久化</strong>：向量库 <code class="language-plaintext highlighter-rouge">save_local</code> 存盘，避免每次重算： <div class="language-python highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="n">summary_store</span><span class="p">.</span><span class="nf">save_local</span><span class="p">(</span><span class="sh">"</span><span class="s">../vector_stores/summary_store</span><span class="sh">"</span><span class="p">)</span>
 <span class="n">detailed_store</span><span class="p">.</span><span class="nf">save_local</span><span class="p">(</span><span class="sh">"</span><span class="s">../vector_stores/detailed_store</span><span class="sh">"</span><span class="p">)</span>
-</code></pre></div> </div> </li> <li> <strong>限流处理</strong>：<code class="language-plaintext highlighter-rouge">retry_with_exponential_backoff</code> + 分批 + <code class="language-plaintext highlighter-rouge">asyncio.sleep</code>，是调用外部 LLM 摘要时的工程标配。</li> <li> <strong>异步</strong>：用 <code class="language-plaintext highlighter-rouge">asyncio.to_thread</code> + <code class="language-plaintext highlighter-rouge">asyncio.gather</code> 并发建两个向量库，I/O 密集场景提速。</li> </ul> <h2 id="一句话总结">一句话总结</h2> <blockquote> <p>Hierarchical Index = <strong>摘要粗筛定位 + 页码过滤细取</strong>。用两级索引换取「效率 + 上下文保真」，适合大文档/大语料，代价是入库时要多跑一遍摘要。</p> </blockquote> <h2 id="参考">参考</h2> <ul> <li>仓库：https://github.com/NirDiamant/RAG_Techniques</li> </ul> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/GraphRAG-with-Milvus/">Graph RAG with Milvus —— 纯向量库造图的多跳推理</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/HyDE-HyPE-Hypothetical-Retrieval/">HyDE 与 HyPE —— 假设检索技术的两个方向</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/colpali-multimodal-rag-qa/">掌握 ColPali 多模态 RAG 需要回答的 8 个问题</a> </li> </ul> <div id="giscus_thread" style="max-width: 930px; margin: 0 auto;"> <br> <script>
+</code></pre></div> </div> </li> <li> <strong>限流处理</strong>：<code class="language-plaintext highlighter-rouge">retry_with_exponential_backoff</code> + 分批 + <code class="language-plaintext highlighter-rouge">asyncio.sleep</code>，是调用外部 LLM 摘要时的工程标配。</li> <li> <strong>异步</strong>：用 <code class="language-plaintext highlighter-rouge">asyncio.to_thread</code> + <code class="language-plaintext highlighter-rouge">asyncio.gather</code> 并发建两个向量库，I/O 密集场景提速。</li> </ul> <h2 id="一句话总结">一句话总结</h2> <blockquote> <p>Hierarchical Index = <strong>摘要粗筛定位 + 页码过滤细取</strong>。用两级索引换取「效率 + 上下文保真」，适合大文档/大语料，代价是入库时要多跑一遍摘要。</p> </blockquote> <h2 id="参考">参考</h2> <ul> <li>仓库：https://github.com/NirDiamant/RAG_Techniques</li> </ul> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/LangChain-v1-Agent-Middleware/">LangChain v1 Agent Middleware 笔记</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/LangGraph-Checkpoint/">LangGraph Checkpoint 详解</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E5%9B%BE%E7%9A%84%E9%81%8D%E5%8E%86-%E7%82%B9%E8%BE%B9%E8%B7%AF%E5%BE%84-C++/">图的遍历（点 / 边 / 路径）—— C++ 模板与 visited 的本质</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/GraphRAG-chunk-level-traversal/">GraphRAG（Chunk 级遍历版）—— 带图的检索，还是假的图谱？</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/GraphRAG-with-Milvus/">Graph RAG with Milvus —— 纯向量库造图的多跳推理</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/HyDE-HyPE-Hypothetical-Retrieval/">HyDE 与 HyPE —— 假设检索技术的两个方向</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> </ul> <div id="giscus_thread" style="max-width: 930px; margin: 0 auto;"> <br> <script>
     (function setupGiscus() {
       function determineGiscusTheme() {
         var theme = localStorage.getItem("theme") || document.documentElement.getAttribute("data-theme") || "system";
@@ -130,7 +130,51 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-graph-rag-with-milvus-纯向量库造图的多跳推理",
+        },{id: "post-langchain-v1-agent-middleware-笔记",
+        
+          title: "LangChain v1 Agent Middleware 笔记",
+        
+        description: "LangChain v1 中间件机制详解——Agent 核心循环前后的 hooks, 控制输入输出、工具调用、消息摘要与修剪。",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/LangChain-v1-Agent-Middleware/";
+          
+        },
+      },{id: "post-langgraph-checkpoint-详解",
+        
+          title: "LangGraph Checkpoint 详解",
+        
+        description: "LangGraph checkpoint 机制深挖——每步 state 快照 + WAL 耐久执行, thread_id 定位会话, checkpoint_id 定位步骤。",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/LangGraph-Checkpoint/";
+          
+        },
+      },{id: "post-图的遍历-点-边-路径-c-模板与-visited-的本质",
+        
+          title: "图的遍历（点 / 边 / 路径）—— C++ 模板与 visited 的本质",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E5%9B%BE%E7%9A%84%E9%81%8D%E5%8E%86-%E7%82%B9%E8%BE%B9%E8%B7%AF%E5%BE%84-C++/";
+          
+        },
+      },{id: "post-graphrag-chunk-级遍历版-带图的检索-还是假的图谱",
+        
+          title: "GraphRAG（Chunk 级遍历版）—— 带图的检索，还是假的图谱？",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/GraphRAG-chunk-level-traversal/";
+          
+        },
+      },{id: "post-graph-rag-with-milvus-纯向量库造图的多跳推理",
         
           title: "Graph RAG with Milvus —— 纯向量库造图的多跳推理",
         

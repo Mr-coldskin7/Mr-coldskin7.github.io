@@ -409,7 +409,7 @@ If the user explicitly asks...           ← 用户说"记住这个" → 立即�
         └── 06/
             ├── 2026-06-14.md   ← 每日日志（append-only）
             └── 2026-06-15.md
-</code></pre></div></div> <p>写入流程（append-only）</p> <p>模型只做一件事：往当天的日志文件追加带时间戳的条目。</p> <p>2026-06-15</p> <ul> <li>10:30 用户说他们团队用 Linear 跟踪 pipeline bug，项目名 INGEST</li> <li>11:15 用户纠正：不要用 npm，用 bun</li> <li>14:00 了解到 auth middleware 重写是因为法律合规要求</li> </ul> <p>关键设计：</p> <ul> <li>路径用模式 logs/YYYY/MM/YYYY-MM-DD.md 描述，不是今天的字面路径</li> <li>因为系统提示被 systemPromptSection 缓存，不会因日期变化而失效</li> <li>模型从 date_change attachment 推导当前日期</li> <li>MEMORY.md 仍然加载到上下文，但模型不直接编辑它</li> </ul> <p>蒸馏机制（/dream）</p> <p>/dream 是一个 4 阶段结构化 prompt（consolidationPrompt.ts）：</p> <p>Phase 1: Orient → ls 记忆目录，读 MEMORY.md，浏览现有主题文件</p> <p>Phase 2: Gather recent signal → 读日志文件（logs/YYYY/MM/YYYY-MM-DD.md） → 识别漂移的记忆 → 可选：grep JSONL 会话记录</p> <p>Phase 3: Consolidate → 写入或更新主题文件 → 合并新信号到现有文件（去重） → 相对日期转绝对日期（”昨天” → “2026-06-14”） → 删除被推翻的事实</p> <p>Phase 4: Prune and index → 更新 MEMORY.md，保持 200 行 / 25KB 以内 → 每条索引一行，&lt; 150 字符 → 删除过时指针，解决矛盾</p> <p>autoDream（自动蒸馏）</p> <p>autoDream 是后台自动运行 /dream 的机制（autoDream.ts）。5 层 gate：</p> <ol> <li>Feature gate → isAutoDreamEnabled()（settings.json 或 GrowthBook）</li> <li>Time gate → 距上次蒸馏 ≥ 24 小时</li> <li>Scan throttle → 至多每 10 分钟检查一次</li> <li>Session gate → 自上次蒸馏后 ≥ 5 个新会话</li> <li>Lock gate → 无其他进程在蒸馏（PID 锁文件）</li> </ol> <p>全部通过后：</p> <ol> <li>获取锁（.consolidate-lock，mtime = lastConsolidatedAt，body = PID）</li> <li>注册 DreamTask（UI 可见）</li> <li>运行 forked agent（受限工具访问）</li> <li>完成后在主会话注入 “Improved N memory files” 消息</li> </ol> <p>失败回滚：锁 mtime 回退到获取前的值，下次 turn 会重新尝试。</p> <p>日期翻转机制</p> <p>getDateChangeAttachments()（attachments.ts:1415-1444）：</p> <p>每 turn 检查： 当前日期 vs 上次发出的日期 ↓ 不同（跨午夜） → 发出 { type: ‘date_change’, newDate: ‘2026-06-16’ } → 渲染为：”The date has changed. Today’s date is now 2026-06-16.”</p> <p>为什么追加在尾部而不是头部：保留 prompt cache 前缀。如果清除头部的日期，整个对话会变成 cache_creation（~920K tokens），凌晨跨日的代价极大。尾部的 stale date 是缓存稳定性的刻意权衡。</p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/GraphRAG-with-Milvus/">Graph RAG with Milvus —— 纯向量库造图的多跳推理</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/Hierarchical-Indices/">Hierarchical Indices 层级索引 —— 先粗后细的两级检索</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/HyDE-HyPE-Hypothetical-Retrieval/">HyDE 与 HyPE —— 假设检索技术的两个方向</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> </ul> <div id="giscus_thread" style="max-width: 930px; margin: 0 auto;"> <br> <script>
+</code></pre></div></div> <p>写入流程（append-only）</p> <p>模型只做一件事：往当天的日志文件追加带时间戳的条目。</p> <p>2026-06-15</p> <ul> <li>10:30 用户说他们团队用 Linear 跟踪 pipeline bug，项目名 INGEST</li> <li>11:15 用户纠正：不要用 npm，用 bun</li> <li>14:00 了解到 auth middleware 重写是因为法律合规要求</li> </ul> <p>关键设计：</p> <ul> <li>路径用模式 logs/YYYY/MM/YYYY-MM-DD.md 描述，不是今天的字面路径</li> <li>因为系统提示被 systemPromptSection 缓存，不会因日期变化而失效</li> <li>模型从 date_change attachment 推导当前日期</li> <li>MEMORY.md 仍然加载到上下文，但模型不直接编辑它</li> </ul> <p>蒸馏机制（/dream）</p> <p>/dream 是一个 4 阶段结构化 prompt（consolidationPrompt.ts）：</p> <p>Phase 1: Orient → ls 记忆目录，读 MEMORY.md，浏览现有主题文件</p> <p>Phase 2: Gather recent signal → 读日志文件（logs/YYYY/MM/YYYY-MM-DD.md） → 识别漂移的记忆 → 可选：grep JSONL 会话记录</p> <p>Phase 3: Consolidate → 写入或更新主题文件 → 合并新信号到现有文件（去重） → 相对日期转绝对日期（”昨天” → “2026-06-14”） → 删除被推翻的事实</p> <p>Phase 4: Prune and index → 更新 MEMORY.md，保持 200 行 / 25KB 以内 → 每条索引一行，&lt; 150 字符 → 删除过时指针，解决矛盾</p> <p>autoDream（自动蒸馏）</p> <p>autoDream 是后台自动运行 /dream 的机制（autoDream.ts）。5 层 gate：</p> <ol> <li>Feature gate → isAutoDreamEnabled()（settings.json 或 GrowthBook）</li> <li>Time gate → 距上次蒸馏 ≥ 24 小时</li> <li>Scan throttle → 至多每 10 分钟检查一次</li> <li>Session gate → 自上次蒸馏后 ≥ 5 个新会话</li> <li>Lock gate → 无其他进程在蒸馏（PID 锁文件）</li> </ol> <p>全部通过后：</p> <ol> <li>获取锁（.consolidate-lock，mtime = lastConsolidatedAt，body = PID）</li> <li>注册 DreamTask（UI 可见）</li> <li>运行 forked agent（受限工具访问）</li> <li>完成后在主会话注入 “Improved N memory files” 消息</li> </ol> <p>失败回滚：锁 mtime 回退到获取前的值，下次 turn 会重新尝试。</p> <p>日期翻转机制</p> <p>getDateChangeAttachments()（attachments.ts:1415-1444）：</p> <p>每 turn 检查： 当前日期 vs 上次发出的日期 ↓ 不同（跨午夜） → 发出 { type: ‘date_change’, newDate: ‘2026-06-16’ } → 渲染为：”The date has changed. Today’s date is now 2026-06-16.”</p> <p>为什么追加在尾部而不是头部：保留 prompt cache 前缀。如果清除头部的日期，整个对话会变成 cache_creation（~920K tokens），凌晨跨日的代价极大。尾部的 stale date 是缓存稳定性的刻意权衡。</p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/LangChain-v1-Agent-Middleware/">LangChain v1 Agent Middleware 笔记</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/LangGraph-Checkpoint/">LangGraph Checkpoint 详解</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E5%9B%BE%E7%9A%84%E9%81%8D%E5%8E%86-%E7%82%B9%E8%BE%B9%E8%B7%AF%E5%BE%84-C++/">图的遍历（点 / 边 / 路径）—— C++ 模板与 visited 的本质</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/GraphRAG-chunk-level-traversal/">GraphRAG（Chunk 级遍历版）—— 带图的检索，还是假的图谱？</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/GraphRAG-with-Milvus/">Graph RAG with Milvus —— 纯向量库造图的多跳推理</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/Hierarchical-Indices/">Hierarchical Indices 层级索引 —— 先粗后细的两级检索</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/HyDE-HyPE-Hypothetical-Retrieval/">HyDE 与 HyPE —— 假设检索技术的两个方向</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> </ul> <div id="giscus_thread" style="max-width: 930px; margin: 0 auto;"> <br> <script>
     (function setupGiscus() {
       function determineGiscusTheme() {
         var theme = localStorage.getItem("theme") || document.documentElement.getAttribute("data-theme") || "system";
@@ -489,7 +489,51 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-graph-rag-with-milvus-纯向量库造图的多跳推理",
+        },{id: "post-langchain-v1-agent-middleware-笔记",
+        
+          title: "LangChain v1 Agent Middleware 笔记",
+        
+        description: "LangChain v1 中间件机制详解——Agent 核心循环前后的 hooks, 控制输入输出、工具调用、消息摘要与修剪。",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/LangChain-v1-Agent-Middleware/";
+          
+        },
+      },{id: "post-langgraph-checkpoint-详解",
+        
+          title: "LangGraph Checkpoint 详解",
+        
+        description: "LangGraph checkpoint 机制深挖——每步 state 快照 + WAL 耐久执行, thread_id 定位会话, checkpoint_id 定位步骤。",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/LangGraph-Checkpoint/";
+          
+        },
+      },{id: "post-图的遍历-点-边-路径-c-模板与-visited-的本质",
+        
+          title: "图的遍历（点 / 边 / 路径）—— C++ 模板与 visited 的本质",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E5%9B%BE%E7%9A%84%E9%81%8D%E5%8E%86-%E7%82%B9%E8%BE%B9%E8%B7%AF%E5%BE%84-C++/";
+          
+        },
+      },{id: "post-graphrag-chunk-级遍历版-带图的检索-还是假的图谱",
+        
+          title: "GraphRAG（Chunk 级遍历版）—— 带图的检索，还是假的图谱？",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/GraphRAG-chunk-level-traversal/";
+          
+        },
+      },{id: "post-graph-rag-with-milvus-纯向量库造图的多跳推理",
         
           title: "Graph RAG with Milvus —— 纯向量库造图的多跳推理",
         

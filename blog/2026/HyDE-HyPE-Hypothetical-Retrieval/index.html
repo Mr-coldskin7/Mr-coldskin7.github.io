@@ -27,7 +27,7 @@
 <span class="n">vector_store</span><span class="p">.</span><span class="nf">add_embeddings</span><span class="p">(</span><span class="n">chunks_with_embedding_vectors</span><span class="p">)</span>
 </code></pre></div></div> <p><strong>流程</strong>：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chunk → LLM 猜N个问题 → 分别embed → N个问题向量(都指向同一chunk) → FAISS
 用户查询 → embed → 问题↔问题匹配 → 映射回chunk原文
-</code></pre></div></div> <ul> <li> <strong>时机</strong>：入库时（离线）</li> <li> <strong>成本</strong>：一次性，入库多花；查询零额外开销</li> <li> <strong>匹配</strong>：问题 ↔ 问题</li> </ul> <h2 id="对比">对比</h2> <table> <thead> <tr> <th>维度</th> <th>HyDE</th> <th>HyPE</th> </tr> </thead> <tbody> <tr> <td>生成时机</td> <td>查询时（在线）</td> <td>入库时（离线）</td> </tr> <tr> <td>生成什么</td> <td>假装好的<strong>答案文档</strong> </td> <td>用户会问的<strong>假设问题</strong> </td> </tr> <tr> <td>成本位置</td> <td>每次查询都花</td> <td>入库一次性花</td> </tr> <tr> <td>匹配方式</td> <td>文档 ↔ 假文档</td> <td>问题 ↔ 问题</td> </tr> <tr> <td>扩展性</td> <td>查询越忙越贵</td> <td>查询阶段零开销，可扩展</td> </tr> </tbody> </table> <h2 id="一句话总结">一句话总结</h2> <p>HyDE 和 HyPE 是<strong>同一个思路的两个方向</strong>：都用 LLM 弥合「用户怎么问」和「文档怎么存」之间的风格鸿沟。</p> <ul> <li> <strong>HyDE</strong> 把查询变成假文档，改的是<strong>查询侧</strong>。</li> <li> <strong>HyPE</strong> 把文档变成假问题，改的是<strong>存储侧</strong>。</li> </ul> <p>HyPE 把成本挪到入库的一次性开销，换来查询时的零额外成本，这是它「可扩展」的最大卖点。HyPE 论文宣称检索精度最高可提升 42 个百分点。</p> <h2 id="参考">参考</h2> <ul> <li>HyPE 预印本：https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5139335</li> <li>仓库：https://github.com/NirDiamant/RAG_Techniques</li> </ul> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/GraphRAG-with-Milvus/">Graph RAG with Milvus —— 纯向量库造图的多跳推理</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/Hierarchical-Indices/">Hierarchical Indices 层级索引 —— 先粗后细的两级检索</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/memorag-summary/">MemoRAG 记忆增强型 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/microsoft-graphrag-summary/">Microsoft GraphRAG 基于知识图谱的 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/multimodal-rag-with-captioning-summary/">Multimodal RAG with Captioning 图像描述型多模态 RAG 总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/colpali-multimodal-rag-qa/">掌握 ColPali 多模态 RAG 需要回答的 8 个问题</a> </li> </ul> <div id="giscus_thread" style="max-width: 930px; margin: 0 auto;"> <br> <script>
+</code></pre></div></div> <ul> <li> <strong>时机</strong>：入库时（离线）</li> <li> <strong>成本</strong>：一次性，入库多花；查询零额外开销</li> <li> <strong>匹配</strong>：问题 ↔ 问题</li> </ul> <h2 id="对比">对比</h2> <table> <thead> <tr> <th>维度</th> <th>HyDE</th> <th>HyPE</th> </tr> </thead> <tbody> <tr> <td>生成时机</td> <td>查询时（在线）</td> <td>入库时（离线）</td> </tr> <tr> <td>生成什么</td> <td>假装好的<strong>答案文档</strong> </td> <td>用户会问的<strong>假设问题</strong> </td> </tr> <tr> <td>成本位置</td> <td>每次查询都花</td> <td>入库一次性花</td> </tr> <tr> <td>匹配方式</td> <td>文档 ↔ 假文档</td> <td>问题 ↔ 问题</td> </tr> <tr> <td>扩展性</td> <td>查询越忙越贵</td> <td>查询阶段零开销，可扩展</td> </tr> </tbody> </table> <h2 id="一句话总结">一句话总结</h2> <p>HyDE 和 HyPE 是<strong>同一个思路的两个方向</strong>：都用 LLM 弥合「用户怎么问」和「文档怎么存」之间的风格鸿沟。</p> <ul> <li> <strong>HyDE</strong> 把查询变成假文档，改的是<strong>查询侧</strong>。</li> <li> <strong>HyPE</strong> 把文档变成假问题，改的是<strong>存储侧</strong>。</li> </ul> <p>HyPE 把成本挪到入库的一次性开销，换来查询时的零额外成本，这是它「可扩展」的最大卖点。HyPE 论文宣称检索精度最高可提升 42 个百分点。</p> <h2 id="参考">参考</h2> <ul> <li>HyPE 预印本：https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5139335</li> <li>仓库：https://github.com/NirDiamant/RAG_Techniques</li> </ul> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/LangChain-v1-Agent-Middleware/">LangChain v1 Agent Middleware 笔记</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/LangGraph-Checkpoint/">LangGraph Checkpoint 详解</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E5%9B%BE%E7%9A%84%E9%81%8D%E5%8E%86-%E7%82%B9%E8%BE%B9%E8%B7%AF%E5%BE%84-C++/">图的遍历（点 / 边 / 路径）—— C++ 模板与 visited 的本质</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/GraphRAG-chunk-level-traversal/">GraphRAG（Chunk 级遍历版）—— 带图的检索，还是假的图谱？</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/GraphRAG-with-Milvus/">Graph RAG with Milvus —— 纯向量库造图的多跳推理</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/Hierarchical-Indices/">Hierarchical Indices 层级索引 —— 先粗后细的两级检索</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/">二叉树刷题总结</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/RAG-techniques-pipeline-categorization/">RAG 技术体系化分类——从 Pipeline 阶段到失败模式</a> </li> </ul> <div id="giscus_thread" style="max-width: 930px; margin: 0 auto;"> <br> <script>
     (function setupGiscus() {
       function determineGiscusTheme() {
         var theme = localStorage.getItem("theme") || document.documentElement.getAttribute("data-theme") || "system";
@@ -107,7 +107,51 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/repositories/";
           },
-        },{id: "post-graph-rag-with-milvus-纯向量库造图的多跳推理",
+        },{id: "post-langchain-v1-agent-middleware-笔记",
+        
+          title: "LangChain v1 Agent Middleware 笔记",
+        
+        description: "LangChain v1 中间件机制详解——Agent 核心循环前后的 hooks, 控制输入输出、工具调用、消息摘要与修剪。",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/LangChain-v1-Agent-Middleware/";
+          
+        },
+      },{id: "post-langgraph-checkpoint-详解",
+        
+          title: "LangGraph Checkpoint 详解",
+        
+        description: "LangGraph checkpoint 机制深挖——每步 state 快照 + WAL 耐久执行, thread_id 定位会话, checkpoint_id 定位步骤。",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/LangGraph-Checkpoint/";
+          
+        },
+      },{id: "post-图的遍历-点-边-路径-c-模板与-visited-的本质",
+        
+          title: "图的遍历（点 / 边 / 路径）—— C++ 模板与 visited 的本质",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E5%9B%BE%E7%9A%84%E9%81%8D%E5%8E%86-%E7%82%B9%E8%BE%B9%E8%B7%AF%E5%BE%84-C++/";
+          
+        },
+      },{id: "post-graphrag-chunk-级遍历版-带图的检索-还是假的图谱",
+        
+          title: "GraphRAG（Chunk 级遍历版）—— 带图的检索，还是假的图谱？",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/GraphRAG-chunk-level-traversal/";
+          
+        },
+      },{id: "post-graph-rag-with-milvus-纯向量库造图的多跳推理",
         
           title: "Graph RAG with Milvus —— 纯向量库造图的多跳推理",
         
