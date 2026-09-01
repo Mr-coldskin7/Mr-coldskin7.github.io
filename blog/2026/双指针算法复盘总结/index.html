@@ -1,0 +1,1110 @@
+<!DOCTYPE html> <html lang="zh"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> 双指针算法复盘总结：从元素思维到边界思维 | leesanyee </title> <meta name="author" content="Lee SanYee"> <meta name="description" content="LeeSanYee 的技术博客，记录学习笔记与思考。 "> <meta name="keywords" content="blog, ml, nlp, cpp, linux"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="/assets/img/icon.png?v=f594268c94ce3845fb99c17cc40fc3f1"> <link rel="apple-touch-icon" href="/assets/img/icon.png?v=f594268c94ce3845fb99c17cc40fc3f1"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://leesanyee.me/blog/2026/%E5%8F%8C%E6%8C%87%E9%92%88%E7%AE%97%E6%B3%95%E5%A4%8D%E7%9B%98%E6%80%BB%E7%BB%93/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item "> <a class="nav-link" href="/graph/">Knowledge Graph </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">双指针算法复盘总结：从元素思维到边界思维</h1> <p class="post-meta"> Created on August 23, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/two-pointer"> <i class="fa-solid fa-hashtag fa-sm"></i> two-pointer</a>   <a href="/blog/tag/sliding-window"> <i class="fa-solid fa-hashtag fa-sm"></i> sliding-window</a>   <a href="/blog/tag/fast-slow"> <i class="fa-solid fa-hashtag fa-sm"></i> fast-slow</a>   <a href="/blog/tag/cpp"> <i class="fa-solid fa-hashtag fa-sm"></i> cpp</a>   ·   <a href="/blog/category/leetcode"> <i class="fa-solid fa-tag fa-sm"></i> Leetcode</a>   <a href="/blog/category/twopointer"> <i class="fa-solid fa-tag fa-sm"></i> TwoPointer</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h1 id="双指针算法复盘总结从元素思维到边界思维">双指针算法复盘总结：从元素思维到边界思维</h1> <blockquote> <p><strong>核心主题</strong>：从”元素思维”转向”边界思维”。</p> </blockquote> <p>刷双指针的题,最大的坎不是不熟悉模板,而是<strong>身份认知</strong>的问题:你总把指针当成”当前元素的下标”,但它实际上是”区域的边界”。这篇复盘把双指针完整分类、每类的区域定义与不变式、错题解剖、防错检查单整理成一份可复用笔记。</p> <hr> <h2 id="一双指针完整分类地图">一、双指针完整分类地图</h2> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>双指针
+├── 同向（两个指针朝同一方向走）
+│   ├── 快慢指针：速度不同，fast探路，slow守家
+│   └── 滑动窗口：距离动态变化，right扩张找可行解，left收缩找最优解
+│
+├── 对向（两个指针从两头往中间走）
+│   ├── 对撞指针：left←————→right，直到相遇
+│   └── 三指针/荷兰国旗：对撞 + 中间加侦察兵i
+│
+└── 分离（两个指针在两条数组/链表上）
+    └── 分离双指针：各走各的，谁小谁移动
+</code></pre></div></div> <p><strong>面试核心就三类</strong>：快慢指针、对撞指针、滑动窗口。荷兰国旗是对撞的扩展。</p> <hr> <h2 id="二每类指针的区域定义与不变式">二、每类指针的”区域定义”与不变式</h2> <h3 id="21-快慢指针fast--slow">2.1 快慢指针（Fast &amp; Slow）</h3> <p><strong>本质</strong>：fast 在未知区探路，slow 标记有效区边界。</p> <p><strong>区域图</strong>：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[ 有效区 ) [ 废弃/未知区 )
+0       slow        fast         n
+</code></pre></div></div> <p><strong>不变式</strong>：<code class="language-plaintext highlighter-rouge">[0, slow)</code> 永远是处理好的有效区，<code class="language-plaintext highlighter-rouge">slow</code> 是”下一个待写入位置”（不是最后一个有效元素的下标）。</p> <p><strong>代码骨架</strong>：</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">slow</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">fast</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">fast</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="n">fast</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">fast</span><span class="p">]</span> <span class="err">满足条件</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">nums</span><span class="p">[</span><span class="n">slow</span><span class="p">]</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="n">fast</span><span class="p">];</span>  <span class="c1">// 先写入边界位置</span>
+        <span class="n">slow</span><span class="o">++</span><span class="p">;</span>                   <span class="c1">// 再扩界</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="k">return</span> <span class="n">slow</span><span class="p">;</span>  <span class="c1">// slow就是有效区长度</span>
+</code></pre></div></div> <p><strong>致命易错点</strong>：</p> <ul> <li>必须先 <code class="language-plaintext highlighter-rouge">nums[slow] = ...</code> 再 <code class="language-plaintext highlighter-rouge">slow++</code>，不能反过来</li> <li> <code class="language-plaintext highlighter-rouge">slow</code> 是”边界/长度”，不是”下标”</li> </ul> <h3 id="22-对撞指针two-pointers-from-both-ends">2.2 对撞指针（Two Pointers from Both Ends）</h3> <p><strong>本质</strong>：left 和 right 从两头往中间挤，利用有序性或对称性。</p> <p><strong>区域图</strong>：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[ 已排除 ) [ 待处理 ] [ 已排除 )
+0        left     right         n-1
+</code></pre></div></div> <p><strong>不变式</strong>：<code class="language-plaintext highlighter-rouge">[0,left)</code> 和 <code class="language-plaintext highlighter-rouge">(right,n-1]</code> 是已处理/已排除区，<code class="language-plaintext highlighter-rouge">[left,right]</code> 是待处理区。</p> <p><strong>代码骨架</strong>：</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">left</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">left</span> <span class="o">&lt;</span> <span class="n">right</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// 注意是 &lt;，不是 &lt;=</span>
+    <span class="k">if</span> <span class="p">(</span><span class="err">条件满足</span><span class="p">)</span> <span class="n">left</span><span class="o">++</span><span class="p">;</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="err">另一条件</span><span class="p">)</span> <span class="n">right</span><span class="o">--</span><span class="p">;</span>
+    <span class="k">else</span> <span class="p">{</span> <span class="n">left</span><span class="o">++</span><span class="p">;</span> <span class="n">right</span><span class="o">--</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div> <h3 id="23-滑动窗口sliding-window">2.3 滑动窗口（Sliding Window）</h3> <p><strong>本质</strong>：快慢指针的变体。right 扩张找”可行解”，left 收缩找”最优解”。</p> <p>窗口是连续区域 <code class="language-plaintext highlighter-rouge">[left, right)</code>。整套算法的节奏只有三个动作，每个动作各回答一个问题——记清楚这三个问题，模板就不会写乱。</p> <h4 id="-什么时候扩张-right加入字符时更新什么数据">① 什么时候扩张 right？加入字符时更新什么数据？</h4> <blockquote> <p><strong>扩张是默认动作</strong>：right 是”读指针”，每个字符都必须被它看过一次，所以外层循环每轮无条件走一步。真正要判断的不是”什么时候扩张”，而是”什么时候停止扩张”——信号不在扩张侧，而在收缩侧：<strong>一旦加入字符后窗口状态翻转，就暂停扩张，转入收缩</strong>（两种题型的”翻转信号”正好相反，见 ③ 的表）。</p> </blockquote> <p>窗口加入字符时，更新的是<strong>记账数据（window state）</strong>——描述”窗口现状”的变量，<strong>不是答案</strong>：</p> <table> <thead> <tr> <th>记什么账</th> <th>对应题目</th> </tr> </thead> <tbody> <tr> <td>频次表 <code class="language-plaintext highlighter-rouge">window[c]++</code> </td> <td>无重复字符最长子串、最小覆盖子串</td> </tr> <tr> <td>不同字符计数 <code class="language-plaintext highlighter-rouge">++</code> </td> <td>至多 K 个不同字符的最长子串</td> </tr> <tr> <td>窗口和 <code class="language-plaintext highlighter-rouge">sum += x</code> </td> <td>长度最小子数组（和 ≥ target）</td> </tr> <tr> <td>已覆盖 target 的字符数</td> <td>最小覆盖子串的”够不够数”</td> </tr> </tbody> </table> <blockquote> <p><strong>规则：扩张 = 入账。入账只改状态，不碰答案。</strong></p> </blockquote> <h4 id="-什么时候暂停扩张开始收缩-left移出字符时更新什么数据">② 什么时候暂停扩张、开始收缩 left？移出字符时更新什么数据？</h4> <blockquote> <p>收到”翻转信号”后，<code class="language-plaintext highlighter-rouge">while</code> 收缩：移出 <code class="language-plaintext highlighter-rouge">s[left]</code> → 更新记账 → <code class="language-plaintext highlighter-rouge">left++</code>，直到窗口达到目标状态（最长型：重新合法；最短型：即将非法）。</p> </blockquote> <p>窗口移出字符时，更新<strong>同一套记账数据</strong>，方向与入账严格相反：</p> <table> <thead> <tr> <th>销什么账</th> <th>对应入账</th> </tr> </thead> <tbody> <tr> <td><code class="language-plaintext highlighter-rouge">window[d]--</code></td> <td><code class="language-plaintext highlighter-rouge">window[c]++</code></td> </tr> <tr> <td>不同字符计数 <code class="language-plaintext highlighter-rouge">--</code> </td> <td><code class="language-plaintext highlighter-rouge">++</code></td> </tr> <tr> <td><code class="language-plaintext highlighter-rouge">sum -= x</code></td> <td><code class="language-plaintext highlighter-rouge">sum += x</code></td> </tr> <tr> <td>覆盖计数视情况 <code class="language-plaintext highlighter-rouge">--</code> </td> <td><code class="language-plaintext highlighter-rouge">++</code></td> </tr> </tbody> </table> <blockquote> <p><strong>规则：收缩 = 销账，与入账严格对称</strong>——从哪个字符入的账，移出它时就要原样退回。</p> </blockquote> <p><strong>关键</strong>：收缩必须是 <code class="language-plaintext highlighter-rouge">while</code> 不是 <code class="language-plaintext highlighter-rouge">if</code>——移出一个字符可能仍不满足条件，需要连续收缩。</p> <h4 id="-答案在哪里更新最长型-vs-最短型">③ 答案在哪里更新？——最长型 vs 最短型</h4> <blockquote> <p><strong>候选解必须是”合法窗口”，所以答案只在窗口合法的时刻更新。</strong> 但”合法时刻”落在哪一侧，决定了两种题型的写法——这是滑动窗口唯一需要分类的地方：</p> </blockquote> <table> <thead> <tr> <th> </th> <th> <strong>最长型</strong>（最长子串/子数组）</th> <th> <strong>最短型</strong>（最小覆盖/最短子数组）</th> </tr> </thead> <tbody> <tr> <td>例题</td> <td>无重复最长子串、至多 K 个不同字符</td> <td>最小覆盖子串、长度最小子数组</td> </tr> <tr> <td>收缩循环的条件</td> <td> <code class="language-plaintext highlighter-rouge">while (窗口非法)</code> —— 缩到<strong>重新合法</strong> </td> <td> <code class="language-plaintext highlighter-rouge">while (窗口合法)</code> —— 缩到<strong>即将非法</strong> </td> </tr> <tr> <td>合法时刻在哪</td> <td>收缩循环的<strong>出口</strong>（缩回合法的瞬间）</td> <td>收缩循环的<strong>体内</strong>（每缩一步仍合法）</td> </tr> <tr> <td>答案更新位置</td> <td> <strong>收缩循环结束后</strong>：<code class="language-plaintext highlighter-rouge">max(ans, right - left)</code> </td> <td> <strong>收缩循环内部</strong>：<code class="language-plaintext highlighter-rouge">min(ans, right - left)</code> </td> </tr> <tr> <td>为什么</td> <td>出口处的窗口 = 以 right 为右端的<strong>最长</strong>合法窗</td> <td>体内每个瞬间都是合法窗，且<strong>越来越短</strong> </td> </tr> </tbody> </table> <blockquote> <p><strong>口诀：最长型在”恢复合法”时取 max，最短型在”维持合法”时取 min。</strong></p> </blockquote> <p>反例验证（为什么不能乱放）：</p> <ul> <li>max 放在扩张时 → 把非法窗口（含重复字符 / 超过 K 个 distinct）也算进去，答案虚高</li> <li>min 放在收缩循环外 → 循环退出时窗口已经非法，最小值永远取不到</li> </ul> <p><strong>两种题型，同一副骨架</strong>：</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 最长型：收缩条件 = 非法，更新在收缩循环之后（合法出口）</span>
+<span class="kt">int</span> <span class="n">left</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ans</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">right</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">add</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">right</span><span class="p">]);</span>            <span class="c1">// 扩张：入账</span>
+    <span class="n">right</span><span class="o">++</span><span class="p">;</span>
+    <span class="k">while</span> <span class="p">(</span><span class="err">窗口非法</span><span class="p">)</span> <span class="p">{</span>            <span class="c1">// 缩到重新合法</span>
+        <span class="n">remove</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">left</span><span class="p">]);</span>      <span class="c1">// 收缩：销账</span>
+        <span class="n">left</span><span class="o">++</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">ans</span> <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">ans</span><span class="p">,</span> <span class="n">right</span> <span class="o">-</span> <span class="n">left</span><span class="p">);</span>   <span class="c1">// 合法时刻（出口）：取 max</span>
+<span class="p">}</span>
+
+<span class="c1">// 最短型：收缩条件 = 合法，更新在收缩循环之内（每个合法瞬间）</span>
+<span class="kt">int</span> <span class="n">left</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ans</span> <span class="o">=</span> <span class="n">INT_MAX</span><span class="p">;</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">right</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">add</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">right</span><span class="p">]);</span>            <span class="c1">// 扩张：入账</span>
+    <span class="n">right</span><span class="o">++</span><span class="p">;</span>
+    <span class="k">while</span> <span class="p">(</span><span class="err">窗口合法</span><span class="p">)</span> <span class="p">{</span>            <span class="c1">// 缩到即将非法</span>
+        <span class="n">ans</span> <span class="o">=</span> <span class="n">min</span><span class="p">(</span><span class="n">ans</span><span class="p">,</span> <span class="n">right</span> <span class="o">-</span> <span class="n">left</span><span class="p">);</span>   <span class="c1">// 合法时刻（体内）：取 min</span>
+        <span class="n">remove</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">left</span><span class="p">]);</span>      <span class="c1">// 收缩：销账</span>
+        <span class="n">left</span><span class="o">++</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div> <p><strong>走一遍（无重复字符最长子串，s = “abcabcbb”）</strong>：</p> <ul> <li>right=0、1、2：依次入账 a、b、c → 窗口合法 → 出口取 max → ans = 1 → 2 → 3</li> <li>right=3：入账 a → 频次 a 变 2 → 窗口非法 → 收缩：销掉 s[0]=’a’ → 重新合法（left=1，窗口 “bca”）→ 出口取 max(3, 2) = 3</li> <li>全程节奏：<strong>入账 → 可能非法 → 销账到合法 → 出口取 max</strong> </li> </ul> <p><strong>走一遍（最小覆盖子串，LeetCode 76——最短型的完整代码）</strong>：</p> <p>想找「覆盖 t 的最短子串」，用的正是<strong>最短型骨架</strong>，和上面的模板一一对照：</p> <table> <thead> <tr> <th>骨架占位</th> <th>76 里的对应</th> </tr> </thead> <tbody> <tr> <td> <code class="language-plaintext highlighter-rouge">add</code>（入账）</td> <td><code class="language-plaintext highlighter-rouge">window[c]++; if (window[c] == need[c]) valid++;</code></td> </tr> <tr> <td>合法条件</td> <td> <code class="language-plaintext highlighter-rouge">valid == need.size()</code>（每种字符都凑齐）</td> </tr> <tr> <td> <code class="language-plaintext highlighter-rouge">while (合法)</code> 收缩</td> <td><code class="language-plaintext highlighter-rouge">while (valid == need.size())</code></td> </tr> <tr> <td>收缩内更新 <code class="language-plaintext highlighter-rouge">min</code> </td> <td><code class="language-plaintext highlighter-rouge">if (right - left &lt; len) { start = left; len = right - left; }</code></td> </tr> <tr> <td> <code class="language-plaintext highlighter-rouge">remove</code>（销账）</td> <td><code class="language-plaintext highlighter-rouge">if (window[d] == need[d]) valid--; window[d]--;</code></td> </tr> </tbody> </table> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+<span class="nl">public:</span>
+    <span class="n">string</span> <span class="n">minWindow</span><span class="p">(</span><span class="n">string</span> <span class="n">s</span><span class="p">,</span> <span class="n">string</span> <span class="n">t</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">char</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">need</span><span class="p">,</span> <span class="n">window</span><span class="p">;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">char</span> <span class="n">c</span> <span class="o">:</span> <span class="n">t</span><span class="p">)</span> <span class="n">need</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">++</span><span class="p">;</span>        <span class="c1">// need：t 的需求清单</span>
+
+        <span class="kt">int</span> <span class="n">left</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">valid</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>                     <span class="c1">// 已「数量凑齐」的字符种类数</span>
+        <span class="kt">int</span> <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">len</span> <span class="o">=</span> <span class="n">INT_MAX</span><span class="p">;</span>      <span class="c1">// 答案：起始下标 + 长度</span>
+
+        <span class="k">while</span> <span class="p">(</span><span class="n">right</span> <span class="o">&lt;</span> <span class="n">s</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>
+            <span class="kt">char</span> <span class="n">c</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">right</span><span class="p">];</span>             <span class="c1">// ① 即将入窗口的字符</span>
+            <span class="n">right</span><span class="o">++</span><span class="p">;</span>                       <span class="c1">//    扩张（默认动作）</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">need</span><span class="p">.</span><span class="n">count</span><span class="p">(</span><span class="n">c</span><span class="p">))</span> <span class="p">{</span>           <span class="c1">//    入账：只记 need 关心的字符</span>
+                <span class="n">window</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">++</span><span class="p">;</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">window</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">==</span> <span class="n">need</span><span class="p">[</span><span class="n">c</span><span class="p">])</span> <span class="n">valid</span><span class="o">++</span><span class="p">;</span>  <span class="c1">// 这种字符凑齐了，种类数 +1</span>
+            <span class="p">}</span>
+
+            <span class="k">while</span> <span class="p">(</span><span class="n">valid</span> <span class="o">==</span> <span class="n">need</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span> <span class="c1">// ② 合法 = 每种字符都凑齐 → 收缩</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">right</span> <span class="o">-</span> <span class="n">left</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// ③ 最短型：在收缩循环内更新 min</span>
+                    <span class="n">start</span> <span class="o">=</span> <span class="n">left</span><span class="p">;</span>          <span class="c1">//    （每步都合法，且越缩越短）</span>
+                    <span class="n">len</span> <span class="o">=</span> <span class="n">right</span> <span class="o">-</span> <span class="n">left</span><span class="p">;</span>
+                <span class="p">}</span>
+                <span class="kt">char</span> <span class="n">d</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">left</span><span class="p">];</span>          <span class="c1">// ② 即将出窗口的字符</span>
+                <span class="n">left</span><span class="o">++</span><span class="p">;</span>                    <span class="c1">//    收缩</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">need</span><span class="p">.</span><span class="n">count</span><span class="p">(</span><span class="n">d</span><span class="p">))</span> <span class="p">{</span>       <span class="c1">//    销账：对称退回</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">window</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">==</span> <span class="n">need</span><span class="p">[</span><span class="n">d</span><span class="p">])</span> <span class="n">valid</span><span class="o">--</span><span class="p">;</span>  <span class="c1">// 减之前先判断（减完就不够了）</span>
+                    <span class="n">window</span><span class="p">[</span><span class="n">d</span><span class="p">]</span><span class="o">--</span><span class="p">;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">len</span> <span class="o">==</span> <span class="n">INT_MAX</span> <span class="o">?</span> <span class="s">""</span> <span class="o">:</span> <span class="n">s</span><span class="p">.</span><span class="n">substr</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">len</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div></div> <p><strong><code class="language-plaintext highlighter-rouge">valid</code> 的计数技巧</strong>：<code class="language-plaintext highlighter-rouge">valid</code> 不是「覆盖了几个字符」，而是<strong>「数量恰好凑齐」的字符种类数</strong>。入账时数量刚好到 <code class="language-plaintext highlighter-rouge">need[c]</code> 就 <code class="language-plaintext highlighter-rouge">valid++</code>；销账时这个字符在移出前数量刚好等于 <code class="language-plaintext highlighter-rouge">need[d]</code>，移出后就差一个，所以先 <code class="language-plaintext highlighter-rouge">valid--</code> 再 <code class="language-plaintext highlighter-rouge">window[d]--</code>。这一收一放，正是 ② 里说的「<strong>入账销账严格对称</strong>」，也把 ② 表格里「已覆盖 target 的字符数」这一行落到了实处。</p> <p><strong>一句话收束</strong>：入账（扩张）只改状态，销账（收缩）对称退回，答案只在”合法”的瞬间诞生——最长型诞生在缩回合法的<strong>出口</strong>，最短型诞生在维持合法的<strong>体内</strong>。</p> <h3 id="24-荷兰国旗三指针--dutch-national-flag">2.4 荷兰国旗（三指针 / Dutch National Flag）</h3> <p><strong>本质</strong>：对撞指针的扩展，处理”3 类元素原地三分区”。</p> <p><strong>区域图</strong>（必须刻进 DNA）：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[0, left)     → 0区（已搞定）
+[left, i)     → 1区（已搞定）
+[i, right]    → 未知区（待探索）
+(right, n-1]  → 2区（已搞定）
+</code></pre></div></div> <p><strong>不变式</strong>：<code class="language-plaintext highlighter-rouge">i</code> 是未知区的左边界，<code class="language-plaintext highlighter-rouge">right</code> 是未知区的右边界。<code class="language-plaintext highlighter-rouge">i</code> 绝对不可以踏入 <code class="language-plaintext highlighter-rouge">(right, n-1]</code> 这个已完工的 2 区。</p> <p><strong>代码骨架</strong>：</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">left</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">right</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// 关键：未知区是[i,right]，不是[0,n)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">swap</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">nums</span><span class="p">[</span><span class="n">left</span><span class="p">]);</span>
+        <span class="n">left</span><span class="o">++</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">;</span>        <span class="c1">// 换过来的是1（来自1区），安全</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">i</span><span class="o">++</span><span class="p">;</span>                <span class="c1">// 1就在中间，不动</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="c1">// nums[i] == 2</span>
+        <span class="n">swap</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">nums</span><span class="p">[</span><span class="n">right</span><span class="p">]);</span>
+        <span class="n">right</span><span class="o">--</span><span class="p">;</span>            <span class="c1">// i不动！换过来的来自未知区，必须再检查</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div> <p><strong>致命易错点</strong>：</p> <ul> <li>循环条件必须是 <code class="language-plaintext highlighter-rouge">i &lt;= right</code>，绝不能是 <code class="language-plaintext highlighter-rouge">i &lt; n</code> </li> <li>swap 2 时 <code class="language-plaintext highlighter-rouge">i</code> 绝对不能动</li> </ul> <h3 id="25-分离双指针">2.5 分离双指针</h3> <p><strong>本质</strong>：两个指针在两个数组上，协作而非竞争。</p> <p><strong>铁律</strong>：谁小谁移动，相等时一起移动。</p> <hr> <h2 id="三错题解剖">三、错题解剖</h2> <h3 id="31-remove-duplicates保留最多-k-个重复">3.1 Remove Duplicates（保留最多 k 个重复）</h3> <p><strong>错误代码</strong>：</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="n">slow</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">unordered_map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">check</span><span class="p">;</span>  <span class="c1">// 错误1：不需要HashMap</span>
+<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">fast</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">fast</span> <span class="o">&lt;</span> <span class="n">nums</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="n">fast</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">check</span><span class="p">[</span><span class="n">fast</span><span class="p">]</span><span class="o">!=</span><span class="n">check</span><span class="p">[</span><span class="n">slow</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">check</span><span class="p">[</span><span class="n">nums</span><span class="p">[</span><span class="n">fast</span><span class="p">]]</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// 错误2：索引和值混用</span>
+        <span class="n">slow</span><span class="o">++</span><span class="p">;</span>              <span class="c1">// 错误3：先移动</span>
+        <span class="n">nums</span><span class="p">[</span><span class="n">slow</span><span class="p">]</span><span class="o">=</span><span class="n">nums</span><span class="p">[</span><span class="n">fast</span><span class="p">];</span> <span class="c1">// 再写入，导致偏移</span>
+        <span class="n">check</span><span class="p">[</span><span class="n">nums</span><span class="p">[</span><span class="n">fast</span><span class="p">]]</span><span class="o">++</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="k">return</span> <span class="n">slow</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>  <span class="c1">// 错误4：返回slow+1来弥补偏移</span>
+</code></pre></div></div> <p><strong>错误根因</strong>：</p> <ol> <li> <strong>没利用”有序数组”特征</strong>：有序数组去重不需要 HashMap，直接和边界比</li> <li> <strong>slow 语义错误</strong>：把 slow 当成”最后一个有效元素下标”，实际上 slow 是”下一个待写入位置”</li> <li> <strong>写入顺序错误</strong>：必须先 <code class="language-plaintext highlighter-rouge">nums[slow] = ...</code> 再 <code class="language-plaintext highlighter-rouge">slow++</code> </li> </ol> <p><strong>正确通用模板（保留 k 个重复）</strong>：</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">removeDuplicates</span><span class="p">(</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">nums</span><span class="p">,</span> <span class="kt">int</span> <span class="n">k</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">nums</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">&lt;=</span> <span class="n">k</span><span class="p">)</span> <span class="k">return</span> <span class="n">n</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">slow</span> <span class="o">=</span> <span class="n">k</span><span class="p">;</span>  <span class="c1">// 前k个无条件保留</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">fast</span> <span class="o">=</span> <span class="n">k</span><span class="p">;</span> <span class="n">fast</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">;</span> <span class="n">fast</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">fast</span><span class="p">]</span> <span class="o">!=</span> <span class="n">nums</span><span class="p">[</span><span class="n">slow</span> <span class="o">-</span> <span class="n">k</span><span class="p">])</span> <span class="p">{</span>  <span class="c1">// 和有效区倒数第k个比（警戒线）</span>
+            <span class="n">nums</span><span class="p">[</span><span class="n">slow</span><span class="p">]</span> <span class="o">=</span> <span class="n">nums</span><span class="p">[</span><span class="n">fast</span><span class="p">];</span>  <span class="c1">// 先写入</span>
+            <span class="n">slow</span><span class="o">++</span><span class="p">;</span>                   <span class="c1">// 再扩界</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">slow</span><span class="p">;</span>  <span class="c1">// 边界就是长度</span>
+<span class="p">}</span>
+</code></pre></div></div> <h3 id="32-sort-colors荷兰国旗">3.2 Sort Colors（荷兰国旗）</h3> <p><strong>错误代码</strong>：</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">while</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">nums</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>  <span class="c1">// 致命错误</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="n">swap</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">slow</span><span class="p">],</span><span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span> <span class="n">slow</span><span class="o">++</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">else</span> <span class="nf">if</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span> <span class="n">i</span><span class="o">++</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span> <span class="n">swap</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">nums</span><span class="p">[</span><span class="n">fast</span><span class="p">]);</span> <span class="n">fast</span><span class="o">--</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div> <p><strong>错误根因</strong>：</p> <ul> <li> <strong>循环条件错误</strong>：用了 <code class="language-plaintext highlighter-rouge">i &lt; n</code>，导致 <code class="language-plaintext highlighter-rouge">i</code> 冲进已经排好的 2 区，把 2 又 swap 回中间</li> <li> <strong>没理解区域定义</strong>：<code class="language-plaintext highlighter-rouge">i</code> 不是”遍历整个数组的游标”，而是”未知区的左哨兵”；<code class="language-plaintext highlighter-rouge">fast</code> 右边是已完工区，禁止踏入</li> </ul> <p><strong>正确代码</strong>：</p> <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">fast</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// 未知区是[i,fast]</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="n">swap</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">nums</span><span class="p">[</span><span class="n">slow</span><span class="p">]);</span> <span class="n">left</span><span class="o">++</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span> <span class="n">i</span><span class="o">++</span><span class="p">;</span> <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span> <span class="n">swap</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">nums</span><span class="p">[</span><span class="n">fast</span><span class="p">]);</span> <span class="n">right</span><span class="o">--</span><span class="p">;</span> <span class="cm">/* i不动 */</span> <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div> <h3 id="33-其他常见错误模式">3.3 其他常见错误模式</h3> <table> <thead> <tr> <th>坑</th> <th>表现</th> <th>本质</th> </tr> </thead> <tbody> <tr> <td><strong>原地修改依赖症</strong></td> <td>merge 题用 <code class="language-plaintext highlighter-rouge">insert</code>、squares 题直接覆盖 <code class="language-plaintext highlighter-rouge">nums[right]</code> </td> <td>把”数据源”和”结果容器”当成同一个东西</td> </tr> <tr> <td><strong>正向遍历思维定式</strong></td> <td>总想从左到右、边遍历边处理</td> <td>忽略了”从后往前”往往没有覆盖风险</td> </tr> <tr> <td><strong>边界条件前置化</strong></td> <td>写一堆 <code class="language-plaintext highlighter-rouge">if(size==0)</code> 特判</td> <td>没有把边界判断融入循环条件</td> </tr> </tbody> </table> <hr> <h2 id="四核心根因元素思维-vs-边界思维">四、核心根因：”元素思维” vs “边界思维”</h2> <blockquote> <p><strong>你总把指针当成”当前元素的下标”，但它实际上是”区域的边界”。</strong></p> </blockquote> <table> <thead> <tr> <th>题目</th> <th>错误表现</th> <th>指针的真实身份</th> </tr> </thead> <tbody> <tr> <td><strong>Remove Duplicates</strong></td> <td> <code class="language-plaintext highlighter-rouge">slow++</code> 后再写入，返回 <code class="language-plaintext highlighter-rouge">slow+1</code> 凑长度</td> <td> <code class="language-plaintext highlighter-rouge">slow</code> 是<strong>边界</strong>，指向”下一个待写入位置”，它本身就是长度</td> </tr> <tr> <td><strong>Sort Colors</strong></td> <td> <code class="language-plaintext highlighter-rouge">i &lt; n</code> 遍历全数组</td> <td> <code class="language-plaintext highlighter-rouge">i</code> 是<strong>未知区左哨兵</strong>，不是普通遍历游标</td> </tr> <tr> <td><strong>Merge Sorted Array</strong></td> <td>想原地 <code class="language-plaintext highlighter-rouge">insert</code> 或正向覆盖</td> <td>没意识到 <code class="language-plaintext highlighter-rouge">nums1</code> 尾部有”空白缓冲区”，应该从后往前填</td> </tr> <tr> <td><strong>Squares of Sorted Array</strong></td> <td>直接覆盖原数组</td> <td>没意识到”结果数组”和”数据源”可以是两个东西</td> </tr> </tbody> </table> <p><strong>一句话总结</strong>：写代码时脑子里想的是”这个元素怎么处理”，但双指针要求你想的是”这个区域怎么变化”。</p> <h3 id="为什么容易混淆">为什么容易混淆？</h3> <p>这是<strong>非常正常</strong>的编程思维惯性：</p> <ul> <li>平时写 <code class="language-plaintext highlighter-rouge">for (int i = 0; i &lt; n; i++)</code>，<code class="language-plaintext highlighter-rouge">i</code> 就是”当前元素”</li> <li>但双指针里，<code class="language-plaintext highlighter-rouge">slow</code> / <code class="language-plaintext highlighter-rouge">left</code> / <code class="language-plaintext highlighter-rouge">i</code> 往往是<strong>左闭右开区间的右边界</strong> </li> <li>这个转变是反直觉的，所以你会用 <code class="language-plaintext highlighter-rouge">slow+1</code> 去”修正”，用 <code class="language-plaintext highlighter-rouge">i &lt; n</code> 去”遍历”</li> </ul> <p><strong><code class="language-plaintext highlighter-rouge">slow+1</code> 和 <code class="language-plaintext highlighter-rouge">i &lt; n</code> 不是代码错误，是”身份认知错误”的补丁。</strong> 补丁打多了，逻辑就乱了。</p> <hr> <h2 id="五防错检查单">五、防错检查单</h2> <p>写代码前必须回答：</p> <ul class="task-list"> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>我画出了区域图吗？（<code class="language-plaintext highlighter-rouge">[搞定区) ptr [待处理区) ptr [搞定区]</code>）</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>每个指针是”位置”还是”边界”？（边界 = 指向区域外第一个元素）</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>循环条件是从”待处理区是否为空”推导的吗？</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>指针移动后，区域定义还成立吗？</li> <li class="task-list-item"> <input type="checkbox" class="task-list-item-checkbox" disabled>返回的是边界（长度）还是下标？</li> </ul> <hr> <h2 id="六一句话决策树">六、一句话决策树</h2> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>看到"原地修改/分区" + "一个数组"
+    │
+    ├─ 找连续子串/子数组的最长最短 → 滑动窗口
+    ├─ 3类固定值原地三分区 → 荷兰国旗（left/i/right）
+    ├─ 有序数组 + 去重/分区 → 快慢指针（slow/fast）
+    └─ 两头往中间凑 → 对撞指针（left/right）
+
+看到"两个数组/链表"找关系
+    └─ 分离双指针（谁小谁走）
+</code></pre></div></div> <hr> <h2 id="七核心口诀">七、核心口诀</h2> <blockquote> <p><strong>两类对撞挤，三类荷兰旗；</strong><br> <strong>换零两边走，换二右边缩；</strong><br> <strong>中间是净土，遇一直接过。</strong><br> <strong>slow是边界，先写再扩界；</strong><br> <strong>i是侦察兵，只逛未知区。</strong></p> </blockquote> <p><strong>补充口诀：</strong></p> <blockquote> <p><strong>“怕覆盖，就倒着填；两头大，取一边；同方向，快慢走。”</strong></p> </blockquote> <hr> <h2 id="八关键认知转变">八、关键认知转变</h2> <h3 id="81-数组是廉价的思维是昂贵的">8.1 数组是廉价的，思维是昂贵的</h3> <p>总想原地操作（<code class="language-plaintext highlighter-rouge">insert</code>、直接覆盖），是因为觉得”开新数组浪费空间”。但算法题里：</p> <ul> <li> <strong>O(n) 额外空间</strong>是常规操作</li> <li> <strong>破坏原始数据</strong>才是致命错误</li> </ul> <p>下次拿到数组题，先问自己：<strong>“我能不能倒着填？能不能开个新数组？”</strong> 如果答案是可以，大概率这就是正解。</p> <h3 id="82-进步轨迹">8.2 进步轨迹</h3> <p>对比第一题和难题（对角线排序）：</p> <ul> <li> <strong>第一题</strong>：<code class="language-plaintext highlighter-rouge">insert</code> 导致长度爆炸，逻辑完全失控</li> <li> <strong>难题</strong>：已经会利用数学特征做分组，会用 <code class="language-plaintext highlighter-rouge">back()</code> + <code class="language-plaintext highlighter-rouge">pop_back()</code> 优雅回填</li> </ul> <p>难题的难度其实更高，但核心逻辑写对了。这说明不是不会双指针，只是<strong>还没习惯”从后往前”和”另开数组”这两个 trick</strong>。</p> <hr> <h2 id="九练习建议">九、练习建议</h2> <h3 id="91-每日必做看到数组题先画两个箭头">9.1 每日必做：看到数组题，先画两个箭头</h3> <ul> <li>箭头从两端往中间走 → <strong>对向双指针</strong>（平方和、两数之和）</li> <li>箭头从后往前走 → <strong>逆向双指针</strong>（合并、替换空格）</li> <li>一快一慢往右走 → <strong>快慢双指针</strong>（移除元素、链表判环）</li> </ul> <p>画 5 分钟箭头，再写代码。代码写对了，再把箭头擦掉。</p> <h3 id="92-专项突破计划">9.2 专项突破计划</h3> <ol> <li>接下来 3 天，只做快慢指针和荷兰国旗，不碰滑动窗口和对撞</li> <li>每道题强制画区域图，用 <code class="language-plaintext highlighter-rouge">[ )</code> 符号标出”已搞定区”和”未知区”</li> <li>写代码前，先口头解释：<code class="language-plaintext highlighter-rouge">slow</code> 是下标还是边界？<code class="language-plaintext highlighter-rouge">i</code> 能踏进 <code class="language-plaintext highlighter-rouge">right</code> 右边吗？</li> <li>允许自己开新数组，先放弃”原地修改”的执念，把逻辑跑通再优化</li> </ol> <h3 id="93-画区域图的正确姿势">9.3 画区域图的正确姿势</h3> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>错误画法（直觉）：
+[1, 1, 2, 2, 3]
+    ↑
+   slow（指向1）
+
+正确画法（双指针语义）：
+[1, 1) [2, 2, 3)
+      ↑
+     slow（边界，指向2）
+</code></pre></div></div> <p><strong>把指针画成”栅栏”而不是”箭头”。</strong></p> <hr> <h2 id="十边界认知自测题">十、边界认知自测题</h2> <blockquote> <p><strong>数组 <code class="language-plaintext highlighter-rouge">[1,1,1,2,2,3]</code>，保留最多 2 个重复，用快慢指针。</strong></p> <ol> <li>初始时 <code class="language-plaintext highlighter-rouge">slow</code> 应该等于几？</li> <li> <code class="language-plaintext highlighter-rouge">fast</code> 从几开始？</li> <li>第一次满足 <code class="language-plaintext highlighter-rouge">nums[fast] != nums[slow-2]</code> 时，<code class="language-plaintext highlighter-rouge">slow</code> 指向的位置会发生什么？</li> </ol> </blockquote> <p><strong>正确答案</strong>：</p> <ol> <li> <code class="language-plaintext highlighter-rouge">slow</code> 初始是 <strong>2</strong>（前 2 个无条件保留，<strong>边界</strong>停在第 3 个位置）</li> <li> <code class="language-plaintext highlighter-rouge">fast</code> 从 <strong>2</strong> 开始探路</li> <li>第一次满足条件时，<code class="language-plaintext highlighter-rouge">nums[slow] = nums[fast]</code>，然后 <code class="language-plaintext highlighter-rouge">slow++</code> 扩界</li> </ol> <p>如果第一反应是 <code class="language-plaintext highlighter-rouge">slow=1</code>、<code class="language-plaintext highlighter-rouge">fast=0</code>、先 <code class="language-plaintext highlighter-rouge">slow++</code> 再赋值 → <strong>身份认知还没转过来，需要再练。</strong></p> <hr> <h2 id="十一更高纬度双指针到底在干嘛">十一、更高纬度：双指针到底在干嘛</h2> <blockquote> <p>前面十节是”术”，这一节是”道”。学会之后，你看到的不再是三道题，而是一个原理的三个投影。</p> </blockquote> <h3 id="111-为什么双指针都是-on单调前沿扫描">11.1 为什么双指针都是 O(n)：单调前沿扫描</h3> <p>暴力做法是在 O(n²) 的 <code class="language-plaintext highlighter-rouge">(i,j)</code> 配对上找答案。双指针做的事从来不是”扫得聪明”，而是：<strong>证明绝大多数配对永远不可能是答案，然后永久丢髥它们</strong>。</p> <blockquote> <p>每个指针单调移动（永不回头）→ 每个指针总共只走 O(n) 步 → 摊还 O(n)。</p> </blockquote> <p>剩下的候选解排成一条<strong>单调阶梯（staircase）</strong>——<code class="language-plaintext highlighter-rouge">l</code> 每前进一步，对应的 <code class="language-plaintext highlighter-rouge">r</code> 只往一个方向动。沿着这条阶梯走一遍就是 O(n)。滑动窗口、对撞、分离，全是这个图景，区别只是那条前沿长什么样。</p> <h3 id="112-指针移动--支配证明">11.2 指针移动 = 支配证明</h3> <p>把 <code class="language-plaintext highlighter-rouge">l++</code> / <code class="language-plaintext highlighter-rouge">r--</code> 从”移动变量”重命名为”删除候选解集”：</p> <blockquote> <p><strong>“我删掉了所有以当前 <code class="language-plaintext highlighter-rouge">l</code>（或 <code class="language-plaintext highlighter-rouge">r</code>）为界的候选解，并证明它们不可能最优。”</strong></p> </blockquote> <p>接雨水那道题：<code class="language-plaintext highlighter-rouge">leftMax &lt; rightMax</code> 时 <code class="language-plaintext highlighter-rouge">left</code> 的水量被左墙锁死，右边再高也救不了这个位置——所以以它为左界的全部候选解都是死的，可以理直气壮地 <code class="language-plaintext highlighter-rouge">left++</code>。<strong>每次移动前问一句：”我删掉了什么，凭什么？” 答不上来的移动，就是靠背模板在写。</strong></p> <h3 id="113-双指针其实是三个家族">11.3 “双指针”其实是三个家族</h3> <p>宽度上记住三张面孔，别再当一个东西背：</p> <table> <thead> <tr> <th>家族</th> <th>代表</th> <th>利用的结构</th> </tr> </thead> <tbody> <tr> <td><strong>原地划分</strong></td> <td>数组型快慢、荷兰旗</td> <td>不需要有序！靠”值分类 + 区域不变式”做 partition</td> </tr> <tr> <td><strong>合并/配对</strong></td> <td>对撞、分离、归并</td> <td>需要有序性（或支配关系），比大小决定谁走</td> </tr> <tr> <td><strong>结构检测</strong></td> <td>Floyd 判环</td> <td>相对采样差 + 鸽巢，跟数组派无共享机制</td> </tr> </tbody> </table> <p>两个彩蛋：荷兰国旗本质是<strong>三路划分 = quicksort 3-way partition 的内核</strong>；归并那道题本质是<strong>归并排序的 merge 步骤</strong>。你刷的每道双指针，都是在单练排序/检索里切出来的一刀。</p> <h3 id="114-数组型快慢--读写分离流水线">11.4 数组型快慢 = 读写分离流水线</h3> <p>忘掉”快慢”，改叫”读写”：<code class="language-plaintext highlighter-rouge">fast</code> 是<strong>读指针</strong>（唯一信息源，必须遍历每个元素），<code class="language-plaintext highlighter-rouge">slow</code> 是<strong>写指针</strong>（有效区边界）。</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>fast (迭代器，读) → [ 过滤规则 ] → slow (输出流，写)
+</code></pre></div></div> <p>这是 <strong>in-place 版的 filter 流水线</strong>，输出流和输入流在同一个数组上重叠。真正的问题只有一个：<strong>什么时候原地安全？</strong></p> <blockquote> <p><strong>写指针永远不能越过尚未读取的数据源。</strong></p> </blockquote> <p>正向写（去重/移除，写 ≤ 读）安全；结果比源长时必须<strong>倒着填</strong>（Merge Sorted Array、替换空格），从尾部空白缓冲区出发——正写和反写是同一枚硬币，方向反转只是为了让写指针继续躲着源走。别再纠结”开新数组是不是浪费”，画两个箭头问：<strong>“这样写我会踩到还没读的元素吗？”</strong></p> <h3 id="115-决策所需的最小状态量错题一的最终解释">11.5 决策所需的最小状态量（错题一的最终解释）</h3> <p>第三章的错题一，当时说是”有序数组不需要 HashMap”。现在可以讲透：区别是<strong>做一次留/删决策，最少要记住多少东西</strong>。</p> <table> <thead> <tr> <th>情况</th> <th>决策规则</th> <th>所需状态</th> </tr> </thead> <tbody> <tr> <td>移除元素（无序也行）</td> <td> <code class="language-plaintext highlighter-rouge">值 == target → 删</code>，纯函数</td> <td> <strong>无状态</strong>，O(1) 都不需要</td> </tr> <tr> <td>去重（无序）</td> <td>“这个值我见过第 k+1 次了吗？”</td> <td> <strong>完整历史</strong>（multiset），O(n)</td> </tr> <tr> <td>去重（有序）</td> <td><code class="language-plaintext highlighter-rouge">nums[fast] != nums[slow-k]</code></td> <td> <strong>一个位置</strong>，O(1)</td> </tr> </tbody> </table> <p>关键的表述：<strong>有序性把”全局支配”压成”局部支配”</strong>。移除元素是全局恒真命题（值本身决定去留，不依赖任何前缀）；去重依赖历史。有序后，相同的值被迫相邻——”这个值出现过几次”的完整历史<strong>坍缩成一个下标</strong>（<code class="language-plaintext highlighter-rouge">slow-k</code> 哨兵）。排序没有替你推导，排序让<strong>记忆降维成指针</strong>。</p> <h3 id="116-这架电梯还能升到别的题">11.6 这架电梯还能升到别的题</h3> <p>“结构单调 → 决策状态可压缩 → 摊还 O(n)”不止双指针：滑动窗口 <code class="language-plaintext highlighter-rouge">while</code> 收缩、单调栈每个元素进出一次、KMP 失配回退有界，<strong>全是同一架电梯的不同楼层</strong>。</p> <p>下次做题别只问”这题是不是双指针”，改问：<strong>“这题的决策，最少的必要记忆是什么？”</strong> 答案是常数 ⇒ 存在一趟流水的做法；答案必须是全部历史 ⇒ 要么排序/建结构把它压下来，要么这题就吃定 O(n) 空间。</p> <hr> <h2 id="十二通俗版专项对撞指针的瓶颈锁定额水">十二、通俗版专项：对撞指针的”瓶颈锁定额水”</h2> <blockquote> <p>第十一章讲了道，这一章把对撞家族里的”瓶颈锁死型”（盛水、接雨水）用最舒服的方式再讲一遍——全部浓缩成一个原理：<strong>木桶效应，瓶颈锁定额水</strong>。</p> </blockquote> <h3 id="121-核心原理矮的是天花板">12.1 核心原理：矮的是天花板</h3> <p>不管盛水还是接雨水，全篇只有一句话：<strong>水能存多少，由矮的那边决定。</strong></p> <p>这是木桶效应——杯壁再高也没用，水从矮的那边溢出去。所以”矮墙 = 天花板”，谁矮谁定水。</p> <h3 id="122-盛最多水矮墙淘汰最单纯的版本">12.2 盛最多水：矮墙淘汰（最单纯的版本）</h3> <p>一排墙，选两堵当杯壁，装水量 = <strong>矮的那堵墙的高度 × 两墙距离</strong>。双指针从最左和最右开始（距离最大），每轮都”淘汰”对里比较矮的那堵墙。</p> <p>为什么淘汰矮的？把道理说得特别白：</p> <blockquote> <p>左边这堵墙矮。把它留着，右边换任何一堵墙——宽度只会更窄（右边只能往左挪），水量天花板永远是矮的那边的高度。<strong>所以这堵矮墙跟谁配都赢不了，直接枪毙它这一整列候选。</strong></p> </blockquote> <p>注意这个动作不是”试试别的”，而是<strong>一次性判死刑</strong>：以矮墙为边的所有组合都不可能超过当前这对——因为当前这对的宽度已经拉满（两端最远），矮墙又封了顶。这个角度上已经到达它的人生巅峰，往里走埋伏更高墙去了。</p> <h3 id="123-接雨水同一个原理搬到每个坑上">12.3 接雨水：同一个原理，搬到每个坑上</h3> <p>接雨水麻烦一点：水不是装在选定的两堵墙之间，而是<strong>积在每一格坑里</strong>，左右都得有墙才存得住水。每个格子能存多少，公式一句话：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>水量 = min(左边最高的墙, 右边最高的墙) − 我这格的高度
+</code></pre></div></div> <p>还是木桶效应：左边最高墙 5、右边最高墙 8，水面最多到 5（从矮那边流走），减去坑深 1，存 4 格水。</p> <p><strong>难点</strong>：每个坑都要”左右最高的墙”，难道每个坑都往左右扫一遍（O(n²)）？双指针的笨办法变聪明之处——从两头往中间边走边记，只记两个数：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>leftMax  = 左指针一路走来见过的墙里最高的
+rightMax = 右指针一路走来见过的墙里最高的
+</code></pre></div></div> <p>现在盯住左指针脚下的格子，要做判断：<strong>它右边到底有没有够高的墙？</strong></p> <p>这里是最容易卡住的一步，请勾重点：</p> <blockquote> <p><code class="language-plaintext highlighter-rouge">rightMax</code> 不是”右边那堵墙有多高”，而是”右边这一路已经看过的墙里最高的”。右边那片还没看过的区域里，真正的右最高<strong>只会比 <code class="language-plaintext highlighter-rouge">rightMax</code> 高（或持平），绝不可能更矮</strong>。</p> </blockquote> <p>所以可以放心地说一句：<strong>右边至少有一堵 <code class="language-plaintext highlighter-rouge">rightMax</code> 这么高的墙。</strong></p> <p>判断就清脆了：</p> <ul> <li> <code class="language-plaintext highlighter-rouge">leftMax &lt; rightMax</code> → 右边保证有比 <code class="language-plaintext highlighter-rouge">leftMax</code> 更高的墙 → 右边当不了瓶颈 → <strong>瓶颈就是 <code class="language-plaintext highlighter-rouge">leftMax</code></strong> → 这格水量 = <code class="language-plaintext highlighter-rouge">leftMax − 自己</code>，定死，左指针往前走</li> <li>反过来，右边一格的积水量被 <code class="language-plaintext highlighter-rouge">rightMax</code> 锁定，右指针往前走</li> </ul> <h3 id="124-一张表收尾淘汰-vs-锁定都是木桶效应">12.4 一张表收尾：淘汰 vs 锁定，都是木桶效应</h3> <table> <thead> <tr> <th> </th> <th>盛最多水</th> <th>接雨水</th> </tr> </thead> <tbody> <tr> <td>每次动作</td> <td>矮墙<strong>淘汰</strong>，换更近的墙</td> <td>矮边<strong>锁定</strong>水面，算完走人</td> </tr> <tr> <td>比较的对象</td> <td>当前两堵墙的高度</td> <td>两侧 running max（压缩的历史）</td> </tr> <tr> <td>依赖结构</td> <td>两端最远 + 矮边封顶（无需排序）</td> <td>逐个格子的左右最高墙（无需排序）</td> </tr> <tr> <td>木桶效应形态</td> <td>全局砍掉整列候选</td> <td>局部钉死一个格子的水位</td> </tr> </tbody> </table> <p>慢节奏上手建议：在纸上随便画一排墙的高度数组，用手模拟 <code class="language-plaintext highlighter-rouge">leftMax</code> / <code class="language-plaintext highlighter-rouge">rightMax</code> 从左到右蠕动一遍，每个格子停下来算一次——走完一遍，代码自然就默写得出来了。</p> <hr> <h2 id="总结">总结</h2> <blockquote> <p><strong>不是不会双指针，是还没习惯”用边界思考，而不是用元素思考”。</strong></p> </blockquote> <p>这个转变没有捷径，但每次写代码前问一句 <strong>“这个指针是箭头，还是栅栏？”</strong>，一周之内就能彻底改过来。</p> <p><strong>好算法往往是反直觉的，而直觉正在被慢慢修正。</strong> 这个过程就叫学习。</p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE%E5%8F%8C%E6%A8%A1%E6%9D%BFsearchInsert%E6%8B%86%E8%A7%A3/">二分查找双模板 + searchInsert 逐行拆解：从模板到边界</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/Agent-Memory-30-techniques/">Agent Memory 全景：30 个记忆技术的模块化拆解</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/lightrag-deep-dive/">LightRAG 深度解析：简单快速的图增强 RAG</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/LangChain-v1-Agent-Middleware/">LangChain v1 Agent Middleware 笔记</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/LangGraph-Checkpoint/">LangGraph Checkpoint 详解</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E5%9B%BE%E7%9A%84%E9%81%8D%E5%8E%86-%E7%82%B9%E8%BE%B9%E8%B7%AF%E5%BE%84-C++/">图的遍历（点 / 边 / 路径）—— C++ 模板与 visited 的本质</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/GraphRAG-chunk-level-traversal/">GraphRAG（Chunk 级遍历版）—— 带图的检索，还是假的图谱？</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/GraphRAG-with-Milvus/">Graph RAG with Milvus —— 纯向量库造图的多跳推理</a> </li> </ul> <div id="giscus_thread" style="max-width: 930px; margin: 0 auto;"> <br> <script>
+    (function setupGiscus() {
+      function determineGiscusTheme() {
+        var theme = localStorage.getItem("theme") || document.documentElement.getAttribute("data-theme") || "system";
+if (theme === "dark") return "dark";
+if (theme === "light") return "light";
+var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+return prefersDark ? "dark" : "light";
+
+      }
+
+      var giscusTheme = determineGiscusTheme();
+      var attrs = {
+        src: "https://giscus.app/client.js",
+        "data-repo": "Mr-coldskin7/Mr-coldskin7.github.io",
+        "data-repo-id": "R_kgDONx3iVw",
+        "data-category": "Announcements",
+        "data-category-id": "DIC_kwDONx3iV84C-J1X",
+        "data-mapping": "pathname",
+        "data-strict": "0",
+        "data-reactions-enabled": "1",
+        "data-emit-metadata": "0",
+        "data-input-position": "bottom",
+        "data-theme": giscusTheme,
+        "data-lang": "zh-CN",
+        crossorigin: "anonymous",
+        async: true
+      };
+
+      var giscusScript = document.createElement("script");
+      Object.entries(attrs).forEach(function(entry) { giscusScript.setAttribute(entry[0], entry[1]); });
+      var host = document.getElementById("giscus_thread");
+      if (host) host.appendChild(giscusScript);
+    })();
+  </script> <noscript> Please enable JavaScript to view the <a href="http://giscus.app/?ref_noscript" rel="external nofollow noopener" target="_blank">comments powered by giscus.</a> </noscript> </div> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "about",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-cv",
+          title: "CV",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/cv/";
+          },
+        },{id: "nav-knowledge-graph",
+          title: "Knowledge Graph",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/graph/";
+          },
+        },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "nav-repositories",
+          title: "repositories",
+          description: "Edit the `_data/repositories.yml` and change the `github_users` and `github_repos` lists to include your own GitHub profile and repositories.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/repositories/";
+          },
+        },{id: "post-二分查找双模板-searchinsert-逐行拆解-从模板到边界",
+        
+          title: "二分查找双模板 + searchInsert 逐行拆解：从模板到边界",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE%E5%8F%8C%E6%A8%A1%E6%9D%BFsearchInsert%E6%8B%86%E8%A7%A3/";
+          
+        },
+      },{id: "post-agent-memory-全景-30-个记忆技术的模块化拆解",
+        
+          title: "Agent Memory 全景：30 个记忆技术的模块化拆解",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Agent-Memory-30-techniques/";
+          
+        },
+      },{id: "post-lightrag-深度解析-简单快速的图增强-rag",
+        
+          title: "LightRAG 深度解析：简单快速的图增强 RAG",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/lightrag-deep-dive/";
+          
+        },
+      },{id: "post-双指针算法复盘总结-从元素思维到边界思维",
+        
+          title: "双指针算法复盘总结：从元素思维到边界思维",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E5%8F%8C%E6%8C%87%E9%92%88%E7%AE%97%E6%B3%95%E5%A4%8D%E7%9B%98%E6%80%BB%E7%BB%93/";
+          
+        },
+      },{id: "post-langchain-v1-agent-middleware-笔记",
+        
+          title: "LangChain v1 Agent Middleware 笔记",
+        
+        description: "LangChain v1 中间件机制详解——Agent 核心循环前后的 hooks, 控制输入输出、工具调用、消息摘要与修剪。",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/LangChain-v1-Agent-Middleware/";
+          
+        },
+      },{id: "post-langgraph-checkpoint-详解",
+        
+          title: "LangGraph Checkpoint 详解",
+        
+        description: "LangGraph checkpoint 机制深挖——每步 state 快照 + WAL 耐久执行, thread_id 定位会话, checkpoint_id 定位步骤。",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/LangGraph-Checkpoint/";
+          
+        },
+      },{id: "post-图的遍历-点-边-路径-c-模板与-visited-的本质",
+        
+          title: "图的遍历（点 / 边 / 路径）—— C++ 模板与 visited 的本质",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E5%9B%BE%E7%9A%84%E9%81%8D%E5%8E%86-%E7%82%B9%E8%BE%B9%E8%B7%AF%E5%BE%84-C++/";
+          
+        },
+      },{id: "post-graphrag-chunk-级遍历版-带图的检索-还是假的图谱",
+        
+          title: "GraphRAG（Chunk 级遍历版）—— 带图的检索，还是假的图谱？",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/GraphRAG-chunk-level-traversal/";
+          
+        },
+      },{id: "post-graph-rag-with-milvus-纯向量库造图的多跳推理",
+        
+          title: "Graph RAG with Milvus —— 纯向量库造图的多跳推理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/GraphRAG-with-Milvus/";
+          
+        },
+      },{id: "post-hierarchical-indices-层级索引-先粗后细的两级检索",
+        
+          title: "Hierarchical Indices 层级索引 —— 先粗后细的两级检索",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Hierarchical-Indices/";
+          
+        },
+      },{id: "post-hyde-与-hype-假设检索技术的两个方向",
+        
+          title: "HyDE 与 HyPE —— 假设检索技术的两个方向",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/HyDE-HyPE-Hypothetical-Retrieval/";
+          
+        },
+      },{id: "post-二叉树刷题总结",
+        
+          title: "二叉树刷题总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/";
+          
+        },
+      },{id: "post-rag-技术体系化分类-从-pipeline-阶段到失败模式",
+        
+          title: "RAG 技术体系化分类——从 Pipeline 阶段到失败模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/RAG-techniques-pipeline-categorization/";
+          
+        },
+      },{id: "post-memorag-记忆增强型-rag-总结",
+        
+          title: "MemoRAG 记忆增强型 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/memorag-summary/";
+          
+        },
+      },{id: "post-microsoft-graphrag-基于知识图谱的-rag-总结",
+        
+          title: "Microsoft GraphRAG 基于知识图谱的 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/microsoft-graphrag-summary/";
+          
+        },
+      },{id: "post-multimodal-rag-with-captioning-图像描述型多模态-rag-总结",
+        
+          title: "Multimodal RAG with Captioning 图像描述型多模态 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/multimodal-rag-with-captioning-summary/";
+          
+        },
+      },{id: "post-掌握-colpali-多模态-rag-需要回答的-8-个问题",
+        
+          title: "掌握 ColPali 多模态 RAG 需要回答的 8 个问题",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/colpali-multimodal-rag-qa/";
+          
+        },
+      },{id: "post-proposition-chunking-命题化切分总结",
+        
+          title: "Proposition Chunking 命题化切分总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/proposition-chunking-summary/";
+          
+        },
+      },{id: "post-query-transformations-查询转换技术总结",
+        
+          title: "Query Transformations 查询转换技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/query-transformations-summary/";
+          
+        },
+      },{id: "post-raptor-技术总结",
+        
+          title: "RAPTOR 技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/raptor-summary/";
+          
+        },
+      },{id: "post-relevant-segment-extraction-rse-学习笔记-从片段到段落",
+        
+          title: "Relevant Segment Extraction (RSE) 学习笔记 —— 从片段到段落",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/relevant-segment-extraction/";
+          
+        },
+      },{id: "post-reranking-with-llamaindex-学习笔记-llm-与-cross-encoder-重排",
+        
+          title: "Reranking with LlamaIndex 学习笔记 —— LLM 与 Cross-Encoder 重排",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/reranking-with-llamaindex/";
+          
+        },
+      },{id: "post-rag-with-feedback-loop-学习笔记-从机制到隐患",
+        
+          title: "RAG with Feedback Loop 学习笔记 —— 从机制到隐患",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rag-feedback-loop/";
+          
+        },
+      },{id: "post-self-rag-学习笔记-从论文思想到代码实现",
+        
+          title: "Self-RAG 学习笔记 —— 从论文思想到代码实现",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/self-rag/";
+          
+        },
+      },{id: "post-claude-code学习13-memory",
+        
+          title: "Claude code学习13 Memory",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B013/";
+          
+        },
+      },{id: "post-claude-code学习12-fileedittool",
+        
+          title: "Claude code学习12 FileEditTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B012/";
+          
+        },
+      },{id: "post-claude-code学习11-bashtool",
+        
+          title: "Claude code学习11 BashTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B011/";
+          
+        },
+      },{id: "post-claude-code学习10-permission-与-hooks-系统",
+        
+          title: "Claude code学习10 Permission 与 Hooks 系统",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B010/";
+          
+        },
+      },{id: "post-claude-code学习9-agent-loop",
+        
+          title: "Claude code学习9 Agent loop",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B09/";
+          
+        },
+      },{id: "post-claude-code学习8-system-reminder-动态信息是如何入prompt的",
+        
+          title: "Claude code学习8 system-reminder，动态信息是如何入prompt的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B08/";
+          
+        },
+      },{id: "post-claude-code学习7-权限模式",
+        
+          title: "Claude code学习7 权限模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B07/";
+          
+        },
+      },{id: "post-claude-code学习6-动态prompt的组装2",
+        
+          title: "Claude code学习6 动态prompt的组装2",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B06/";
+          
+        },
+      },{id: "post-claude-code学习5-动态prompt的组装1",
+        
+          title: "Claude code学习5 动态prompt的组装1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B05/";
+          
+        },
+      },{id: "post-claude-code学习4-静态prompt里面有什么以及claude-code启动时做了些什么",
+        
+          title: "Claude code学习4 静态prompt里面有什么以及Claude code启动时做了些什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B04/";
+          
+        },
+      },{id: "post-claude-code学习3-为什么claude-code工程化设计是这样的",
+        
+          title: "Claude code学习3 为什么Claude code工程化设计是这样的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/";
+          
+        },
+      },{id: "post-claude-code学习2-claude-code的上下文管理",
+        
+          title: "Claude code学习2 Claude code的上下文管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02/";
+          
+        },
+      },{id: "post-claude-code学习1-我们要从这个项目里学到什么",
+        
+          title: "Claude code学习1 我们要从这个项目里学到什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B01/";
+          
+        },
+      },{id: "post-learn-claude-code项目学习",
+        
+          title: "learn claude code项目学习",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/learn-claude-code%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/";
+          
+        },
+      },{id: "post-如何理解transformer",
+        
+          title: "如何理解transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformer-a/";
+          
+        },
+      },{id: "post-旋转矩阵的理解",
+        
+          title: "旋转矩阵的理解",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformation/";
+          
+        },
+      },{id: "post-cs231a-相机模型笔记",
+        
+          title: "CS231A 相机模型笔记",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cs231a-1/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv2/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv1/";
+          
+        },
+      },{id: "post-linux权限",
+        
+          title: "Linux权限",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP3/";
+          
+        },
+      },{id: "post-linux命令格式",
+        
+          title: "Linux命令格式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP2/";
+          
+        },
+      },{id: "post-excel常用操作",
+        
+          title: "Excel常用操作",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/excel/";
+          
+        },
+      },{id: "post-linux文件路径",
+        
+          title: "Linux文件路径",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP1/";
+          
+        },
+      },{id: "post-常见linux命令和shell脚本",
+        
+          title: "常见Linux命令和shell脚本",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/shellLinux/";
+          
+        },
+      },{id: "post-micropytorch",
+        
+          title: "microPytorch",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/.microPYtorch/";
+          
+        },
+      },{id: "post-c-vector",
+        
+          title: "C++ Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cpp-vector-stl/";
+          
+        },
+      },{id: "post-c-template",
+        
+          title: "C++ Template",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppTemplate/";
+          
+        },
+      },{id: "post-pandas库的基本使用",
+        
+          title: "pandas库的基本使用",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/pandas1/";
+          
+        },
+      },{id: "post-c-中的static和const-1",
+        
+          title: "C++中的static和const 1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppStaticandConst/";
+          
+        },
+      },{id: "post-c-的内外部连接",
+        
+          title: "C++的内外部连接",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppLink/";
+          
+        },
+      },{id: "post-用c-实现内存池1",
+        
+          title: "用C++实现内存池1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo_pool/";
+          
+        },
+      },{id: "post-c-的内存管理",
+        
+          title: "C++的内存管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo/";
+          
+        },
+      },{id: "post-每日一题2296-设计一个文本编辑器",
+        
+          title: "每日一题2296. 设计一个文本编辑器",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LC/";
+          
+        },
+      },{id: "post-c-中的vector",
+        
+          title: "C++中的Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-transformer",
+        
+          title: "Transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transfomer/";
+          
+        },
+      },{id: "post-深度学习和机器学习中的重要概念",
+        
+          title: "深度学习和机器学习中的重要概念",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/MLfun/";
+          
+        },
+      },{id: "post-attention注意力机制-修正补充版",
+        
+          title: "Attention注意力机制（修正补充版）",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention2/";
+          
+        },
+      },{id: "post-attention注意力机制",
+        
+          title: "Attention注意力机制",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention/";
+          
+        },
+      },{id: "post-unet网络",
+        
+          title: "Unet网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Unet/";
+          
+        },
+      },{id: "post-seq2seq的模型-构建以及损失函数",
+        
+          title: "Seq2Seq的模型，构建以及损失函数",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Seq2Seq-1/";
+          
+        },
+      },{id: "post-text-generation",
+        
+          title: "Text Generation",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Text-Generation/";
+          
+        },
+      },{id: "post-rnn的优化",
+        
+          title: "RNN的优化",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/RNN%E7%9A%84%E4%BC%98%E5%8C%96/";
+          
+        },
+      },{id: "post-lstm长短记忆网络",
+        
+          title: "LSTM长短记忆网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LSTM%E9%95%BF%E7%9F%AD%E8%AE%B0%E5%BF%86%E7%BD%91%E7%BB%9C/";
+          
+        },
+      },{id: "post-simple-rnn",
+        
+          title: "Simple RNN",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Simple-RNN/";
+          
+        },
+      },{id: "post-linux内核全注释阅读-linux内核体系结构1",
+        
+          title: "Linux内核全注释阅读 Linux内核体系结构1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Linux%E5%86%85%E6%A0%B8%E5%85%A8%E6%B3%A8%E9%87%8A%E9%98%85%E8%AF%BB-Linux%E5%86%85%E6%A0%B8%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%841/";
+          
+        },
+      },{id: "post-nlp的数据处理-文本处理以及词嵌套",
+        
+          title: "NLP的数据处理 文本处理以及词嵌套",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/NLP%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86-%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%BB%A5%E5%8F%8A%E8%AF%8D%E5%B5%8C%E5%A5%97/";
+          
+        },
+      },{id: "post-deepseek-r1论文解读",
+        
+          title: "DeepSeek R1论文解读",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/DeepSeek-R1%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/";
+          
+        },
+      },{id: "post-deepseek蒸馏模型的本地部署",
+        
+          title: "Deepseek蒸馏模型的本地部署",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Deepseek%E8%92%B8%E9%A6%8F%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/";
+          
+        },
+      },{id: "post-测试博客",
+        
+          title: "测试博客",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Test/";
+          
+        },
+      },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
+        
+          title: 'Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "We’re sharing updates across our Gemini family of models and a glimpse of Project Astra, our vision for the future of AI assistants.",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/", "_blank");
+          
+        },
+      },{id: "post-displaying-external-posts-on-your-al-folio-blog",
+        
+          title: 'Displaying External Posts on Your al-folio Blog <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2", "_blank");
+          
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/Mr-coldskin7", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/feed.xml", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>

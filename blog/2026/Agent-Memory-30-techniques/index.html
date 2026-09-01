@@ -1,0 +1,967 @@
+<!DOCTYPE html> <html lang="zh"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> Agent Memory 全景：30 个记忆技术的模块化拆解 | leesanyee </title> <meta name="author" content="Lee SanYee"> <meta name="description" content="LeeSanYee 的技术博客，记录学习笔记与思考。 "> <meta name="keywords" content="blog, ml, nlp, cpp, linux"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="/assets/img/icon.png?v=f594268c94ce3845fb99c17cc40fc3f1"> <link rel="apple-touch-icon" href="/assets/img/icon.png?v=f594268c94ce3845fb99c17cc40fc3f1"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://leesanyee.me/blog/2026/Agent-Memory-30-techniques/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item "> <a class="nav-link" href="/graph/">Knowledge Graph </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">Agent Memory 全景：30 个记忆技术的模块化拆解</h1> <p class="post-meta"> Created on August 26, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/agent"> <i class="fa-solid fa-hashtag fa-sm"></i> agent</a>   <a href="/blog/tag/memory"> <i class="fa-solid fa-hashtag fa-sm"></i> memory</a>   <a href="/blog/tag/rag"> <i class="fa-solid fa-hashtag fa-sm"></i> rag</a>   <a href="/blog/tag/llm"> <i class="fa-solid fa-hashtag fa-sm"></i> llm</a>   <a href="/blog/tag/vector-store"> <i class="fa-solid fa-hashtag fa-sm"></i> vector-store</a>   <a href="/blog/tag/knowledge-graph"> <i class="fa-solid fa-hashtag fa-sm"></i> knowledge-graph</a>   <a href="/blog/tag/retrieval"> <i class="fa-solid fa-hashtag fa-sm"></i> retrieval</a>   <a href="/blog/tag/consolidation"> <i class="fa-solid fa-hashtag fa-sm"></i> consolidation</a>   <a href="/blog/tag/evaluation"> <i class="fa-solid fa-hashtag fa-sm"></i> evaluation</a>   ·   <a href="/blog/category/agent"> <i class="fa-solid fa-tag fa-sm"></i> Agent</a>   <a href="/blog/category/memory"> <i class="fa-solid fa-tag fa-sm"></i> Memory</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h1 id="agent-memory-全景30-个记忆技术的模块化拆解">Agent Memory 全景：30 个记忆技术的模块化拆解</h1> <blockquote> <p>基于 <a href="https://github.com/NirDiamant/Agent_Memory_Techniques" rel="external nofollow noopener" target="_blank">NirDiamant/Agent_Memory_Techniques</a> 的 30 个 notebook 整理。这是一篇「地图式」笔记——不求复述每个 notebook 的代码，只求把 30 个技术收敛成几条底层逻辑，以及它们各自的<strong>运作机制、公式和失败模式</strong>。</p> </blockquote> <h2 id="一句话理解">一句话理解</h2> <p><strong>Agent Memory = 分层存储 + 生命周期维护 + 混合检索。</strong> 30 个技术全是这三件事的变体。如果只记住一句话，记住上面这句。</p> <hr> <h2 id="总纲30-个技术回答-5-个问题">总纲：30 个技术回答 5 个问题</h2> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>存进去 ← 找回来 ← 维护 ← 组织 ← 评测
+ (01-10)   (20)    (14-19)  (12/13)  (28/29)
+</code></pre></div></div> <table> <thead> <tr> <th>模块</th> <th>编号</th> <th>回答的问题</th> </tr> </thead> <tbody> <tr> <td>短期记忆（上下文管理）</td> <td>01–05</td> <td>对话越来越长，token 装不下怎么办？</td> </tr> <tr> <td>长期记忆（知识化）</td> <td>06–10</td> <td>跨会话，怎么记住「关于世界的事实」？</td> </tr> <tr> <td>检索</td> <td>20（+06、17）</td> <td>存了几百万条，怎么快速找到对的那条？</td> </tr> <tr> <td>分层架构</td> <td>12、13、26</td> <td>记忆多了，怎么组织才不糊？</td> </tr> <tr> <td>生命周期维护</td> <td>14、15、18、19</td> <td>记忆重复、冲突、过时、爆炸怎么办？</td> </tr> <tr> <td>学习与进化</td> <td>11、16</td> <td>怎么让 agent 越用越好？</td> </tr> <tr> <td>多会话 / 多 agent</td> <td>21、22、23</td> <td>怎么跨会话、跨 agent 共享记忆？</td> </tr> <tr> <td>生产框架</td> <td>24–27</td> <td>别自己造轮子的成品有哪些？</td> </tr> <tr> <td>评测</td> <td>28、29</td> <td>怎么量化记忆系统好不好？</td> </tr> <tr> <td>生产工程</td> <td>30</td> <td>上生产还缺什么？</td> </tr> </tbody> </table> <hr> <h2 id="模块-1--短期记忆上下文装不下怎么办0105">模块 1 · 短期记忆：上下文装不下怎么办（01–05）</h2> <p>核心问题：对话变长，token 爆了。五个技术是同一个问题的五种权衡——<strong>在「保真」和「成本」之间找分割点</strong>。</p> <table> <thead> <tr> <th>#</th> <th>技术</th> <th>本质</th> <th>取舍</th> </tr> </thead> <tbody> <tr> <td>01</td> <td>Conversation Buffer</td> <td>全量存，每轮重发</td> <td>零损失，但 token 线性增长、累计成本二次上升</td> </tr> <tr> <td>02</td> <td>Sliding Window</td> <td>只留最后 K 条，FIFO 淘汰</td> <td>有界成本，但硬遗忘、无优雅降级</td> </tr> <tr> <td>03</td> <td>Summary</td> <td>历史压成滚动摘要</td> <td>省 token，但 lossy</td> </tr> <tr> <td>04</td> <td><strong>Summary Buffer</strong></td> <td>近期原样 + 远期摘要</td> <td><strong>工业标准答案</strong></td> </tr> <tr> <td>05</td> <td>Token Buffer</td> <td>按 token 预算精确裁剪</td> <td>需要匹配的 tokenizer</td> </tr> </tbody> </table> <p><strong>记住</strong>：04（Summary Buffer）是标准解——最近 K 条消息逐字保留，更早的折进一个滚动摘要。TencentDB Agent Memory 的「符号化短时记忆」就是这个思想，只是把文字摘要换成了 Mermaid 符号画布。</p> <hr> <h2 id="模块-2--长期记忆对话怎么变知识0610">模块 2 · 长期记忆：对话怎么变知识（06–10）</h2> <p>核心问题：跨会话，怎么记住「关于世界的事实」？这块最基础、也最容易搞混的是 <strong>Episodic 和 Semantic 的区分</strong>。</p> <table> <thead> <tr> <th>#</th> <th>技术</th> <th>本质</th> </tr> </thead> <tbody> <tr> <td>06</td> <td>Vector Store</td> <td>embed 成向量，按语义召回（基础设施）</td> </tr> <tr> <td>07</td> <td>Entity</td> <td>抽命名实体，维护每实体的 facts（像通讯录）</td> </tr> <tr> <td>08</td> <td>Knowledge Graph</td> <td>抽 (主,谓,宾) 三元组建图，支持多跳推理</td> </tr> <tr> <td>09</td> <td>Episodic</td> <td>存「整段经历」带时间戳</td> </tr> <tr> <td>10</td> <td>Semantic</td> <td>抽「无时间戳的永恒事实」+ 去重 + 矛盾检测</td> </tr> </tbody> </table> <h3 id="episodic09存整段经历">Episodic（09）：存「整段经历」</h3> <ul> <li> <strong>数据模型</strong>：一个 episode = <code class="language-plaintext highlighter-rouge">{messages, 起止时间戳, summary, topic tags, embedding}</code>。存的是原始消息 + 摘要，不是抽出来的事实。</li> <li> <strong>边界检测</strong>：决定一个 episode 在哪结束——会话式（显式 <code class="language-plaintext highlighter-rouge">end_session()</code>）、话题式（LLM 检测话题漂移）、时间式（固定时长）。</li> <li> <strong>定稿</strong>：LLM 生成摘要 + 抽 topic tags + 对摘要算 embedding。摘要用于快速检索，原文用于下钻。</li> <li> <strong>检索</strong>：综合分 = <code class="language-plaintext highlighter-rouge">α·语义相似度 + β·时间新鲜度</code>。把「意思相近」和「最近发生」两个信号融合。</li> </ul> <p>Episodic 回答的是 <strong>“what happened when”</strong>，适合审计、debug、”上次我们怎么做的”这类问题。失败模式：边界切太粗 → 一个 episode 塞进三个话题；切太细 → 一个任务碎成五段。</p> <h3 id="semantic10抽无时间戳的永恒事实">Semantic（10）：抽「无时间戳的永恒事实」</h3> <ul> <li> <strong>事实抽取</strong>：LLM 扫消息，抽陈述性事实。”我上个月换 Mac 了” → <code class="language-plaintext highlighter-rouge">User uses macOS</code>。<strong>主动扔掉「何时说的」</strong>，只要事实本身。</li> <li> <strong>去重判定（硬阈值）</strong>：cosine <strong>&gt; 0.85</strong> 判重复 → 不新增，给旧事实 confidence +1；<strong>0.5~0.85</strong> 之间 → 调 LLM 判断同义还是矛盾；<strong>&lt; 0.5</strong> → 新事实入库。</li> <li> <strong>矛盾处理</strong>：新事实与旧事实冲突时，归档旧的、存新的（以新为准）。</li> <li> <strong>置信度</strong>：每条事实带 confidence，反复提到加分。</li> </ul> <p>Semantic 回答的是 <strong>“what do I know”</strong>，适合紧凑召回、用户画像。失败模式：LLM 把「观点」当「事实」抽进来；没有时间衰减时旧事实永远占坑。</p> <h3 id="两者的关系">两者的关系</h3> <blockquote> <p><strong>Episodic 存「经历」，Semantic 存「结论」。</strong> 生产系统永远双轨并用：episode 保证据，semantic 保判断。二者加上 14（consolidation）就构成「episodic 捕获 → semantic 提取 → 周期性巩固」的三层栈，这是绝大多数生产记忆系统的骨架。</p> </blockquote> <hr> <h2 id="模块-3--检索管线20怎么把对的记忆找回来">模块 3 · 检索管线（20）：怎么把对的记忆找回来</h2> <p>这是全库最技术的一块。核心结论：<strong>纯向量检索不够，生产系统用多级混合管线</strong>。</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>query → ①embedding(语义) ─┐
+       → ②BM25(关键词)  ──┼→ ③RRF 融合 → ④cross-encoder 重排 → ⑤MMR 去冗余 → 结果
+                                           ↑
+                                  ⑥HyDE(查询改写)
+</code></pre></div></div> <h3 id="-embedding语义检索">① Embedding（语义检索）</h3> <p>把 query 和每条记忆都变成向量，算余弦相似度：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cos(θ) = (A·B) / (||A||·||B||)
+</code></pre></div></div> <p>强在<strong>跨越用词差异</strong>——「怎么调试登录超时」和「auth 接口 600 秒报错」向量很近，即使一个词都不重复。弱在<strong>不认词</strong>：专业术语、人名、API 名这些低频但关键的词，embedding 模型可能没学过，导致漏召回。</p> <h3 id="-bm25关键词检索">② BM25（关键词检索）</h3> <p>经典的词频-逆文档频率模型：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>score(q,d) = Σ IDF(t) · (f(t,d)·(k1+1)) / (f(t,d) + k1·(1−b+b·|d|/avgdl))
+</code></pre></div></div> <ul> <li> <code class="language-plaintext highlighter-rouge">IDF(t)</code>：词越稀有，权重越高。</li> <li> <code class="language-plaintext highlighter-rouge">f(t,d)</code>：词在文档里的出现频率。</li> </ul> <p>强在<strong>精确词匹配</strong>（模型名、函数名、大小写敏感的词一击即中），弱在<strong>不懂同义</strong>（”登录” 和 “login” 是两个字面）。</p> <h3 id="-rrf-融合reciprocal-rank-fusion">③ RRF 融合（Reciprocal Rank Fusion）</h3> <p>把 ① 和 ② 的<strong>排名</strong>合并，而不是合并分数（两者分数量纲不同，不能直接加）：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>RRF_score(d) = Σ 1/(k + rank_r(d))    # k 通常取 60
+</code></pre></div></div> <p><strong>为什么用排名不用分数</strong>：向量相似度是 0.9，BM25 是 4.7，直接相加无意义。排名是无量纲的，可以跨方法相加。这就是 TencentDB 配置里 <code class="language-plaintext highlighter-rouge">recall.strategy: "hybrid"</code> 的底层实现。</p> <h3 id="-cross-encoder-重排">④ Cross-encoder 重排</h3> <p>关键在于 <strong>bi-encoder vs cross-encoder</strong>：</p> <table> <thead> <tr> <th> </th> <th>bi-encoder（①②）</th> <th>cross-encoder（④）</th> </tr> </thead> <tbody> <tr> <td>怎么做</td> <td>query 和 doc <strong>分开</strong>各自 embed，再算相似度</td> <td>query 和 doc <strong>拼在一起</strong>喂进模型，直接输出相关分</td> </tr> <tr> <td>速度</td> <td>快（向量可预存）</td> <td>慢（每对都要过模型，50–200ms）</td> </tr> <tr> <td>精度</td> <td>粗</td> <td>准</td> </tr> </tbody> </table> <p>所以管线是两段式：①②③ 用便宜的 bi-encoder 从百万条里粗筛 top-20，④ 再用贵的 cross-encoder 精排这 20 条。<strong>「粗筛 + 精排」</strong>，和 Milvus GraphRAG 里的 CoT rerank 同一个思想。</p> <h3 id="-mmr-去冗余maximal-marginal-relevance">⑤ MMR 去冗余（Maximal Marginal Relevance）</h3> <p>解决「top-10 全是同一个意思的重复」：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>MMR = argmax [ λ·Sim(q,d) − (1−λ)·max_{d'∈已选} Sim(d,d') ]
+</code></pre></div></div> <p>第一项要相关，第二项惩罚与已选结果的重复，<code class="language-plaintext highlighter-rouge">λ</code> 控制平衡（通常 0.5~0.7）。避免 token 浪费在冗余上。</p> <h3 id="-hyde查询改写">⑥ HyDE（查询改写）</h3> <p>解决「短 query vs 长记忆」的词表鸿沟：先让 LLM 生成一篇<strong>假设答案</strong>，再用这篇假设答案去 embed 和检索——长文本对长文本，相似度算得更准。核心洞察：用一个「不保证正确但语义对」的假设答案，代替真实 query 做向量匹配。</p> <p><strong>实践建议</strong>：最小可行是 <strong>①+②+③（hybrid）</strong>，④⑤⑥ 是进阶。跨编码器重排要额外的模型部署成本，别一上来全上。</p> <hr> <h2 id="模块-4--分层架构记忆怎么组织121326">模块 4 · 分层架构：记忆怎么组织（12、13、26）</h2> <p>核心问题：记忆多了，怎么不糊成一团。</p> <table> <thead> <tr> <th>#</th> <th>技术</th> <th>本质</th> </tr> </thead> <tbody> <tr> <td>12</td> <td>Working Memory</td> <td>上下文内的「注意力管理」：salience 打分 + <strong>pin 固定</strong> + 动态淘汰（不是 FIFO）</td> </tr> <tr> <td>13</td> <td>Hierarchical Layers</td> <td>hot(L1 上下文) / warm(L2 向量库) / cold(L3 归档) 三层 + 自动晋升/降级</td> </tr> <tr> <td>26</td> <td>Letta/MemGPT</td> <td>OS 虚拟内存隐喻：core(常驻) / archival(可搜) / recall(全史)，agent 自己分页</td> </tr> </tbody> </table> <p><strong>记住</strong>：分层 = <strong>按访问频率分 tier + 逐级 drill-down</strong>，是 CPU cache 的隐喻，也是 TencentDB Agent Memory 的核心主张。12 的「pin」最实用——系统指令、用户偏好应永远钉在上下文，别被 FIFO 冲走。</p> <hr> <h2 id="模块-5--生命周期记忆怎么维护14151819">模块 5 · 生命周期：记忆怎么维护（14、15、18、19）</h2> <p>核心问题：记忆会重复、冲突、过时、爆炸。四种武器，两两一组。</p> <h3 id="14-consolidation合并去冲突重算重要性">14 Consolidation：合并、去冲突、重算重要性</h3> <p>一个<strong>后台批处理</strong>（定时/达阈值时跑，不是在每次对话时跑）：</p> <ol> <li> <strong>聚类</strong>：按语义相似度把相关记忆聚成一簇。</li> <li> <strong>合并</strong>：簇内重复项合成一条更丰富的记忆。</li> <li> <strong>解冲突</strong>：三条策略——<strong>以新为准</strong>（默认）、以置信度高为准、以用户确认为准。</li> <li> <strong>重算重要性</strong>：按访问频率 + 新鲜度 + 结果好坏调整权重。</li> </ol> <p><strong>关键权衡</strong>：合并是<strong>不可逆的有损操作</strong>——合并完原始的五条就没了。所以 15 才强调「留原文」。</p> <h3 id="15-compaction渐进多级压缩但原文不丢">15 Compaction：渐进多级压缩，但原文不丢</h3> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>L0 原文(全量) ──压缩──→ L1 要点 ──压缩──→ L2 一句话 ──压缩──→ L3 标签
+        ↑冷存储保留                      ↑检索时按需选级
+</code></pre></div></div> <p>日常检索用 L1/L2（信息密度高、省 token），需要精确细节时<strong>下钻回 L0 冷存储</strong>。宣称能把同样存储预算塞进 10–100 倍语义内容。</p> <p><strong>核心张力（storage-fidelity tradeoff）</strong>：压得越狠越省钱，但可能丢掉以后要用的细节。<strong>解法是「可逆性」</strong>——原文永远留在冷存储，压缩只是「前置的摘要」。</p> <h3 id="18-temporal检索时降权不删">18 Temporal：检索时降权，不删</h3> <p>给每条记忆挂三个时间戳——<code class="language-plaintext highlighter-rouge">created_at</code>、<code class="language-plaintext highlighter-rouge">last_access_at</code>、<code class="language-plaintext highlighter-rouge">event_time</code>（事件实际发生的时间）。</p> <ul> <li> <strong>recency 加权</strong>：综合分 = <code class="language-plaintext highlighter-rouge">α·语义相似 + β·新鲜度</code>。</li> <li> <strong>时间范围查询</strong>：”过去 24 小时发生了什么”。</li> <li> <strong>“as of” 查询</strong>（最强大）：<strong>重建「某时刻我知道什么」</strong>——过滤掉该时间戳之后创建的记忆。</li> <li> <strong>事件时间线</strong>：按 <code class="language-plaintext highlighter-rouge">event_time</code> 排序，还原因果链。</li> </ul> <h3 id="19-forgetting真的删">19 Forgetting：真的删</h3> <ol> <li> <strong>指数衰减</strong>：<code class="language-plaintext highlighter-rouge">S(t) = S₀·e^(−λt)</code>，λ 越大忘得越快（艾宾浩斯遗忘曲线）。</li> <li> <strong>访问强化（spaced repetition）</strong>：每次命中，<code class="language-plaintext highlighter-rouge">S(t)</code> 反弹回 <code class="language-plaintext highlighter-rouge">S₀</code>——常用记忆长生不老。</li> <li> <strong>剪枝阈值</strong>：<code class="language-plaintext highlighter-rouge">S(t)</code> 跌破阈值 → 删除或归档。</li> <li> <strong>生命周期</strong>：创建 → 活跃使用 → 衰减 → 剪枝/归档。</li> </ol> <h3 id="18-和-19-的实战区别同一场景">18 和 19 的实战区别（同一场景）</h3> <blockquote> <p>用户 3 月说”住在纽约”，6 月说”搬到洛杉矶”。</p> <ul> <li> <strong>18</strong>：两条都留，检索时洛杉矶（更新鲜）排前面；”我 4 月住哪？” → as-of 查询回答纽约。</li> <li> <strong>19</strong>：纽约那条衰减、跌破阈值后被<strong>剪枝删除</strong>；4 月的状态无法重建。</li> </ul> </blockquote> <p><strong>什么时候用哪个</strong>：需要审计/回溯 → 用 18；存储爆炸、成本敏感 → 加 19。<strong>先上 18 更安全</strong>——不丢数据、可回退。</p> <hr> <h2 id="模块-6--学习与进化1116">模块 6 · 学习与进化（11、16）</h2> <table> <thead> <tr> <th>#</th> <th>技术</th> <th>本质</th> </tr> </thead> <tbody> <tr> <td>11</td> <td>Procedural</td> <td>存「怎么做」的可复用工作流（skill library），不是「发生了什么」</td> </tr> <tr> <td>16</td> <td>Self-Reflection</td> <td>任务后自省「为何成/败」，存 lesson 供未来检索（Reflexion 框架）</td> </tr> </tbody> </table> <ul> <li> <strong>11 Procedural</strong>：从一次成功执行里剥离「可复用动作序列」，<strong>泛化</strong>（具体值换成占位符——”部署 app X 到 server Y” → “部署 {app} 到 {server}”），存进 skill library。标杆案例是 Voyager（Minecraft agent 写可复用技能）。</li> <li> <strong>16 Self-Reflection</strong>：任务结束后三问——”什么做对了？什么做错了？下次怎么做？”，蒸馏成可复用原则入库，下次任务前检索注入。<strong>核心价值：不用重训模型就能让 agent 变好</strong>——用语言反馈替代梯度更新。</li> </ul> <p><strong>和 09/10 的区别</strong>：09 存”发生了什么”，10 存”事实是什么”，11 存”怎么把它做成”，16 存”上次为什么成/败”。这也正是 TencentDB roadmap 里「Skill generation」要做而还没做的方向。</p> <hr> <h2 id="模块-7--多会话--多-agent--agent-自主212223">模块 7 · 多会话 / 多 agent / agent 自主（21、22、23）</h2> <table> <thead> <tr> <th>#</th> <th>技术</th> <th>本质</th> </tr> </thead> <tbody> <tr> <td>21</td> <td>Cross-Session</td> <td>序列化 + 按 user ID 持久化 + 冷启动</td> </tr> <tr> <td>22</td> <td>Multi-Agent Shared</td> <td>共享黑板 + namespace 分区 + 冲突解决（乐观锁）</td> </tr> <tr> <td>23</td> <td>Memory-as-a-Tool</td> <td>把 CRUD 暴露成工具，agent 自己决定存/查/改/删</td> </tr> </tbody> </table> <ul> <li> <strong>21 Cross-Session</strong>：会话结束序列化存盘 → 按 user ID 分片 → 冷启动给模板/问卷 → 记忆大了<strong>只加载「最近 N 条 + 最重要 M 条」</strong>，不全量加载。</li> <li> <strong>22 Multi-Agent Shared</strong>：经典 blackboard 架构。关键设计是 <strong>私有 scratchpad</strong>——agent 的草稿只自己可见，<strong>只有成品才写入共享区</strong>，防止半成品污染公共空间。冲突解决用 last-write-wins 或乐观锁（带版本号写，冲突重试）。</li> <li> <strong>23 Memory-as-a-Tool</strong>：把 <code class="language-plaintext highlighter-rouge">save_memory</code> / <code class="language-plaintext highlighter-rouge">search_memory</code> / <code class="language-plaintext highlighter-rouge">update_memory</code> / <code class="language-plaintext highlighter-rouge">delete_memory</code> 做成 4 个 tool，agent 在正常的 tool-use 循环里决定何时调用。<strong>这是「显式工具」vs「隐式管线」两种哲学的分野</strong>——前者透明可控可审计，后者（如 Mem0 自动提取）省心但黑盒。</li> </ul> <hr> <h2 id="模块-8--生产框架2427别自己造轮子的四家成品">模块 8 · 生产框架（24–27）：「别自己造轮子」的四家成品</h2> <table> <thead> <tr> <th>框架</th> <th>本质</th> <th>底层</th> </tr> </thead> <tbody> <tr> <td>24 Graphiti</td> <td>时序知识图谱，每条边带时间戳</td> <td>Neo4j，自托管</td> </tr> <tr> <td>25 Mem0</td> <td>托管记忆层，自动提取 + 去重</td> <td>语义记忆为核心</td> </tr> <tr> <td>26 Letta/MemGPT</td> <td>分层记忆，agent 自己分页</td> <td>core / archival / recall</td> </tr> <tr> <td>27 Zep</td> <td>全自动：实体 + 事实 + 时序图，异步</td> <td>Graphiti 加持</td> </tr> </tbody> </table> <p><strong>记住</strong>：这四家 = 模块 2–5 概念的<strong>成品封装</strong>。Mem0 = 语义记忆，Zep/Graphiti = 图，Letta = 分层。TencentDB Agent Memory 是第 5 家，差异化在「团队级共享 + 符号化短时记忆」。</p> <hr> <h2 id="模块-9--评测2829">模块 9 · 评测（28、29）</h2> <table> <thead> <tr> <th>#</th> <th>技术</th> <th>本质</th> </tr> </thead> <tbody> <tr> <td>28</td> <td>Evaluation</td> <td>自建数据集，指标 = precision/recall/staleness/contradiction + LLM-as-judge</td> </tr> <tr> <td>29</td> <td>LoCoMo/LongMemEval</td> <td>标准基准：单跳/多跳/时间/开放/对抗五类题</td> </tr> </tbody> </table> <p><strong>四个指标（记牢，多数人只测前两个）：</strong></p> <ul> <li> <strong>precision = TP/(TP+FP)</strong>：召回的记忆里有多少相关？（找得准不准）</li> <li> <strong>recall = TP/(TP+FN)</strong>：所有相关记忆里找回多少？（找得全不全）</li> <li> <strong>staleness</strong>：agent 是否用了<strong>过时</strong>数据？← <strong>记忆系统真正的死穴</strong> </li> <li> <strong>contradiction</strong>：库里是否存了<strong>矛盾</strong>事实，能否检测/解决？</li> </ul> <p><strong>29 标准基准</strong>：LoCoMo 有 10 段多会话对话、约 2000 个 QA 对，分五类（单跳/多跳/时间/开放/对抗），用 BLEU / ROUGE-L / token F1 / LLM judge 打分，跑一轮带 LLM judge 约 $5–15。关键做法是<strong>跑「无记忆 baseline」做对照</strong>，量化检索到底加了多少价值。</p> <hr> <h2 id="模块-10--生产工程30">模块 10 · 生产工程（30）</h2> <p>caching(Redis) / TTL / 水平分片 / 备份恢复 / <strong>GDPR 删除（连 embedding、图节点一起删）</strong> / 可观测性 / 成本管理。</p> <hr> <h2 id="收束核心心智模型--实践清单">收束：核心心智模型 + 实践清单</h2> <p>30 个技术最终收敛成 5 条底层逻辑：</p> <ol> <li> <strong>上下文窗口是稀缺资源</strong>——记忆的本质是「换出 + 换回」。</li> <li> <strong>存储是分层的，检索是混合的</strong>——拒绝扁平向量堆。</li> <li> <strong>记忆有生命周期</strong>——去重、解冲突、让旧知识失效。</li> <li> <strong>谁来管记忆有两种范式</strong>——agent 显式工具 vs 系统隐式管线。</li> <li> <strong>评测是硬指标</strong>——重点看 staleness 和 contradiction，不只是 precision/recall。</li> </ol> <p><strong>最小阅读路径（只看 6 个就够）</strong>：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>04 → 10 → 20 → 14 → 19 → 28
+</code></pre></div></div> <p>这条链 = 短期分割点 → 长期事实抽取 → 混合检索 → 维护 → 遗忘 → 评测，覆盖全部 5 条底层逻辑，其余 24 个是变体。</p> <p><strong>给自建记忆系统的四步清单</strong>（对应四个最常见的短板）：</p> <table> <thead> <tr> <th>短板</th> <th>解法</th> <th>最小可行</th> </tr> </thead> <tbody> <tr> <td>只有人工导航，没有语义召回</td> <td>06 + 20</td> <td>向量 + BM25 + RRF（hybrid）</td> </tr> <tr> <td>重复、冲突、不可逆合并</td> <td>14 + 15</td> <td>三策略解冲突 + 留原文</td> </tr> <tr> <td>旧结论永远占坑</td> <td>18 + 19</td> <td>先上 18（recency 加权，不删数据）</td> </tr> <tr> <td>无法量化好坏</td> <td>28</td> <td>precision/recall + staleness</td> </tr> </tbody> </table> <hr> <h2 id="参考">参考</h2> <ul> <li><a href="https://github.com/NirDiamant/Agent_Memory_Techniques" rel="external nofollow noopener" target="_blank">NirDiamant/Agent_Memory_Techniques</a></li> <li><a href="https://github.com/TencentCloud/TencentDB-Agent-Memory" rel="external nofollow noopener" target="_blank">TencentCloud/TencentDB-Agent-Memory</a></li> <li> <a href="https://github.com/getzep/graphiti" rel="external nofollow noopener" target="_blank">Graphiti</a>、<a href="https://github.com/mem0ai/mem0" rel="external nofollow noopener" target="_blank">Mem0</a>、<a href="https://github.com/letta-ai/letta" rel="external nofollow noopener" target="_blank">Letta/MemGPT</a>、<a href="https://github.com/getzep/zep" rel="external nofollow noopener" target="_blank">Zep</a> </li> <li>Shinn et al., “Reflexion: Language Agents with Verbal Reinforcement Learning,” 2023</li> <li>Wang et al., “Voyager: An Open-Ended Embodied Agent with Large Language Models,” 2023</li> </ul> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE%E5%8F%8C%E6%A8%A1%E6%9D%BFsearchInsert%E6%8B%86%E8%A7%A3/">二分查找双模板 + searchInsert 逐行拆解：从模板到边界</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/lightrag-deep-dive/">LightRAG 深度解析：简单快速的图增强 RAG</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E5%8F%8C%E6%8C%87%E9%92%88%E7%AE%97%E6%B3%95%E5%A4%8D%E7%9B%98%E6%80%BB%E7%BB%93/">双指针算法复盘总结：从元素思维到边界思维</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/LangChain-v1-Agent-Middleware/">LangChain v1 Agent Middleware 笔记</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/LangGraph-Checkpoint/">LangGraph Checkpoint 详解</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E5%9B%BE%E7%9A%84%E9%81%8D%E5%8E%86-%E7%82%B9%E8%BE%B9%E8%B7%AF%E5%BE%84-C++/">图的遍历（点 / 边 / 路径）—— C++ 模板与 visited 的本质</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/GraphRAG-chunk-level-traversal/">GraphRAG（Chunk 级遍历版）—— 带图的检索，还是假的图谱？</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/GraphRAG-with-Milvus/">Graph RAG with Milvus —— 纯向量库造图的多跳推理</a> </li> </ul> <div id="giscus_thread" style="max-width: 930px; margin: 0 auto;"> <br> <script>
+    (function setupGiscus() {
+      function determineGiscusTheme() {
+        var theme = localStorage.getItem("theme") || document.documentElement.getAttribute("data-theme") || "system";
+if (theme === "dark") return "dark";
+if (theme === "light") return "light";
+var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+return prefersDark ? "dark" : "light";
+
+      }
+
+      var giscusTheme = determineGiscusTheme();
+      var attrs = {
+        src: "https://giscus.app/client.js",
+        "data-repo": "Mr-coldskin7/Mr-coldskin7.github.io",
+        "data-repo-id": "R_kgDONx3iVw",
+        "data-category": "Announcements",
+        "data-category-id": "DIC_kwDONx3iV84C-J1X",
+        "data-mapping": "pathname",
+        "data-strict": "0",
+        "data-reactions-enabled": "1",
+        "data-emit-metadata": "0",
+        "data-input-position": "bottom",
+        "data-theme": giscusTheme,
+        "data-lang": "zh-CN",
+        crossorigin: "anonymous",
+        async: true
+      };
+
+      var giscusScript = document.createElement("script");
+      Object.entries(attrs).forEach(function(entry) { giscusScript.setAttribute(entry[0], entry[1]); });
+      var host = document.getElementById("giscus_thread");
+      if (host) host.appendChild(giscusScript);
+    })();
+  </script> <noscript> Please enable JavaScript to view the <a href="http://giscus.app/?ref_noscript" rel="external nofollow noopener" target="_blank">comments powered by giscus.</a> </noscript> </div> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "about",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-cv",
+          title: "CV",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/cv/";
+          },
+        },{id: "nav-knowledge-graph",
+          title: "Knowledge Graph",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/graph/";
+          },
+        },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "nav-repositories",
+          title: "repositories",
+          description: "Edit the `_data/repositories.yml` and change the `github_users` and `github_repos` lists to include your own GitHub profile and repositories.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/repositories/";
+          },
+        },{id: "post-二分查找双模板-searchinsert-逐行拆解-从模板到边界",
+        
+          title: "二分查找双模板 + searchInsert 逐行拆解：从模板到边界",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE%E5%8F%8C%E6%A8%A1%E6%9D%BFsearchInsert%E6%8B%86%E8%A7%A3/";
+          
+        },
+      },{id: "post-agent-memory-全景-30-个记忆技术的模块化拆解",
+        
+          title: "Agent Memory 全景：30 个记忆技术的模块化拆解",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Agent-Memory-30-techniques/";
+          
+        },
+      },{id: "post-lightrag-深度解析-简单快速的图增强-rag",
+        
+          title: "LightRAG 深度解析：简单快速的图增强 RAG",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/lightrag-deep-dive/";
+          
+        },
+      },{id: "post-双指针算法复盘总结-从元素思维到边界思维",
+        
+          title: "双指针算法复盘总结：从元素思维到边界思维",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E5%8F%8C%E6%8C%87%E9%92%88%E7%AE%97%E6%B3%95%E5%A4%8D%E7%9B%98%E6%80%BB%E7%BB%93/";
+          
+        },
+      },{id: "post-langchain-v1-agent-middleware-笔记",
+        
+          title: "LangChain v1 Agent Middleware 笔记",
+        
+        description: "LangChain v1 中间件机制详解——Agent 核心循环前后的 hooks, 控制输入输出、工具调用、消息摘要与修剪。",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/LangChain-v1-Agent-Middleware/";
+          
+        },
+      },{id: "post-langgraph-checkpoint-详解",
+        
+          title: "LangGraph Checkpoint 详解",
+        
+        description: "LangGraph checkpoint 机制深挖——每步 state 快照 + WAL 耐久执行, thread_id 定位会话, checkpoint_id 定位步骤。",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/LangGraph-Checkpoint/";
+          
+        },
+      },{id: "post-图的遍历-点-边-路径-c-模板与-visited-的本质",
+        
+          title: "图的遍历（点 / 边 / 路径）—— C++ 模板与 visited 的本质",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E5%9B%BE%E7%9A%84%E9%81%8D%E5%8E%86-%E7%82%B9%E8%BE%B9%E8%B7%AF%E5%BE%84-C++/";
+          
+        },
+      },{id: "post-graphrag-chunk-级遍历版-带图的检索-还是假的图谱",
+        
+          title: "GraphRAG（Chunk 级遍历版）—— 带图的检索，还是假的图谱？",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/GraphRAG-chunk-level-traversal/";
+          
+        },
+      },{id: "post-graph-rag-with-milvus-纯向量库造图的多跳推理",
+        
+          title: "Graph RAG with Milvus —— 纯向量库造图的多跳推理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/GraphRAG-with-Milvus/";
+          
+        },
+      },{id: "post-hierarchical-indices-层级索引-先粗后细的两级检索",
+        
+          title: "Hierarchical Indices 层级索引 —— 先粗后细的两级检索",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Hierarchical-Indices/";
+          
+        },
+      },{id: "post-hyde-与-hype-假设检索技术的两个方向",
+        
+          title: "HyDE 与 HyPE —— 假设检索技术的两个方向",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/HyDE-HyPE-Hypothetical-Retrieval/";
+          
+        },
+      },{id: "post-二叉树刷题总结",
+        
+          title: "二叉树刷题总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/";
+          
+        },
+      },{id: "post-rag-技术体系化分类-从-pipeline-阶段到失败模式",
+        
+          title: "RAG 技术体系化分类——从 Pipeline 阶段到失败模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/RAG-techniques-pipeline-categorization/";
+          
+        },
+      },{id: "post-memorag-记忆增强型-rag-总结",
+        
+          title: "MemoRAG 记忆增强型 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/memorag-summary/";
+          
+        },
+      },{id: "post-microsoft-graphrag-基于知识图谱的-rag-总结",
+        
+          title: "Microsoft GraphRAG 基于知识图谱的 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/microsoft-graphrag-summary/";
+          
+        },
+      },{id: "post-multimodal-rag-with-captioning-图像描述型多模态-rag-总结",
+        
+          title: "Multimodal RAG with Captioning 图像描述型多模态 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/multimodal-rag-with-captioning-summary/";
+          
+        },
+      },{id: "post-掌握-colpali-多模态-rag-需要回答的-8-个问题",
+        
+          title: "掌握 ColPali 多模态 RAG 需要回答的 8 个问题",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/colpali-multimodal-rag-qa/";
+          
+        },
+      },{id: "post-proposition-chunking-命题化切分总结",
+        
+          title: "Proposition Chunking 命题化切分总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/proposition-chunking-summary/";
+          
+        },
+      },{id: "post-query-transformations-查询转换技术总结",
+        
+          title: "Query Transformations 查询转换技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/query-transformations-summary/";
+          
+        },
+      },{id: "post-raptor-技术总结",
+        
+          title: "RAPTOR 技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/raptor-summary/";
+          
+        },
+      },{id: "post-relevant-segment-extraction-rse-学习笔记-从片段到段落",
+        
+          title: "Relevant Segment Extraction (RSE) 学习笔记 —— 从片段到段落",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/relevant-segment-extraction/";
+          
+        },
+      },{id: "post-reranking-with-llamaindex-学习笔记-llm-与-cross-encoder-重排",
+        
+          title: "Reranking with LlamaIndex 学习笔记 —— LLM 与 Cross-Encoder 重排",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/reranking-with-llamaindex/";
+          
+        },
+      },{id: "post-rag-with-feedback-loop-学习笔记-从机制到隐患",
+        
+          title: "RAG with Feedback Loop 学习笔记 —— 从机制到隐患",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rag-feedback-loop/";
+          
+        },
+      },{id: "post-self-rag-学习笔记-从论文思想到代码实现",
+        
+          title: "Self-RAG 学习笔记 —— 从论文思想到代码实现",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/self-rag/";
+          
+        },
+      },{id: "post-claude-code学习13-memory",
+        
+          title: "Claude code学习13 Memory",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B013/";
+          
+        },
+      },{id: "post-claude-code学习12-fileedittool",
+        
+          title: "Claude code学习12 FileEditTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B012/";
+          
+        },
+      },{id: "post-claude-code学习11-bashtool",
+        
+          title: "Claude code学习11 BashTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B011/";
+          
+        },
+      },{id: "post-claude-code学习10-permission-与-hooks-系统",
+        
+          title: "Claude code学习10 Permission 与 Hooks 系统",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B010/";
+          
+        },
+      },{id: "post-claude-code学习9-agent-loop",
+        
+          title: "Claude code学习9 Agent loop",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B09/";
+          
+        },
+      },{id: "post-claude-code学习8-system-reminder-动态信息是如何入prompt的",
+        
+          title: "Claude code学习8 system-reminder，动态信息是如何入prompt的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B08/";
+          
+        },
+      },{id: "post-claude-code学习7-权限模式",
+        
+          title: "Claude code学习7 权限模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B07/";
+          
+        },
+      },{id: "post-claude-code学习6-动态prompt的组装2",
+        
+          title: "Claude code学习6 动态prompt的组装2",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B06/";
+          
+        },
+      },{id: "post-claude-code学习5-动态prompt的组装1",
+        
+          title: "Claude code学习5 动态prompt的组装1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B05/";
+          
+        },
+      },{id: "post-claude-code学习4-静态prompt里面有什么以及claude-code启动时做了些什么",
+        
+          title: "Claude code学习4 静态prompt里面有什么以及Claude code启动时做了些什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B04/";
+          
+        },
+      },{id: "post-claude-code学习3-为什么claude-code工程化设计是这样的",
+        
+          title: "Claude code学习3 为什么Claude code工程化设计是这样的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/";
+          
+        },
+      },{id: "post-claude-code学习2-claude-code的上下文管理",
+        
+          title: "Claude code学习2 Claude code的上下文管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02/";
+          
+        },
+      },{id: "post-claude-code学习1-我们要从这个项目里学到什么",
+        
+          title: "Claude code学习1 我们要从这个项目里学到什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B01/";
+          
+        },
+      },{id: "post-learn-claude-code项目学习",
+        
+          title: "learn claude code项目学习",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/learn-claude-code%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/";
+          
+        },
+      },{id: "post-如何理解transformer",
+        
+          title: "如何理解transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformer-a/";
+          
+        },
+      },{id: "post-旋转矩阵的理解",
+        
+          title: "旋转矩阵的理解",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformation/";
+          
+        },
+      },{id: "post-cs231a-相机模型笔记",
+        
+          title: "CS231A 相机模型笔记",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cs231a-1/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv2/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv1/";
+          
+        },
+      },{id: "post-linux权限",
+        
+          title: "Linux权限",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP3/";
+          
+        },
+      },{id: "post-linux命令格式",
+        
+          title: "Linux命令格式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP2/";
+          
+        },
+      },{id: "post-excel常用操作",
+        
+          title: "Excel常用操作",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/excel/";
+          
+        },
+      },{id: "post-linux文件路径",
+        
+          title: "Linux文件路径",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP1/";
+          
+        },
+      },{id: "post-常见linux命令和shell脚本",
+        
+          title: "常见Linux命令和shell脚本",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/shellLinux/";
+          
+        },
+      },{id: "post-micropytorch",
+        
+          title: "microPytorch",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/.microPYtorch/";
+          
+        },
+      },{id: "post-c-vector",
+        
+          title: "C++ Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cpp-vector-stl/";
+          
+        },
+      },{id: "post-c-template",
+        
+          title: "C++ Template",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppTemplate/";
+          
+        },
+      },{id: "post-pandas库的基本使用",
+        
+          title: "pandas库的基本使用",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/pandas1/";
+          
+        },
+      },{id: "post-c-中的static和const-1",
+        
+          title: "C++中的static和const 1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppStaticandConst/";
+          
+        },
+      },{id: "post-c-的内外部连接",
+        
+          title: "C++的内外部连接",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppLink/";
+          
+        },
+      },{id: "post-用c-实现内存池1",
+        
+          title: "用C++实现内存池1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo_pool/";
+          
+        },
+      },{id: "post-c-的内存管理",
+        
+          title: "C++的内存管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo/";
+          
+        },
+      },{id: "post-每日一题2296-设计一个文本编辑器",
+        
+          title: "每日一题2296. 设计一个文本编辑器",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LC/";
+          
+        },
+      },{id: "post-c-中的vector",
+        
+          title: "C++中的Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-transformer",
+        
+          title: "Transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transfomer/";
+          
+        },
+      },{id: "post-深度学习和机器学习中的重要概念",
+        
+          title: "深度学习和机器学习中的重要概念",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/MLfun/";
+          
+        },
+      },{id: "post-attention注意力机制-修正补充版",
+        
+          title: "Attention注意力机制（修正补充版）",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention2/";
+          
+        },
+      },{id: "post-attention注意力机制",
+        
+          title: "Attention注意力机制",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention/";
+          
+        },
+      },{id: "post-unet网络",
+        
+          title: "Unet网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Unet/";
+          
+        },
+      },{id: "post-seq2seq的模型-构建以及损失函数",
+        
+          title: "Seq2Seq的模型，构建以及损失函数",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Seq2Seq-1/";
+          
+        },
+      },{id: "post-text-generation",
+        
+          title: "Text Generation",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Text-Generation/";
+          
+        },
+      },{id: "post-rnn的优化",
+        
+          title: "RNN的优化",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/RNN%E7%9A%84%E4%BC%98%E5%8C%96/";
+          
+        },
+      },{id: "post-lstm长短记忆网络",
+        
+          title: "LSTM长短记忆网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LSTM%E9%95%BF%E7%9F%AD%E8%AE%B0%E5%BF%86%E7%BD%91%E7%BB%9C/";
+          
+        },
+      },{id: "post-simple-rnn",
+        
+          title: "Simple RNN",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Simple-RNN/";
+          
+        },
+      },{id: "post-linux内核全注释阅读-linux内核体系结构1",
+        
+          title: "Linux内核全注释阅读 Linux内核体系结构1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Linux%E5%86%85%E6%A0%B8%E5%85%A8%E6%B3%A8%E9%87%8A%E9%98%85%E8%AF%BB-Linux%E5%86%85%E6%A0%B8%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%841/";
+          
+        },
+      },{id: "post-nlp的数据处理-文本处理以及词嵌套",
+        
+          title: "NLP的数据处理 文本处理以及词嵌套",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/NLP%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86-%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%BB%A5%E5%8F%8A%E8%AF%8D%E5%B5%8C%E5%A5%97/";
+          
+        },
+      },{id: "post-deepseek-r1论文解读",
+        
+          title: "DeepSeek R1论文解读",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/DeepSeek-R1%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/";
+          
+        },
+      },{id: "post-deepseek蒸馏模型的本地部署",
+        
+          title: "Deepseek蒸馏模型的本地部署",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Deepseek%E8%92%B8%E9%A6%8F%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/";
+          
+        },
+      },{id: "post-测试博客",
+        
+          title: "测试博客",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Test/";
+          
+        },
+      },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
+        
+          title: 'Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "We’re sharing updates across our Gemini family of models and a glimpse of Project Astra, our vision for the future of AI assistants.",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/", "_blank");
+          
+        },
+      },{id: "post-displaying-external-posts-on-your-al-folio-blog",
+        
+          title: 'Displaying External Posts on Your al-folio Blog <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2", "_blank");
+          
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/Mr-coldskin7", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/feed.xml", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>
