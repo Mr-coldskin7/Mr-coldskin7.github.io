@@ -1,0 +1,1028 @@
+<!DOCTYPE html> <html lang="zh"> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> CS146S 学习笔记（Week 4-8）：从智能体管理者到多栈 AI 构建 | leesanyee </title> <meta name="author" content="Lee SanYee"> <meta name="description" content="LeeSanYee 的技术博客，记录学习笔记与思考。 "> <meta name="keywords" content="blog, ml, nlp, cpp, linux"> <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' https:; frame-src 'self' https:; connect-src 'self' https:;"> <style>
+  :root {
+    --max-content-width: 930px;
+  }
+</style> <link rel="stylesheet" href="/assets/css/tailwind.css?v=50c64c15cbb9fd1ce6056fdb8bcb4b62"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" integrity="sha256-MVopmdyC2tYTiJ8wlktf0uh0v4NgT+vNdyVFepi7Q0c=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/academicons@1.9.5/css/academicons.min.css" integrity="sha256-SzrCOBJbGVFMahewkgjwnApaV2+av1DwMAA+/QGLyZw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/scholar-icons@1.0.3/css/scholar-icons.css" integrity="sha256-VY3hHVj/hNX3fYG6wtbA6TcKJQl7+FthzGSyIB64klY=" crossorigin="anonymous"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?v=591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="/assets/img/icon.png?v=f594268c94ce3845fb99c17cc40fc3f1"> <link rel="apple-touch-icon" href="/assets/img/icon.png?v=f594268c94ce3845fb99c17cc40fc3f1"> <link rel="stylesheet" href="/assets/css/main.css?v=3116ba77db9ee1581d05bb3e86fbf7f1"> <link rel="canonical" href="https://leesanyee.me/blog/2026/CS146S-Week4-8-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"> <script src="/assets/js/theme.js?v=5286c3e4c334d0ecb8fc0c40ff4fa7ec"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?v=5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> </head> <body class="fixed-top-nav "> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> leesanyee </a> <button class="navbar-toggler collapsed navbar-toggler-main" type="button" data-nav-toggle="navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse navbar-collapse-main" id="navbarNav"> <ul class="navbar-nav navbar-menu-list flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">CV </a> </li> <li class="nav-item "> <a class="nav-link" href="/graph/">Knowledge Graph </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item"> <button id="search-toggle" type="button" title="Search" aria-label="Open search"> <span class="nav-link">ctrl k <i class="fa-solid fa-magnifying-glass"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" type="button" title="Change theme" aria-label="Change color theme"> <i class="fa-half-sun-moon" id="light-toggle-system"></i> <i class="fa-solid fa-moon" id="light-toggle-dark"></i> <i class="fa-solid fa-sun" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="container mt-5" role="main"> <div class="post"> <header class="post-header"> <h1 class="post-title">CS146S 学习笔记（Week 4-8）：从智能体管理者到多栈 AI 构建</h1> <p class="post-meta"> Created on September 01, 2026 </p> <p class="post-tags"> <a href="/blog/2026"> <i class="fa-solid fa-calendar fa-sm"></i> 2026 </a>   ·   <a href="/blog/tag/cs146s"> <i class="fa-solid fa-hashtag fa-sm"></i> cs146s</a>   <a href="/blog/tag/llm"> <i class="fa-solid fa-hashtag fa-sm"></i> llm</a>   <a href="/blog/tag/agent"> <i class="fa-solid fa-hashtag fa-sm"></i> agent</a>   <a href="/blog/tag/claude-code"> <i class="fa-solid fa-hashtag fa-sm"></i> claude-code</a>   <a href="/blog/tag/prompt-engineering"> <i class="fa-solid fa-hashtag fa-sm"></i> prompt-engineering</a>   <a href="/blog/tag/code-review"> <i class="fa-solid fa-hashtag fa-sm"></i> code-review</a>   <a href="/blog/tag/security"> <i class="fa-solid fa-hashtag fa-sm"></i> security</a>   ·   <a href="/blog/category/cs146s"> <i class="fa-solid fa-tag fa-sm"></i> CS146S</a> </p> </header> <article class="post-content"> <div id="markdown-content"> <h1 id="cs146s-学习笔记week-4-8从智能体管理者到多栈-ai-构建">CS146S 学习笔记（Week 4-8）：从智能体管理者到多栈 AI 构建</h1> <blockquote> <p>本文是 CS146S（斯坦福《现代软件开发者》）Week 4-8 的完整学习笔记，覆盖：<strong>智能体管理与 Claude Code 方法论</strong>（W4）→ <strong>现代 AI 开发工具产品原则</strong>（W5）→ <strong>AI 测试与安全</strong>（W6）→ <strong>AI 代码审查</strong>（W7）→ <strong>多栈 AI 应用构建</strong>（W8）。</p> <p>一条主线串起来：<strong>W4 教你当 agent 管理者 → W5 教你好的 AI 工具长什么样 → W6 警示 AI 写码后的安全护栏 → W7 验证 AI 审查可不可信 → W8 放飞用 AI 构建多栈应用。</strong></p> </blockquote> <hr> <h2 id="一week-4编码智能体模式agent-patterns">一、Week 4：编码智能体模式（Agent Patterns）</h2> <p>本周为 Boris Cherny（Claude Code 创建者）的两场讲座：浓缩版「How to be an Agent Manager」+ 完整版「Welcome to Claude Code」。⚠️ 仓库 PDF 有坑：<code class="language-plaintext highlighter-rouge">4_1</code> 文件名标为 Silas Alberti，内容实为 Boris Cherny。</p> <h3 id="11-how-to-be-an-agent-manager如何当智能体管理者">1.1 How to be an Agent Manager（如何当智能体管理者）</h3> <p><strong>核心转变</strong>——开发演进的四个阶段：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>单开发者管理自己产出 → Lead 管理多人产出 → Lead 管理多人+AI辅助 → 单开发者管理一群AI agent
+</code></pre></div></div> <p>最终形态：<strong>你从「写代码的人」变成「agent 的产品经理」</strong>。</p> <p><strong>任务分工</strong>（谁做什么）：</p> <table> <thead> <tr> <th>步骤</th> <th>谁做</th> </tr> </thead> <tbody> <tr> <td>提供高层需求</td> <td>🟩 人类</td> </tr> <tr> <td>需求转成设计文档</td> <td>🟩 人类 / 🟦 agent</td> </tr> <tr> <td>按文档实现 + 加测试 + 跑 CI + code review + 更新文档</td> <td>🟦 Agent</td> </tr> </tbody> </table> <p><strong>指挥 agent 的四大技术</strong>：</p> <ol> <li> <strong>Agent 行为文件</strong>：<code class="language-plaintext highlighter-rouge">CLAUDE.md</code> / <code class="language-plaintext highlighter-rouge">.cursorrules</code> / <code class="language-plaintext highlighter-rouge">AGENTS.md</code>（告诉 agent 仓库规矩）</li> <li> <strong>Hooks</strong>：确定性脚本，挂到特定事件（<code class="language-plaintext highlighter-rouge">PreToolUse</code> / <code class="language-plaintext highlighter-rouge">PostToolUse</code> / <code class="language-plaintext highlighter-rouge">UserPromptSubmit</code> / <code class="language-plaintext highlighter-rouge">PreCompact</code>）</li> <li> <strong>Commands</strong>：把常用 prompt 存成可执行命令（跑测试、审查代码、git commit/push）</li> <li> <strong>Subagents</strong>：运行时委派，给不同工作流独立人格/工具集/上下文窗口——<strong>「agent 管理 agent」</strong>的方向</li> </ol> <p><strong>管理者 Best Practices</strong>：</p> <ul> <li>需要兜底（backstops）：仓库测试 + CI/CD 规范</li> <li> <strong>可审计性</strong>：每个 agent 产生的 diff 都要标注来源</li> <li>不同难度任务用不同模型；复杂任务多 handhold、简单任务全异步</li> <li><strong>频繁 checkpoint commit</strong></li> </ul> <p><strong>开放问题</strong>：怎么自动化任务前 10-20% 的「研究阶段」？怎么维护待办任务队列？</p> <h3 id="12-welcome-to-claude-codeboris-完整版">1.2 Welcome to Claude Code（Boris 完整版）</h3> <p><strong>tl;dr</strong>：① 编程正在改变 ② 用 Claude Code 选你的路 ③ 想六个月后的未来。</p> <p><strong>宏观判断</strong>：编程语言生产率指数增长（FORTRAN→C→Python→TS→Go/Rust），<strong>IDE 生产率同样指数增长</strong>（ed→Eclipse→Copilot→Devin→Claude Code）。<strong>验证技术</strong>也在快速演化：手动调试 → 静态类型 → 自动化测试 → CI → property-based testing → e2e → chaos testing → <strong>AI 漏洞测试 / AI 单测 / AI fuzz / self-play</strong>。</p> <p><strong>Claude Code 的方法</strong>：终端原生（terminal-native）、低层模型访问、无限可 hack（<code class="language-plaintext highlighter-rouge">npm i -g @anthropic-ai/claude-code</code>）。</p> <p><strong>一个核心，五种形态</strong>：</p> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>terminal ⊂ IDE ⊂ Web &amp; iOS ⊂ GitHub App ⊂ SDK（claude -p 可编程管道）
+</code></pre></div></div> <p>SDK 形态能组成 Unix 管道，如：</p> <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>get-gcp-logs 1uhd832d | claude <span class="nt">-p</span> <span class="s2">"correlate errors + commits"</span> <span class="nt">--output-format</span><span class="o">=</span>json | jq <span class="s1">'.result'</span>
+</code></pre></div></div> <p><strong>四大使用场景</strong>：</p> <ol> <li> <strong>代码库 Q&amp;A + 研究</strong>：翻 git 历史回答「为什么修了 #18363」这类问题</li> <li> <strong>写代码</strong>：1-shot / sidekick（结对）/ prototype（原型）</li> <li> <strong>集成工具与 MCP</strong>：<code class="language-plaintext highlighter-rouge">claude mcp add barley_server -- node myserver</code> </li> <li> <strong>自动化</strong>：把 agent 嵌入数据管道</li> </ol> <p><strong>核心方法论——让工作流适配任务</strong>：</p> <ul> <li>复杂任务：<code class="language-plaintext highlighter-rouge">explore → plan → confirm → code → commit</code>（先调研，<strong>让用户选方案再动手</strong>）</li> <li>测试先行：<code class="language-plaintext highlighter-rouge">tests → commit → code → iterate → commit</code> </li> <li>前端：<code class="language-plaintext highlighter-rouge">code → screenshot → iterate</code>（对着截图迭代到像为止）</li> </ul> <p><strong>给 AI 产品人的三条教训</strong>：</p> <ol> <li> <strong>为六个月后的模型而构建</strong>——别按今天模型的局限设计产品</li> <li>随时准备进化</li> <li>别问模型能为你做什么——问你能为模型/生态做什么</li> </ol> <hr> <h2 id="二week-5现代终端zach-lloyd--warp-ceo">二、Week 5：现代终端（Zach Lloyd / Warp CEO）</h2> <p>主题「Building a Breakout AI Developer Product」——<strong>7 条现代 AI 开发工具产品原则</strong>：</p> <table> <thead> <tr> <th>#</th> <th>原则</th> <th>要点</th> </tr> </thead> <tbody> <tr> <td>1</td> <td>从开发者已知的出发</td> <td>IDE 心智→Cursor、终端→Warp、聊天→Bolt；代码与自然语言随时切换</td> </tr> <tr> <td>2</td> <td>配置灵活性</td> <td>普通用户<strong>零配置</strong>开箱即用；熟练用户深度可配（prompts/project rules/MCP）；模型无缝切换</td> </tr> <tr> <td>3</td> <td>开发者人体工学</td> <td>能省一次击键就省；零上手摩擦（「5 分钟震撼」）</td> </tr> <tr> <td>4</td> <td>Chat 是一等公民</td> <td>代码是意图的别扭表达，未来更多直接说自然语言</td> </tr> <tr> <td>5</td> <td>MCP 集成</td> <td>MCP = LLM 与现实世界的通用语</td> </tr> <tr> <td>6</td> <td>快速反馈回路</td> <td>面板/仪表盘随 prompt 近实时变化；可解释性是一等公民</td> </tr> <tr> <td>7</td> <td>Agent 工作流</td> <td>实质任务全自主；人类介入度可调（agent 问澄清 → YOLO）</td> </tr> </tbody> </table> <p><strong>开放问题</strong>：code review/app 构建/监控等点方案会不会整合成 all-in-one？AI IDE → AI 终端 → AI 浏览器怎么演进？个性化 agent 规则的<strong>统一标准</strong>是什么——<code class="language-plaintext highlighter-rouge">AGENTS.md</code> 是第一步，不会长期停留在 <code class="language-plaintext highlighter-rouge">.cursorrules</code>/<code class="language-plaintext highlighter-rouge">CLAUDE.md</code> 各自为政。</p> <hr> <h2 id="三week-6ai-测试与安全isaac-evans--semgrep-ceo">三、Week 6：AI 测试与安全（Isaac Evans / Semgrep CEO）</h2> <p><strong>为什么</strong>：当 LLM 写你大部分代码时，需要大量护栏。软件错误 = 用户信任崩塌 + 巨额成本。</p> <p><strong>三大漏洞检测技术</strong>（本课核心概念）：</p> <table> <thead> <tr> <th> </th> <th>SAST</th> <th>DAST</th> <th>SCA</th> </tr> </thead> <tbody> <tr> <td>全称</td> <td>静态应用安全测试</td> <td>动态应用安全测试</td> <td>软件成分分析</td> </tr> <tr> <td>视角</td> <td>🟦 白盒</td> <td>⬛ 黑盒</td> <td>📦 依赖分析</td> </tr> <tr> <td>时机</td> <td>SDLC 早期</td> <td>SDLC 全程</td> <td>持续</td> </tr> <tr> <td>手段</td> <td>源码/二进制模式匹配</td> <td>fuzzing、会话 token 操纵、header 测试、暴力速率限制</td> <td>包元数据、传递依赖、漏洞库匹配、工件扫描</td> </tr> <tr> <td>特点</td> <td>便宜、发现早、误报高</td> <td>模拟真实黑客、误报低</td> <td>管开源依赖</td> </tr> </tbody> </table> <p><strong>AI 的双刃剑</strong>：</p> <ul> <li> <strong>坏（新攻击向量）</strong>：详见下文专节</li> <li> <strong>好</strong>：「Shift left」更易落地——LLM 进工作流发现问题、自动化渗透测试</li> </ul> <h3 id="32-ai-agent-的新型攻击向量讲座重点">3.2 AI Agent 的新型攻击向量（讲座重点）</h3> <p>随着 AI Agent（Copilot / Cursor / 各类 Coding Agent）获得执行代码、调用工具、读写文件的权限，<strong>攻击面发生了质变</strong>。五个核心攻击向量：</p> <p><strong>① Prompt Injection（提示注入）</strong></p> <ul> <li> <strong>定义</strong>：向生成式 AI 系统输入隐藏或误导性指令，使其偏离预期行为</li> <li> <strong>本质</strong>：利用 AI 对输入文本的「无条件信任」</li> <li> <strong>案例</strong>：攻击者在代码注释、文档、网页中嵌入隐藏指令，当 AI Agent 读取这些内容时，就会执行攻击者想要的操作</li> </ul> <p><strong>② Tool Misuse（工具滥用）</strong></p> <ul> <li> <strong>定义</strong>：通过欺骗性提示操纵 Agent，使其滥用已集成的工具</li> <li> <strong>案例</strong>（讲座截图）：攻击者在源码中注入提示 → Agent 被诱导修改 <code class="language-plaintext highlighter-rouge">settings.json</code> → 添加一个<strong>恶意的 MCP 服务器配置</strong> → 系统立即启动该 MCP 服务器——相当于在用户机器上打开了后门</li> <li> <strong>MCP 补充</strong>：Model Context Protocol 是 Anthropic 提出的开放标准，让 AI 模型安全连接外部工具和数据源。但<strong>如果 Agent 能随意修改 MCP 配置，它就变成了攻击通道</strong> </li> </ul> <p><strong>③ Intent Breaking（意图破坏）</strong></p> <ul> <li> <strong>定义</strong>：操纵 Agent 的执行计划，把行动从原始目标上转移</li> <li> <strong>场景</strong>：用户让 Agent「优化代码」，攻击者通过注入让 Agent 实际执行「删除日志文件」或「把敏感数据发送到外部」</li> </ul> <p><strong>④ Identity Spoofing（身份伪造）</strong></p> <ul> <li> <strong>定义</strong>：利用被攻破的认证机制，伪装成合法 Agent</li> <li> <strong>风险</strong>：多个 Agent 互相调用时，一个被攻破的 Agent 可以冒充合法身份向其他系统发出恶意请求</li> </ul> <p><strong>⑤ Code Attacks（代码攻击）</strong></p> <ul> <li> <strong>定义</strong>：利用 Agent 执行代码的能力，获取执行环境的未授权访问</li> <li> <strong>本质</strong>：Agent 通常有代码执行权限（跑测试、构建项目），攻击者诱导其执行恶意代码</li> <li> <strong>案例</strong>：诱导 Agent 运行 <code class="language-plaintext highlighter-rouge">os.system('open -a Calculator')</code> 或更危险的系统命令</li> </ul> <h3 id="33-ai-用于安全的局限性semgrep-的诚实反思">3.3 AI 用于安全的局限性（Semgrep 的诚实反思）</h3> <p>讲座坦诚指出当前用 LLM 做安全检测（AI SAST）的问题：</p> <table> <thead> <tr> <th>局限性</th> <th>详细说明</th> </tr> </thead> <tbody> <tr> <td>极高的误报率</td> <td>Claude Code / Codex 等工具在某些漏洞上误报率可达 <strong>50-100%</strong>；传统 SAST 已经是 50%+，AI 并没有明显更好</td> </tr> <tr> <td>基准测试不切实际</td> <td>现有评测基准往往过于简单或脱离真实代码库，难以评估 LLM 真实能力</td> </tr> <tr> <td>非确定性分析（Nondeterministic）</td> <td>同一提示运行多次结果不同——你无法确定是否漏掉了漏洞</td> </tr> <tr> <td>上下文衰减（Context Rot）</td> <td>并非所有上下文对 AI 同等重要，AI 可能忽略关键的安全相关代码</td> </tr> <tr> <td>压缩问题（Compaction）</td> <td>为塞进上下文窗口，代码被摘要/压缩，导致安全细节丢失</td> </tr> </tbody> </table> <p><strong>开放问题</strong>：怎么降误报幻觉？怎么验证 LLM 补丁安全且不引入回归？AI 应该解释为什么 flag 吗？正确基准是什么？<strong>AI 补丁引入漏洞，谁负责？</strong></p> <hr> <h2 id="四week-7现代软件支持ai-代码审查">四、Week 7：现代软件支持（AI 代码审查）</h2> <blockquote> <p>💡 本地无 PDF，主题聚焦 <strong>Code Review</strong>，作业基于 Graphite。</p> </blockquote> <p><strong>课程主题</strong>：我们能信任哪些 AI 代码系统 / 调试与诊断 / 智能文档生成。</p> <p><strong>作业：「Exploring AI Code Review Using Graphite」</strong></p> <ol> <li>在更复杂的 full-stack 代码库上，用 AI 工具 <strong>1-shot</strong> 实现 TASKS.md 的任务</li> <li>每任务一个分支 → <strong>人工逐行审查</strong>（可结对互审）→ 开 PR（含问题描述/测试记录/权衡取舍）</li> <li>用 <strong>Graphite Diamond 生成 AI 审查</strong>，在 writeup 里对比「你的评论 vs AI 评论」</li> <li>反思：AI review 何时比人强/弱？今后对 AI 审查的信任阈值？</li> </ol> <blockquote> <p>配套：Graphite 30 天试用，教育计划码 <code class="language-plaintext highlighter-rouge">CS146S</code>。</p> </blockquote> <p><strong>阅读材料体系</strong>（理解 AI 审查的完整视角）：</p> <ul> <li>为什么必须做 code review（业界经典帖）</li> <li>GitHub 员工视角的审查哲学</li> <li>AI 辅助审查的实证研究（arxiv）</li> <li> <strong>AI 代码审查落地最佳实践</strong>（Graphite）：AI review ≠ 静态分析器——能理解上下文、提建议、甚至生成修复；收益 = 效率 / 一致性 / 知识共享 / 降低认知负荷 / 持续改进；流程 = 选工具 → 配置 → 跑起来 → 衡量</li> <li>数百万次 AI review 的经验谈（YouTube）</li> </ul> <hr> <h2 id="五week-8自动化-ui-和应用程序构建">五、Week 8：自动化 UI 和应用程序构建</h2> <blockquote> <p>💡 本地无 PDF 也无阅读材料清单，作业是唯一锚点。</p> </blockquote> <p><strong>主题</strong>：面向所有人的设计和前端开发 / 用 prompt 快速做 UI/UX 原型迭代。</p> <p><strong>作业：「Multi-Stack AI-Accelerated Web App Build」</strong></p> <p>同一个功能应用用 <strong>3 个不同技术栈</strong>各做一版，端到端可用（前端+后端+持久化）：</p> <ul> <li> <strong>硬性要求</strong>： <ul> <li>至少一版用 <strong>bolt.new</strong>（AI 应用生成平台，课程发 3 个月 Pro 码）</li> <li>至少一版前端或后端用<strong>非 JS 语言</strong>（Django / Rails）</li> </ul> </li> <li> <strong>最低功能范围</strong>：CRUD 一个主资源 + 持久化存储 + 基本校验/错误处理 + 可用的简单 UI + 运行说明</li> <li> <strong>交付</strong>：3 个独立项目文件夹（源码 + README + 生成后偏差/手工修复记录）+ writeup（应用概念 + 3 版描述）</li> </ul> <p><strong>Bolt 使用提示</strong>：从干净 prompt 描述应用概念/实体/路由/UI 流开始；<strong>在 prompt 里写清数据模型和关系</strong>；迭代式细化 CRUD/auth/前端组件 prompt；每版保持隔离防依赖冲突；生成代码导出提交为独立项目。</p> <hr> <h2 id="六一页速查表">六、一页速查表</h2> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>W4 智能体管理 ── 你 = agent 的产品经理
+  ├─ 指挥技术: 行为文件 / Hooks / Commands / Subagents
+  ├─ Claude Code 方法论: explore→plan→confirm→code→commit; 测试先行; screenshot 迭代
+  └─ 产品教训: 为六个月后的模型构建; 随时进化; 问你能为模型做什么
+
+W5 7 条产品原则 ── 已知界面出发 / 零配置开箱+深度可配 / 人体工学 / Chat 一等公民
+                       / MCP 通用语 / 快速反馈回路 / Agent 工作流
+
+W6 测试与安全 ── SAST(白盒早) / DAST(黑盒黑客) / SCA(依赖成分)
+  └─ AI 新威胁: Prompt injection / Tool misuse / Intent breaking / Identity spoofing / Code attacks
+
+W7 AI 代码审查 ── 1-shot 实现 → 人工逐行审 → PR → AI 审查对比
+  └─ 信任问题: AI 何时比人强? 误报/非确定性/context rot 是软肋
+
+W8 多栈构建 ── 同一应用 × 3 栈（bolt.new 一版 + 非 JS 一版）
+  └─ 核心: 数据模型写进 prompt, 迭代细化, 隔离分版
+</code></pre></div></div> <p><strong>一句话总结</strong>：从本周开始，你的角色正式从「写代码的人」变成「管理 agent 的人」——W4 给你指挥方法，W5 给你产品眼光，W6 给你安全护栏，W7 教你别盲信 AI 输出，W8 让你体验「一句话生成整个应用」然后亲手修补它。</p> </div> </article> <br> <hr> <br> <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2> <p class="mb-2">Here are some more articles you might like to read next:</p> <ul class="list-disc pl-7 my-3 space-y-2 marker:text-[var(--global-theme-color)]"> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/" target="_blank" rel="noopener noreferrer">Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2" target="_blank" rel="noopener noreferrer">Displaying External Posts on Your al-folio Blog</a> <svg width="1rem" height="1rem" viewbox="0 0 30 30" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"> <path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/Agent-Evaluation-%E8%AF%84%E6%B5%8B%E4%BD%93%E7%B3%BB%E4%B8%8E%E8%AF%84%E6%B5%8B%E9%9B%86%E6%9E%84%E5%BB%BA/">Agent 评测体系与评测集构建——美团《评测漫谈》+《评测白皮书 01》笔记</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E5%A4%9A%E6%A8%A1%E6%80%81LLM%E7%94%A8%E6%88%B7%E6%99%BA%E8%83%BD%E4%BD%93%E5%81%9A%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E7%A6%BB%E7%BA%BFAB%E6%B5%8B%E8%AF%95/">多模态 LLM 用户智能体做推荐系统离线 A/B 测试</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/Self-Improving-Agents-%E7%BB%9F%E4%B8%80%E6%8B%86%E8%A7%A3/">自我改进 Agent 统一拆解：θ / Σ 双路线</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/CS146S-Prompt%E4%B8%8EAI-IDE%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3/">CS146S 学习笔记：从 Prompt 技术全景到 AI IDE 设计文档规范</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE%E5%8F%8C%E6%A8%A1%E6%9D%BFsearchInsert%E6%8B%86%E8%A7%A3/">二分查找双模板 + searchInsert 逐行拆解：从模板到边界</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/Agent-Memory-30-techniques/">Agent Memory 全景：30 个记忆技术的模块化拆解</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/lightrag-deep-dive/">LightRAG 深度解析：简单快速的图增强 RAG</a> </li> <li class="leading-relaxed"> <a class="underline decoration-1 hover:text-[var(--global-hover-color)]" href="/blog/2026/%E5%8F%8C%E6%8C%87%E9%92%88%E7%AE%97%E6%B3%95%E5%A4%8D%E7%9B%98%E6%80%BB%E7%BB%93/">双指针算法复盘总结：从元素思维到边界思维</a> </li> </ul> <div id="giscus_thread" style="max-width: 930px; margin: 0 auto;"> <br> <script>
+    (function setupGiscus() {
+      function determineGiscusTheme() {
+        var theme = localStorage.getItem("theme") || document.documentElement.getAttribute("data-theme") || "system";
+if (theme === "dark") return "dark";
+if (theme === "light") return "light";
+var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+return prefersDark ? "dark" : "light";
+
+      }
+
+      var giscusTheme = determineGiscusTheme();
+      var attrs = {
+        src: "https://giscus.app/client.js",
+        "data-repo": "Mr-coldskin7/Mr-coldskin7.github.io",
+        "data-repo-id": "R_kgDONx3iVw",
+        "data-category": "Announcements",
+        "data-category-id": "DIC_kwDONx3iV84C-J1X",
+        "data-mapping": "pathname",
+        "data-strict": "0",
+        "data-reactions-enabled": "1",
+        "data-emit-metadata": "0",
+        "data-input-position": "bottom",
+        "data-theme": giscusTheme,
+        "data-lang": "zh-CN",
+        crossorigin: "anonymous",
+        async: true
+      };
+
+      var giscusScript = document.createElement("script");
+      Object.entries(attrs).forEach(function(entry) { giscusScript.setAttribute(entry[0], entry[1]); });
+      var host = document.getElementById("giscus_thread");
+      if (host) host.appendChild(giscusScript);
+    })();
+  </script> <noscript> Please enable JavaScript to view the <a href="http://giscus.app/?ref_noscript" rel="external nofollow noopener" target="_blank">comments powered by giscus.</a> </noscript> </div> </div> </div> <footer class="fixed-bottom" role="contentinfo"> <div class="container mt-0"> © Copyright 2026 Lee SanYee. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/alshedivat/al-folio" rel="external nofollow noopener" target="_blank">al-folio</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. </div> </footer> <script>
+  window.alFolio = {
+    compatBootstrap: false
+  };
+</script> <script src="/assets/js/nav-toggle.js?v=141bd79a73ebc0f0b6ea58e440ae79fc"></script> <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script> <script defer src="/assets/js/masonry.js?v=e49affc7bd2646f6acdad1dbe02c2359" type="text/javascript"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/al_math/js/mathjax-setup.js"></script> <script src="/assets/js/tooltips-setup.js?v=fe487e99db6c43751e6e7bdb2d6a0611"></script> <script src="/assets/js/no_defer.js?v=53b1b1a645525975c963ce8bf8bfefcf"></script> <script defer src="/assets/js/common.js?v=87baac90f765f2f3362dcf6aaf312a8a"></script> <script defer src="/assets/js/copy_code.js?v=c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?v=896d254890d9b47f0281f63bfccf0dee"></script> <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script> <script async src="https://badge.dimensions.ai/badge.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/al_img_tools/js/zoom.js"></script> <script defer src="/assets/js/progress-bar.js?v=499464c5c63ced6cf7ad62509f1e2610" type="text/javascript"></script> <script src="https://cdn.jsdelivr.net/npm/vanilla-back-to-top@7.2.1/dist/vanilla-back-to-top.min.js" integrity="sha256-uMJJ3EoTyfRBoTbR+lrfu1uRQ87RZG8AR3cVNuQVeFg=" crossorigin="anonymous"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/al_search/js/search/ninja-keys.min.js"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/al_search/js/search-setup.js"></script> <script>
+// get the ninja-keys element
+const ninja = document.querySelector('ninja-keys');
+
+// add the home and posts menu items
+ninja.data = [{
+    id: "nav-about",
+    title: "about",
+    section: "Navigation",
+    handler: () => {
+      window.location.href = "/";
+    },
+  },{id: "nav-cv",
+          title: "CV",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/cv/";
+          },
+        },{id: "nav-knowledge-graph",
+          title: "Knowledge Graph",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/graph/";
+          },
+        },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "nav-repositories",
+          title: "repositories",
+          description: "Edit the `_data/repositories.yml` and change the `github_users` and `github_repos` lists to include your own GitHub profile and repositories.",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/repositories/";
+          },
+        },{id: "post-agent-评测体系与评测集构建-美团-评测漫谈-评测白皮书-01-笔记",
+        
+          title: "Agent 评测体系与评测集构建——美团《评测漫谈》+《评测白皮书 01》笔记",
+        
+        description: "美团图灵 Agent 评测团队两篇博客的研读笔记，重点记录如何从零构建 Agent 评测集：Task 三元组、Rubric 二元化、端到端/过程分层、黄金集/错题集与 Case 挖掘飞轮。",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Agent-Evaluation-%E8%AF%84%E6%B5%8B%E4%BD%93%E7%B3%BB%E4%B8%8E%E8%AF%84%E6%B5%8B%E9%9B%86%E6%9E%84%E5%BB%BA/";
+          
+        },
+      },{id: "post-多模态-llm-用户智能体做推荐系统离线-a-b-测试",
+        
+          title: "多模态 LLM 用户智能体做推荐系统离线 A/B 测试",
+        
+        description: "CityU DS seminar 笔记——把「用户」建模成一个能浏览多模态界面的 LLM 智能体，用它产生的模拟反馈替代昂贵的在线 A/B 测试。",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E5%A4%9A%E6%A8%A1%E6%80%81LLM%E7%94%A8%E6%88%B7%E6%99%BA%E8%83%BD%E4%BD%93%E5%81%9A%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E7%A6%BB%E7%BA%BFAB%E6%B5%8B%E8%AF%95/";
+          
+        },
+      },{id: "post-自我改进-agent-统一拆解-θ-σ-双路线",
+        
+          title: "自我改进 Agent 统一拆解：θ / Σ 双路线",
+        
+        description: "三篇综述整合——自我改进 Agent 的本质是把验证过的信号写进模型权重 θ 或外部脚手架 Σ，关键分界线在判据是否在控制回路内。",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Self-Improving-Agents-%E7%BB%9F%E4%B8%80%E6%8B%86%E8%A7%A3/";
+          
+        },
+      },{id: "post-cs146s-学习笔记-week-4-8-从智能体管理者到多栈-ai-构建",
+        
+          title: "CS146S 学习笔记（Week 4-8）：从智能体管理者到多栈 AI 构建",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/CS146S-Week4-8-%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/";
+          
+        },
+      },{id: "post-cs146s-学习笔记-从-prompt-技术全景到-ai-ide-设计文档规范",
+        
+          title: "CS146S 学习笔记：从 Prompt 技术全景到 AI IDE 设计文档规范",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/CS146S-Prompt%E4%B8%8EAI-IDE%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3/";
+          
+        },
+      },{id: "post-二分查找双模板-searchinsert-逐行拆解-从模板到边界",
+        
+          title: "二分查找双模板 + searchInsert 逐行拆解：从模板到边界",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE%E5%8F%8C%E6%A8%A1%E6%9D%BFsearchInsert%E6%8B%86%E8%A7%A3/";
+          
+        },
+      },{id: "post-agent-memory-全景-30-个记忆技术的模块化拆解",
+        
+          title: "Agent Memory 全景：30 个记忆技术的模块化拆解",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Agent-Memory-30-techniques/";
+          
+        },
+      },{id: "post-lightrag-深度解析-简单快速的图增强-rag",
+        
+          title: "LightRAG 深度解析：简单快速的图增强 RAG",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/lightrag-deep-dive/";
+          
+        },
+      },{id: "post-双指针算法复盘总结-从元素思维到边界思维",
+        
+          title: "双指针算法复盘总结：从元素思维到边界思维",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E5%8F%8C%E6%8C%87%E9%92%88%E7%AE%97%E6%B3%95%E5%A4%8D%E7%9B%98%E6%80%BB%E7%BB%93/";
+          
+        },
+      },{id: "post-langchain-v1-agent-middleware-笔记",
+        
+          title: "LangChain v1 Agent Middleware 笔记",
+        
+        description: "LangChain v1 中间件机制详解——Agent 核心循环前后的 hooks, 控制输入输出、工具调用、消息摘要与修剪。",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/LangChain-v1-Agent-Middleware/";
+          
+        },
+      },{id: "post-langgraph-checkpoint-详解",
+        
+          title: "LangGraph Checkpoint 详解",
+        
+        description: "LangGraph checkpoint 机制深挖——每步 state 快照 + WAL 耐久执行, thread_id 定位会话, checkpoint_id 定位步骤。",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/LangGraph-Checkpoint/";
+          
+        },
+      },{id: "post-图的遍历-点-边-路径-c-模板与-visited-的本质",
+        
+          title: "图的遍历（点 / 边 / 路径）—— C++ 模板与 visited 的本质",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E5%9B%BE%E7%9A%84%E9%81%8D%E5%8E%86-%E7%82%B9%E8%BE%B9%E8%B7%AF%E5%BE%84-C++/";
+          
+        },
+      },{id: "post-graphrag-chunk-级遍历版-带图的检索-还是假的图谱",
+        
+          title: "GraphRAG（Chunk 级遍历版）—— 带图的检索，还是假的图谱？",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/GraphRAG-chunk-level-traversal/";
+          
+        },
+      },{id: "post-graph-rag-with-milvus-纯向量库造图的多跳推理",
+        
+          title: "Graph RAG with Milvus —— 纯向量库造图的多跳推理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/GraphRAG-with-Milvus/";
+          
+        },
+      },{id: "post-hierarchical-indices-层级索引-先粗后细的两级检索",
+        
+          title: "Hierarchical Indices 层级索引 —— 先粗后细的两级检索",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Hierarchical-Indices/";
+          
+        },
+      },{id: "post-hyde-与-hype-假设检索技术的两个方向",
+        
+          title: "HyDE 与 HyPE —— 假设检索技术的两个方向",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/HyDE-HyPE-Hypothetical-Retrieval/";
+          
+        },
+      },{id: "post-二叉树刷题总结",
+        
+          title: "二叉树刷题总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/%E4%BA%8C%E5%8F%89%E6%A0%91%E5%88%B7%E9%A2%98%E6%80%BB%E7%BB%93/";
+          
+        },
+      },{id: "post-rag-技术体系化分类-从-pipeline-阶段到失败模式",
+        
+          title: "RAG 技术体系化分类——从 Pipeline 阶段到失败模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/RAG-techniques-pipeline-categorization/";
+          
+        },
+      },{id: "post-memorag-记忆增强型-rag-总结",
+        
+          title: "MemoRAG 记忆增强型 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/memorag-summary/";
+          
+        },
+      },{id: "post-microsoft-graphrag-基于知识图谱的-rag-总结",
+        
+          title: "Microsoft GraphRAG 基于知识图谱的 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/microsoft-graphrag-summary/";
+          
+        },
+      },{id: "post-multimodal-rag-with-captioning-图像描述型多模态-rag-总结",
+        
+          title: "Multimodal RAG with Captioning 图像描述型多模态 RAG 总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/multimodal-rag-with-captioning-summary/";
+          
+        },
+      },{id: "post-掌握-colpali-多模态-rag-需要回答的-8-个问题",
+        
+          title: "掌握 ColPali 多模态 RAG 需要回答的 8 个问题",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/colpali-multimodal-rag-qa/";
+          
+        },
+      },{id: "post-proposition-chunking-命题化切分总结",
+        
+          title: "Proposition Chunking 命题化切分总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/proposition-chunking-summary/";
+          
+        },
+      },{id: "post-query-transformations-查询转换技术总结",
+        
+          title: "Query Transformations 查询转换技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/query-transformations-summary/";
+          
+        },
+      },{id: "post-raptor-技术总结",
+        
+          title: "RAPTOR 技术总结",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/raptor-summary/";
+          
+        },
+      },{id: "post-relevant-segment-extraction-rse-学习笔记-从片段到段落",
+        
+          title: "Relevant Segment Extraction (RSE) 学习笔记 —— 从片段到段落",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/relevant-segment-extraction/";
+          
+        },
+      },{id: "post-reranking-with-llamaindex-学习笔记-llm-与-cross-encoder-重排",
+        
+          title: "Reranking with LlamaIndex 学习笔记 —— LLM 与 Cross-Encoder 重排",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/reranking-with-llamaindex/";
+          
+        },
+      },{id: "post-rag-with-feedback-loop-学习笔记-从机制到隐患",
+        
+          title: "RAG with Feedback Loop 学习笔记 —— 从机制到隐患",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/rag-feedback-loop/";
+          
+        },
+      },{id: "post-self-rag-学习笔记-从论文思想到代码实现",
+        
+          title: "Self-RAG 学习笔记 —— 从论文思想到代码实现",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/self-rag/";
+          
+        },
+      },{id: "post-claude-code学习13-memory",
+        
+          title: "Claude code学习13 Memory",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B013/";
+          
+        },
+      },{id: "post-claude-code学习12-fileedittool",
+        
+          title: "Claude code学习12 FileEditTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B012/";
+          
+        },
+      },{id: "post-claude-code学习11-bashtool",
+        
+          title: "Claude code学习11 BashTool",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B011/";
+          
+        },
+      },{id: "post-claude-code学习10-permission-与-hooks-系统",
+        
+          title: "Claude code学习10 Permission 与 Hooks 系统",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B010/";
+          
+        },
+      },{id: "post-claude-code学习9-agent-loop",
+        
+          title: "Claude code学习9 Agent loop",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B09/";
+          
+        },
+      },{id: "post-claude-code学习8-system-reminder-动态信息是如何入prompt的",
+        
+          title: "Claude code学习8 system-reminder，动态信息是如何入prompt的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B08/";
+          
+        },
+      },{id: "post-claude-code学习7-权限模式",
+        
+          title: "Claude code学习7 权限模式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B07/";
+          
+        },
+      },{id: "post-claude-code学习6-动态prompt的组装2",
+        
+          title: "Claude code学习6 动态prompt的组装2",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B06/";
+          
+        },
+      },{id: "post-claude-code学习5-动态prompt的组装1",
+        
+          title: "Claude code学习5 动态prompt的组装1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B05/";
+          
+        },
+      },{id: "post-claude-code学习4-静态prompt里面有什么以及claude-code启动时做了些什么",
+        
+          title: "Claude code学习4 静态prompt里面有什么以及Claude code启动时做了些什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B04/";
+          
+        },
+      },{id: "post-claude-code学习3-为什么claude-code工程化设计是这样的",
+        
+          title: "Claude code学习3 为什么Claude code工程化设计是这样的",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B03/";
+          
+        },
+      },{id: "post-claude-code学习2-claude-code的上下文管理",
+        
+          title: "Claude code学习2 Claude code的上下文管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B02/";
+          
+        },
+      },{id: "post-claude-code学习1-我们要从这个项目里学到什么",
+        
+          title: "Claude code学习1 我们要从这个项目里学到什么",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/Claude-code%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B01/";
+          
+        },
+      },{id: "post-learn-claude-code项目学习",
+        
+          title: "learn claude code项目学习",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2026/learn-claude-code%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/";
+          
+        },
+      },{id: "post-如何理解transformer",
+        
+          title: "如何理解transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformer-a/";
+          
+        },
+      },{id: "post-旋转矩阵的理解",
+        
+          title: "旋转矩阵的理解",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transformation/";
+          
+        },
+      },{id: "post-cs231a-相机模型笔记",
+        
+          title: "CS231A 相机模型笔记",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cs231a-1/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv2/";
+          
+        },
+      },{id: "post-python版本opencv1",
+        
+          title: "Python版本opencv1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/opencv1/";
+          
+        },
+      },{id: "post-linux权限",
+        
+          title: "Linux权限",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP3/";
+          
+        },
+      },{id: "post-linux命令格式",
+        
+          title: "Linux命令格式",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP2/";
+          
+        },
+      },{id: "post-excel常用操作",
+        
+          title: "Excel常用操作",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/excel/";
+          
+        },
+      },{id: "post-linux文件路径",
+        
+          title: "Linux文件路径",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LinuxP1/";
+          
+        },
+      },{id: "post-常见linux命令和shell脚本",
+        
+          title: "常见Linux命令和shell脚本",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/shellLinux/";
+          
+        },
+      },{id: "post-micropytorch",
+        
+          title: "microPytorch",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/.microPYtorch/";
+          
+        },
+      },{id: "post-c-vector",
+        
+          title: "C++ Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cpp-vector-stl/";
+          
+        },
+      },{id: "post-c-template",
+        
+          title: "C++ Template",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppTemplate/";
+          
+        },
+      },{id: "post-pandas库的基本使用",
+        
+          title: "pandas库的基本使用",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/pandas1/";
+          
+        },
+      },{id: "post-c-中的static和const-1",
+        
+          title: "C++中的static和const 1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppStaticandConst/";
+          
+        },
+      },{id: "post-c-的内外部连接",
+        
+          title: "C++的内外部连接",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppLink/";
+          
+        },
+      },{id: "post-用c-实现内存池1",
+        
+          title: "用C++实现内存池1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo_pool/";
+          
+        },
+      },{id: "post-c-的内存管理",
+        
+          title: "C++的内存管理",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppMemo/";
+          
+        },
+      },{id: "post-每日一题2296-设计一个文本编辑器",
+        
+          title: "每日一题2296. 设计一个文本编辑器",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LC/";
+          
+        },
+      },{id: "post-c-中的vector",
+        
+          title: "C++中的Vector",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cppVector/";
+          
+        },
+      },{id: "post-transformer",
+        
+          title: "Transformer",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/transfomer/";
+          
+        },
+      },{id: "post-深度学习和机器学习中的重要概念",
+        
+          title: "深度学习和机器学习中的重要概念",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/MLfun/";
+          
+        },
+      },{id: "post-attention注意力机制-修正补充版",
+        
+          title: "Attention注意力机制（修正补充版）",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention2/";
+          
+        },
+      },{id: "post-attention注意力机制",
+        
+          title: "Attention注意力机制",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Attention/";
+          
+        },
+      },{id: "post-unet网络",
+        
+          title: "Unet网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Unet/";
+          
+        },
+      },{id: "post-seq2seq的模型-构建以及损失函数",
+        
+          title: "Seq2Seq的模型，构建以及损失函数",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Seq2Seq-1/";
+          
+        },
+      },{id: "post-text-generation",
+        
+          title: "Text Generation",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Text-Generation/";
+          
+        },
+      },{id: "post-rnn的优化",
+        
+          title: "RNN的优化",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/RNN%E7%9A%84%E4%BC%98%E5%8C%96/";
+          
+        },
+      },{id: "post-lstm长短记忆网络",
+        
+          title: "LSTM长短记忆网络",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LSTM%E9%95%BF%E7%9F%AD%E8%AE%B0%E5%BF%86%E7%BD%91%E7%BB%9C/";
+          
+        },
+      },{id: "post-simple-rnn",
+        
+          title: "Simple RNN",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Simple-RNN/";
+          
+        },
+      },{id: "post-linux内核全注释阅读-linux内核体系结构1",
+        
+          title: "Linux内核全注释阅读 Linux内核体系结构1",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Linux%E5%86%85%E6%A0%B8%E5%85%A8%E6%B3%A8%E9%87%8A%E9%98%85%E8%AF%BB-Linux%E5%86%85%E6%A0%B8%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%841/";
+          
+        },
+      },{id: "post-nlp的数据处理-文本处理以及词嵌套",
+        
+          title: "NLP的数据处理 文本处理以及词嵌套",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/NLP%E7%9A%84%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86-%E6%96%87%E6%9C%AC%E5%A4%84%E7%90%86%E4%BB%A5%E5%8F%8A%E8%AF%8D%E5%B5%8C%E5%A5%97/";
+          
+        },
+      },{id: "post-deepseek-r1论文解读",
+        
+          title: "DeepSeek R1论文解读",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/DeepSeek-R1%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/";
+          
+        },
+      },{id: "post-deepseek蒸馏模型的本地部署",
+        
+          title: "Deepseek蒸馏模型的本地部署",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Deepseek%E8%92%B8%E9%A6%8F%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%9C%AC%E5%9C%B0%E9%83%A8%E7%BD%B2/";
+          
+        },
+      },{id: "post-测试博客",
+        
+          title: "测试博客",
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/Test/";
+          
+        },
+      },{id: "post-google-gemini-updates-flash-1-5-gemma-2-and-project-astra",
+        
+          title: 'Google Gemini updates: Flash 1.5, Gemma 2 and Project Astra <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "We’re sharing updates across our Gemini family of models and a glimpse of Project Astra, our vision for the future of AI assistants.",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://blog.google/technology/ai/google-gemini-update-flash-ai-assistant-io-2024/", "_blank");
+          
+        },
+      },{id: "post-displaying-external-posts-on-your-al-folio-blog",
+        
+          title: 'Displaying External Posts on Your al-folio Blog <svg width="1.2rem" height="1.2rem" top=".5rem" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><path d="M17 13.5v6H5v-12h6m3-3h6v6m0-6-9 9" class="icon_svg-stroke" stroke="#999" stroke-width="1.5" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+        
+        description: "",
+        section: "Posts",
+        handler: () => {
+          
+            window.open("https://medium.com/@al-folio/displaying-external-posts-on-your-al-folio-blog-b60a1d241a0a?source=rss-17feae71c3c4------2", "_blank");
+          
+        },
+      },{
+        id: 'social-github',
+        title: 'GitHub',
+        section: 'Socials',
+        handler: () => {
+          window.open("https://github.com/Mr-coldskin7", "_blank");
+        },
+      },{
+        id: 'social-rss',
+        title: 'RSS Feed',
+        section: 'Socials',
+        handler: () => {
+          window.open("/feed.xml", "_blank");
+        },
+      },{
+      id: 'light-theme',
+      title: 'Change theme to light',
+      description: 'Change the theme of the site to Light',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("light");
+      },
+    },
+    {
+      id: 'dark-theme',
+      title: 'Change theme to dark',
+      description: 'Change the theme of the site to Dark',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("dark");
+      },
+    },
+    {
+      id: 'system-theme',
+      title: 'Use system default theme',
+      description: 'Change the theme of the site to System Default',
+      section: 'Theme',
+      handler: () => {
+        setThemeSetting("system");
+      },
+    },];
+
+</script> <script src="/assets/al_search/js/shortcut-key.js"></script> </body> </html>
