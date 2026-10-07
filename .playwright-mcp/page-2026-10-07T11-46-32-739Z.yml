@@ -1,0 +1,611 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - heading "Agent评测漫谈 —— 由浅入深讲解Agent评测" [level=1] [ref=e7]
+      - generic [ref=e9]:
+        - generic [ref=e10]: 原创
+        - generic [ref=e11]: 图灵Agent评测
+        - button "美团技术团队" [ref=e13] [cursor=pointer]
+        - generic:
+          - emphasis [ref=e14]: 2026年8月6日 10:24
+          - emphasis [ref=e15]: 北京
+      - generic [ref=e16]:
+        - generic [ref=e19]:
+          - img "图片" [ref=e27]
+          - paragraph [ref=e30]:
+            - text: 点亮👆
+            - generic [ref=e31]: “☆”星标
+            - text: ，不错过推送内容~
+        - generic [ref=e33]:
+          - paragraph [ref=e34]:
+            - generic [ref=e35]: 全文速读
+          - paragraph [ref=e37]:
+            - generic [ref=e38]: 本篇博客是一篇科普文章，由浅入深的介绍Agent评测。其中前两章系统介绍了评测是什么，以及如何建立评测体系；其中第二章是美团图灵Agent评测团队深入美团各业务团队BP总结出的实践经验，是我们在两年实践过程中逐步打磨出来的认知。第三章重点介绍了龙虾/爱马仕这类长程Agent框架的出现对评测带来的变化。
+          - paragraph [ref=e39]:
+            - generic [ref=e40]: 本篇博客在美团内部发表之后获得了较多的关注，我们发现大家对Agent评测的热情非常高，因此我们决定将内部博客进行公开，想把这些经验分享给更多的同学，希望对大家有所启发或帮助。
+          - paragraph [ref=e41]:
+            - generic [ref=e42]: 🎈我们还在文末增加了读者互动环节，欢迎大家晒出自己的见解、思考，分享实践经验，一起交流学习。
+        - list
+        - paragraph [ref=e43]:
+          - generic [ref=e44]: 本文目录
+        - list [ref=e45]:
+          - listitem [ref=e46]:
+            - generic [ref=e47]: 一、Agent评测是什么
+          - list [ref=e48]:
+            - listitem [ref=e49]:
+              - generic [ref=e50]: 1.1 评测的核心目的
+            - listitem [ref=e51]:
+              - generic [ref=e52]: 1.2 Agent评测与传统模型评测的不同
+            - listitem [ref=e53]:
+              - generic [ref=e54]: 1.3 为什么Agent评测不是只看结果，还要看行为和过程
+            - listitem [ref=e55]:
+              - generic [ref=e56]: 1.4 为什么说观测是评测的基石
+            - listitem [ref=e57]:
+              - generic [ref=e58]: 1.5 小结：Trajectory Evaluation 与 Response Evaluation
+          - listitem [ref=e59]:
+            - generic [ref=e60]: 二、评测的核心方法论
+          - list [ref=e61]:
+            - listitem [ref=e62]:
+              - generic [ref=e63]: 2.1 评测体系的核心不是堆指标，而是搭桥
+            - listitem [ref=e64]:
+              - generic [ref=e65]: 2.2 客观评测与主观评测并行
+            - listitem [ref=e66]:
+              - generic [ref=e67]: 2.3 使用“人人一致、人机一致”的方法论对齐主观评测
+            - listitem [ref=e68]:
+              - generic [ref=e69]: 2.4 Agent评测是一门实践科学
+            - listitem [ref=e70]:
+              - generic [ref=e71]: 2.5 专家知识补充模型能力在垂域场景的不足
+            - listitem [ref=e72]:
+              - generic [ref=e73]: 2.6 小结&FAQ
+          - listitem [ref=e74]:
+            - generic [ref=e75]: 三、Agent观测评测的演进
+          - list [ref=e76]:
+            - listitem [ref=e77]:
+              - generic [ref=e78]: 3.1 短程Agent时代的观测评测
+            - listitem [ref=e79]:
+              - generic [ref=e80]: 3.2 长程Agent的观测评测
+          - listitem [ref=e81]:
+            - generic [ref=e82]: 四、总结：Agent评测正在从打分动作走向基础设施能力
+        - separator [ref=e83]
+        - paragraph [ref=e84]:
+          - generic [ref=e85]: 一、Agent评测是什么
+        - heading "| 1.1 评测的核心目的" [level=3] [ref=e86]
+        - paragraph [ref=e88]:
+          - generic [ref=e89]:
+            - text: 评测的核心目的是为了回答
+            - strong [ref=e90]: Agent 的好不好？以及到底哪里好，哪里不好？
+            - text: 从而为下一轮迭代指明方向。评测是Agent效果的“精密量具”。
+        - paragraph [ref=e91]: 这也是为什么 Agent 评测不能只停留在离线打榜，更不能只看某次 Demo 的表现。它必须服务于真实业务中的研发、上线、回归、优化和规模化落地。
+        - paragraph [ref=e92]: 而Agent评测的基石是观测，因此我们得出了Agent研发公式 —— 观测 + 评测 = 持续迭代
+        - heading "| 1.2 Agent评测与传统模型评测的不同" [level=3] [ref=e93]
+        - paragraph [ref=e95]: 评测方法会随着 AI 形态变化而变化，大致经历了三个阶段：
+        - figure [ref=e96]:
+          - img "图片" [ref=e98]
+        - paragraph [ref=e99]: 传统机器学习更像在回答“算得准不准”。 大模型评测开始回答“模型能力强不强”。 而 Agent 评测真正要回答的是：
+        - blockquote [ref=e100]:
+          - paragraph [ref=e101]: 当模型被放进一个真实系统里，和 Prompt、Skill、工具链、记忆、状态管理、业务流程耦合在一起后，它能不能稳定交付好的结果。
+        - paragraph [ref=e102]: 这意味着 Agent 的评测对象已经不再是单一模型，而是一个“模型 + 系统 + 工具 + 流程”的复杂系统。
+        - heading "| 1.3 为什么Agent评测不是只看结果，还要看行为和过程" [level=3] [ref=e103]
+        - paragraph [ref=e105]: 在真实场景中，两个 Agent 可能最终都“做对了”，但工程价值完全不同：
+        - list [ref=e106]:
+          - listitem [ref=e107]:
+            - generic [ref=e108]: 一个路径清晰、工具调用稳定、耗时可控、可重复复现
+          - listitem [ref=e109]:
+            - generic [ref=e110]: 一个反复试错、路径混乱、靠偶然命中结果、不可复现
+        - paragraph [ref=e111]: 如果只看最终答案，这两者会被误判为同一水平；但从规模化、成本优化、用户体验的角度看，差别非常大。
+        - paragraph [ref=e112]: 因此，Agent 评测至少需要覆盖四层内容：
+        - list [ref=e113]:
+          - listitem [ref=e114]:
+            - generic [ref=e116]:
+              - strong [ref=e117]: 结果层
+              - text: ：任务是否完成，输出是否可用
+          - listitem [ref=e118]:
+            - generic [ref=e120]:
+              - strong [ref=e121]: 过程层
+              - text: ：规划是否合理，步骤是否稳定
+          - listitem [ref=e122]:
+            - generic [ref=e124]:
+              - strong [ref=e125]: 效率层
+              - text: ：耗时、Token、工具调用次数是否可接受
+          - listitem [ref=e126]:
+            - generic [ref=e128]:
+              - strong [ref=e129]: 风险层（安全层）
+              - text: ：是否越权、是否误操作、是否存在安全隐患
+        - paragraph [ref=e130]: 从这个意义上讲，自2023年GPT爆火以来，Agent发展从ChatBot形态快速发展至ClaudCode、OpenClaw这样的多功能长程Agent，Agent能力日渐强大，Agent评测正在从“答案评测”走向“行为评测”。
+        - heading "| 1.4 为什么说观测是评测的基石" [level=3] [ref=e131]
+        - paragraph [ref=e133]:
+          - generic [ref=e134]:
+            - text: 有一个朴素的认知：Agent 属于广义的 SaaS 层，大模型赋予Agent泛化能力但也带出随机性的问题，而用户仍旧期望得到一个稳定可靠的智能体。为了弥合“随机性”与“可靠性”之间的鸿沟，我们必须回归工程视角看待Agent ——
+            - strong [ref=e135]: 看不见的问题，几乎不可能被稳定解决
+            - text: 。
+        - paragraph [ref=e136]: Agent 的一次执行通常包含如下链路：
+        - figure [ref=e137]:
+          - img "图片" [ref=e139]
+        - paragraph [ref=e140]:
+          - generic [ref=e141]:
+            - text: 只要其中任意一层出问题，最终效果都可能劣化。为了结果稳定，我们需要过程稳定。但如果日志系统只能看到“用户说了什么”和“最后回复了什么”，就几乎无法判断问题根因。正是基于“
+            - strong [ref=e142]: 我想看Case却发现没打日志
+            - text: ”这个朴素的问题，工业界发展出了 Trace 系统，将黑盒内部的逻辑推理过程进行全路径的披露，将所有影响模型输出的输入信息都记录下来。
+        - paragraph [ref=e143]: 对 Agent 的每一个“隐形动作”进行精准观测，是实现从“概率性生成”向“工业级可靠性”跨越的必由之路。
+        - heading "| 1.5 小结：Trajectory Evaluation 与 Response Evaluation" [level=3] [ref=e144]
+        - paragraph [ref=e146]: 经过前文的论述，我们知道Agent评测本质是在回答好不好，为迭代指明方向。而Agent评测本身既要关注结果（Response）也要关注过程（Trace或者叫做Trajectory）。
+        - heading "二、评测的核心方法论" [level=2] [ref=e147]
+        - heading "| 2.1 评测体系的核心不是堆指标，而是搭桥" [level=3] [ref=e150]
+        - paragraph [ref=e152]: 有的同学会好奇，为什么一定要“搭桥”？这是因为Agent评测体系必须追求业务价值与评测指标之间的解释性。而Agent 评测的难点之一，是模型能力指标和业务结果指标之间有天然鸿沟。
+        - figure [ref=e153]:
+          - img "图片" [ref=e155]
+        - paragraph [ref=e156]: 这两类指标不能直接映射，中间必须有一层面向任务系统的桥梁指标。我们提供一种分层思路如下：
+        - figure [ref=e157]:
+          - img "图片" [ref=e159]
+        - paragraph [ref=e160]: 以 AI 搜索为例，业务可能关心DAU、留存和点击；搜索系统本身关心召回率和点击率；Agent 层则关心意图识别是否准确、检索是否有效、结果整合是否可信。
+        - paragraph [ref=e161]: 只有把这些层次串起来，才能真正回答“为什么业务指标变差”以及“模型能力提升为什么没有带来业务收益”。这件事必须依赖真正懂业务流程的人来共同建立指标体系。
+        - heading "| 2.2 客观评测与主观评测并行" [level=3] [ref=e162]
+        - paragraph [ref=e164]: 经过第一章的介绍，我们知道，Agent的核心目标就是要稳定地交付好的结果。行业内 Agent 评测大量借鉴了大模型评测的方法论，总体上可以拆成客观评测和主观评测：
+        - figure [ref=e165]:
+          - img "图片" [ref=e167]
+        - paragraph [ref=e168]: 因此更现实的做法通常是：
+        - list [ref=e169]:
+          - listitem [ref=e170]:
+            - generic [ref=e171]: 用客观评测覆盖高频、结构化、可规则化的部分
+          - listitem [ref=e172]:
+            - generic [ref=e173]: 用主观评测覆盖开放性、高价值、复杂业务场景
+          - listitem [ref=e174]:
+            - generic [ref=e175]: 用主观评测校准客观评测和 AI 评测，再把规模化部分交给自动化系统
+        - heading "| 2.3 使用“人人一致、人机一致”的方法论对齐主观评测" [level=3] [ref=e176]
+        - paragraph [ref=e178]: “好不好”是一个主观问题，主观的标准需要对齐，否则我们不能确定某次迭代之后，到底是指标的抖动带来的提升还是真实的效果提升。
+        - paragraph [ref=e179]: 在评测实践中，真正困难的不是“没有人会评”，而是“不同的人评得不一样，机器和人评得也不一样”。在过去一年，我们图灵团队深度BP业务方的过程中，我们发现多个团队相继踩入了相同的坑。
+        - paragraph [ref=e180]: 图灵评测积累的关键认知可以概括为“人人对齐和人机对齐”，具体如下：
+        - list [ref=e181]:
+          - listitem [ref=e182]:
+            - generic [ref=e184]:
+              - strong [ref=e185]: 人人一致
+              - text: ：1个“独裁者”好过10个“民主者”。需要一位强有力的角色，拉齐产品、运营、研发、QA的评测标准，遵循同一套评测体系，避免大家各自为政。不同评测员通过背靠背标注的方法拉齐标准。
+        - figure [ref=e186]:
+          - img "图片" [ref=e188]
+        - list [ref=e189]:
+          - listitem [ref=e190]:
+            - generic [ref=e192]:
+              - strong [ref=e193]: 人机一致
+              - text: ：机器评测结果与人工评测结果保持一致，否则不置信。人机一致的意义在于规模化提效，以应对更大的业务流量。
+        - paragraph [ref=e194]: 具体如何进行对齐呢？最佳实践是把模糊指标下钻成更细的评测Rubric（或者叫评测维度：学界关于评测维度dimension和评测规则rubric的说法尚未统一，我们这里与开源项目Arize AI对齐），再把每个Rubric尽可能二元化。具体如下：
+        - list [ref=e195]:
+          - listitem [ref=e196]:
+            - generic [ref=e198]:
+              - strong [ref=e199]: 指标下钻
+              - text: ：把“大而模糊”的概念下钻拆解成多个清晰维度
+          - listitem [ref=e200]:
+            - generic [ref=e202]:
+              - strong [ref=e203]: Rubric 二元化
+              - text: ：把打分规则尽量收敛成是/否/未知、0/1/unknown
+          - listitem [ref=e204]:
+            - generic [ref=e206]:
+              - strong [ref=e207]: 持续迭代
+              - text: ：用 unknown 占比来反查 Rubric 是否定义合理，直到单条 Rubric 的人人一致率、人机一致率达到可信阈值（例如85%、90%）
+        - paragraph [ref=e208]: 这种拆解法的价值在于：从“主观的模糊感受”转向“可判断的事实依据”，用下钻降低模糊度，从而降低人与人之间、人与机器之间的分歧。应用这套方法，数字站长的人机一致率可以达到99%。Beam以图灵的二元化方案改造评测体系，人机一致率从62%提升到92%。
+        - paragraph [ref=e209]: 下面我们分享两个案例。
+        - paragraph [ref=e210]: 案例一：如何评价初中生作文的好坏？（满分40分）
+        - figure [ref=e211]:
+          - img "图片" [ref=e213]
+        - paragraph [ref=e214]: 案例二：以骑手外呼场景模型回复是否“口语化”举例
+        - paragraph [ref=e215]: 经典错误示范 —— 请判断大模型的回答是否口语化，并按照0到10分打分。
+        - paragraph [ref=e216]: 下钻与二元化之后的改进版：
+        - list [ref=e217]:
+          - listitem [ref=e218]:
+            - generic [ref=e219]: 模型是否以您指代骑手；
+          - listitem [ref=e220]:
+            - generic [ref=e221]: 模型是否使用“甭客气”，“明儿见”等非官方文书的口语交流词汇；
+          - listitem [ref=e222]:
+            - generic [ref=e223]: 模型输出是否包含“吧”，“呢”，“那个”等语气词汇。
+        - paragraph [ref=e224]: 补充：标注和评测的关系是什么？
+        - paragraph [ref=e225]: 其中，标注是一种动作，而评测是一套目标导向的判断流程。机器预标注可以帮助人工提效，但只有在人机一致率保障才能称为自动化评测，否则只是机器标注。
+        - heading "| 2.4 Agent评测是一门实践科学" [level=3] [ref=e226]
+        - paragraph [ref=e228]: 从执行链路看，Agent 评测可以被拆成五个关键环节，
+        - list [ref=e229]:
+          - listitem [ref=e230]:
+            - generic [ref=e232]:
+              - strong [ref=e233]: 采集
+              - text: ：采集线上或沙箱中的原始任务数据
+          - listitem [ref=e234]:
+            - generic [ref=e236]:
+              - strong [ref=e237]: 清洗
+              - text: ：去重、归类、补上下文、修复脏数据
+          - listitem [ref=e238]:
+            - generic [ref=e240]:
+              - strong [ref=e241]: 评测
+              - text: ：人工评测、AI 评测
+          - listitem [ref=e242]:
+            - generic [ref=e244]:
+              - strong [ref=e245]: 质检
+              - text: ：检查评测标准是否稳定、评测结果是否可信
+          - listitem [ref=e246]:
+            - generic [ref=e248]:
+              - strong [ref=e249]: 分析/归因
+              - text: ：定位问题归因，形成优化建议和回归任务
+        - paragraph [ref=e250]: 这5个环节与线上AB、持续观测共同构成了Agent迭代的数据飞轮。
+        - paragraph [ref=e251]: 绝大部分新上手Agent评测团队都有一个误区 —— 多方调研总结设计一个复杂精妙的评测指标体系，而越复杂的指标越难以执行和对齐。
+        - paragraph [ref=e252]:
+          - generic [ref=e253]:
+            - text: 而Agent评测是一门实践科学。
+            - strong [ref=e254]: 起步阶段“让数据飞轮高效运转起来”的意义远大于“设计一个复杂精妙的评测体系”。评测体系的建立不是一蹴而就的，而是依靠 Good Case 和 Bad Case 喂养的
+            - text: 。
+        - paragraph [ref=e255]: 因此 ，Agent 评测指标体系的搭建最佳实践路径如下：
+        - list [ref=e256]:
+          - listitem [ref=e257]:
+            - generic [ref=e258]: 从高频核心场景起步，先定义少量关键指标
+          - listitem [ref=e259]:
+            - generic [ref=e260]: 从生产环境中收集 Bad Case
+          - listitem [ref=e261]:
+            - generic [ref=e262]: 沉淀高质量 Good Case，明确什么叫“好”
+          - listitem [ref=e263]:
+            - generic [ref=e264]: 把 Good/Bad Case 转成标准评测样本
+          - listitem [ref=e265]:
+            - generic [ref=e266]: 用评测结果反哺 Prompt、Skill、策略和模型优化等等
+          - listitem [ref=e267]:
+            - generic [ref=e268]: 再从新的线上表现里持续抽样，形成下一轮迭代
+        - paragraph [ref=e269]: 其中，Bad Case 的价值往往更高，因为它最容易暴露能力边界和系统短板；而 Good Case 的作用则是帮助团队定义高质量完成的范式。
+        - paragraph [ref=e270]: 一个成熟的评测团队，核心能力不是一开始就搭出完美系统，而是能把线上问题、失败样本、模糊反馈不断转化成结构化评测资产。我们通过Bad Case和Good Case修正评测体系的目标，逐步修正“独裁者”与真实目标之间的负面偏差。例如履约数字站长业务，项目启动之处只有20多个评测指标，而经历1年时间推全之后，我们扩展到了近200个指标。
+        - heading "| 2.5 专家知识补充模型能力在垂域场景的不足" [level=3] [ref=e271]
+        - paragraph [ref=e273]: 从GPT 3.5发布至今，虽然基座能力发生了天翻地覆的变化，但是模型能力终究不是万能的。在过去三年的Agent实践中，我们遇到过大量脱离实际的“许愿式”需求。我们要知道模型是训练出来的，模型本身拟合了Token的概率分布，即便在大规模参数下会产生能力的“涌现”，但模型能力的提升依旧强依赖语料的输入，尤其是高质量语料的输入。无论是早期的RLHF，还是如今的DPO、GRPO等算法，虽然训练架构在不断简化，但对高质量核心数据的依赖从未改变。
+        - paragraph [ref=e274]: 例如字节专门设立了众包专家标注平台 Xpert，用于生产地理、代码、法律、医学等专业领域的高质量数据，以此支撑豆包基座模型的迭代训练。基座模型能力的提升，大家的直观感受就是它在一个又一个垂直领域的表现越来越好。
+        - paragraph [ref=e275]: 因此，当我们在特定垂域面临业务知识语料匮乏（或公网无公开高质数据）的挑战时，通过引入行业专家的知识输入来补足模型/Agent的能力，就成了破局的关键——尤其是在项目的冷启动阶段。
+        - figure [ref=e276]:
+          - img "图片" [ref=e278]
+        - paragraph [ref=e279]: 呼应前文，评测的目的是回答“Agent好不好”，那么谁来定义“好不好”呢？靠最懂业务最有Sense的行业专家。
+        - heading "| 2.6 小结&FAQ" [level=3] [ref=e280]
+        - paragraph [ref=e282]: 这个章节讲述的是图灵评测从履约的项目出发，又经过这1年多BP公司各个业务方的过程中沉淀的核心方法论。
+        - paragraph [ref=e283]:
+          - strong [ref=e284]:
+            - generic [ref=e285]: FAQ
+        - paragraph [ref=e286]:
+          - strong [ref=e287]: Q1：“独裁者”必须是1个人吗，还是1个团队共同遵循一套评测规范即可？
+        - paragraph [ref=e288]: 首先一个团队需要遵循同一套评测体系。独裁者的作用多方征求意见并整合评测体系，当项目方观念无法对齐的时候，由独裁者拍板定论，避免评测体系分化带来项目方各自为政以及内部拉扯带来的损耗。
+        - paragraph [ref=e289]:
+          - strong [ref=e290]: Q2：评测体系依赖“独裁者”，存不存在风险？
+        - paragraph [ref=e291]: 我们要认清一个事实，评测体系是不断演进的。从业务冷启动到扩量再到全量，这个过程中用户从愿意尝鲜的AI爱好者扩展到全部用户，用户画像会发生明显的偏移。这导致评测目标需要随着业务的扩量不断地发生调整。独裁者的价值更多的体现在拉齐标准，评测目标更多的是由真实的业务场景中BadCase/Good Case修正并驱动的。当然，我们需要在评测标准建立之初选出最懂业务的人来制定评测体系。
+        - paragraph [ref=e292]:
+          - strong [ref=e293]: Q3：冷启动阶段一定要设立种子评测集吗？能不能直接小流量开灰上线，直接收集Good Case和Bad Case来驱动评测呢？
+        - paragraph [ref=e294]: 冷启动阶段是否必须设立种子评测集，本质上是一个风险与成本的Trade-Off。
+        - paragraph [ref=e295]: 为什么建议设立种子集：大模型具有随机性，Corner Case 可能会导致Agent体验剧烈偏移。因此，需要通过回测保证Agent基线能力，不断融入Good Case和Bad Case来拓宽Agent的能力边界。
+        - paragraph [ref=e296]: 关于小流量开灰的策略：如果业务场景容错率高，或者构建高质量种子集的成本远超线上试错带来的负面反馈，可以尝试小流量上线收集线上case。
+        - paragraph [ref=e297]:
+          - generic [ref=e298]:
+            - strong [ref=e299]: 推荐落地方案
+            - text: ：人工生产少量评测集后，AI辅助生成或扩写，以较低成本完成冷启动的种子评测集构建。
+        - paragraph [ref=e300]:
+          - strong [ref=e301]: Q4：我们邀请的行业专家对“好”的定义不一致应该怎么办？
+        - paragraph [ref=e302]:
+          - generic [ref=e303]:
+            - strong [ref=e304]: 答
+            - text: ：最朴素且有效的方法，邀请一批行业专家定义“好”的标准，从中抽取共性的部分建设评测体系。例如邀请金牌销售来定义优秀的销售SOP。
+        - paragraph [ref=e305]: 那么非共性的部分就没有价值了吗？并非如此。对于专家意见不一致的部分，往往意味着业务本身存在多种优秀策略。我们可以将这些分歧转化为 Agent 的不同风格或策略分支（例如：AI电销中，老练激进派 vs 细水长流派），并允许在不同的测试集（Benchmark）中独立评测。这些分歧点非但不是噪声，反而会成为 Agent 未来走向精细化迭代、覆盖更多长尾场景的重要养分。
+        - heading "三、Agent观测评测的演进" [level=2] [ref=e306]
+        - paragraph [ref=e309]: 2023年GPT爆火，2024年工作流出现，去年 Claude Code发布，再到今年的龙虾热、爱马仕热，长程Agent逐渐进入了大众视野。Agent Harness也全面进入长程Agent时代。
+        - paragraph [ref=e310]: 长程Agent（Long-horizon Agent）与短程Agent的区别，在于它如何处理“时间跨度带来的复杂性”：
+        - figure [ref=e311]:
+          - img "图片" [ref=e313]
+        - paragraph [ref=e314]: 这些差异会为观测评测带来怎样的变化呢？
+        - heading "| 3.1 短程Agent时代的观测评测" [level=3] [ref=e315]
+        - paragraph [ref=e317]:
+          - generic [ref=e318]:
+            - text: 短程Agent时代的评测对象相对简单。ChatAgent 时代的典型输入输出形态是：
+            - code [ref=e319]: Query -> Answer
+            - text: 。
+        - paragraph [ref=e320]: 这类场景的共同特点是：Agent 更多是在“回答问题”，进行少量的系统操作，而不是“进入操作系统执行任务”。典型应用场景，例如AI搜索、客服机器人。此类Agent评测重点通常落在回答本身，例如：
+        - figure [ref=e321]:
+          - img "图片" [ref=e323]
+        - paragraph [ref=e324]: 在过去1年的发展中图灵形成了成熟的解决方案，包括人工评测、机器评测，部分案例如下：
+        - figure [ref=e325]:
+          - img "图片" [ref=e327]
+        - heading "| 3.2 长程Agent的观测评测" [level=3] [ref=e328]
+        - paragraph [ref=e330]:
+          - strong [ref=e331]: 3.2.1 长程Agent带来评测范式变化
+        - paragraph [ref=e332]: 长程 Agent 解决的不是“回答一个问题”，而是“完成一个复杂任务”。它通常需要：
+        - list [ref=e333]:
+          - listitem [ref=e334]:
+            - generic [ref=e335]: 任务需要多步骤拆解
+          - listitem [ref=e336]:
+            - generic [ref=e337]: 执行过程中需要多次调用 Tool 或 Skill
+          - listitem [ref=e338]:
+            - generic [ref=e339]: 需要读取中间结果并动态调整策略
+        - paragraph [ref=e340]: 让我们回顾一下观测和评测的目标，带着这个目标去看长程Agent
+        - list [ref=e341]:
+          - listitem [ref=e342]:
+            - generic [ref=e344]:
+              - strong [ref=e345]: 观测目标
+              - text: ：还原现场，精确定位，解决“我想看Case却发现没打日志”的问题
+          - listitem [ref=e346]:
+            - generic [ref=e348]:
+              - strong [ref=e349]: 评测目标
+              - text: ：回答Agent好不好，指出迭代方向
+        - figure [ref=e350]:
+          - img "图片" [ref=e352]
+        - paragraph [ref=e353]:
+          - strong [ref=e354]: 3.2.2 Skill评测
+        - paragraph [ref=e355]: 在讲Skill评测之前，我们先分享一下我们关于26年春节后这一轮龙虾/Skill热潮的调研。
+        - paragraph [ref=e356]: 谁在提出龙虾和Skill的评测需求（2月至今龙虾/Skill热潮的用户画像）？
+        - paragraph [ref=e357]: 总结起来目前龙虾和Skill相关需求主要 广义的运营提效 场景，大致可以分成三类：
+        - figure [ref=e358]:
+          - img "图片" [ref=e360]
+        - paragraph [ref=e361]: 用户规模正在从少量专业角色扩展到更广人群
+        - list [ref=e362]:
+          - listitem [ref=e363]:
+            - generic [ref=e364]: 商家侧仍在探索和试点阶段，规模有限
+          - listitem [ref=e365]:
+            - generic [ref=e366]: 公司内部AI at Work系统中的龙虾（或其他长程Agent）融合更广，用户覆盖产、运、研、销等多类角色
+          - listitem [ref=e367]:
+            - generic [ref=e368]: Skill 的开发门槛越来越低，甚至可以由 AI 辅助生成
+        - paragraph [ref=e369]: 这会带来一个直接结论：
+        - blockquote [ref=e370]:
+          - paragraph [ref=e371]: 未来需要评测的人，不只是一小撮产运研同学，而可能是每一个会创建、修改、接入 Skill 的人。
+        - paragraph [ref=e372]: 这对评测系统提出了新的要求：
+        - list [ref=e373]:
+          - listitem [ref=e374]:
+            - generic [ref=e375]: 要足够简单
+          - listitem [ref=e376]:
+            - generic [ref=e377]: 要足够标准化
+          - listitem [ref=e378]:
+            - generic [ref=e379]: 要足够自动化
+          - listitem [ref=e380]:
+            - generic [ref=e381]: 最好能接入开发与发布流程
+        - paragraph [ref=e382]:
+          - strong [ref=e383]: 当前的本质痛点
+        - paragraph [ref=e384]: 本质在于 —— 大家不知道怎样写好 Skill，也缺乏对 Skill 全生命周期进行评测的工具。
+        - paragraph [ref=e385]: 为了方便大家理解，我们将Skill全生命周期拆解如下：
+        - figure [ref=e386]:
+          - img "图片" [ref=e388]
+        - paragraph [ref=e389]: 综上，Skill评测的痛点总体可以拆解成三个方面：
+        - figure [ref=e390]:
+          - img "图片" [ref=e392]
+        - paragraph [ref=e393]:
+          - strong [ref=e394]: 面向Task的评测
+        - paragraph [ref=e395]:
+          - generic [ref=e396]:
+            - text: 2026年1月9号，Anthropic发表了一篇博客揭秘
+            - link "AI Agent评估" [ref=e397]:
+              - /url: https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents
+            - text: ，在这篇博客中首次提到了面向Task的长程Agent评测。文中对Task，定义为“具有明确输入和成功标准的单个测试”。
+        - paragraph [ref=e398]: 我们综合了Anthropic以及开源软件对Task的定义，简化如下。
+        - figure [ref=e399]:
+          - img "图片" [ref=e401]
+        - paragraph [ref=e402]: prompt定义了我们的问题/诉求，expeted behavior定义了我们预期Agent达成的行为，当我们在正式或测试环境中向Agent发送promt，通过trace获取到长程Agent真实的执行路径，就可以得到（prompt - expeted_behavior - trace）三元组，类似于短程Agent的（query - ground_truth - answer），即可进行评测。
+        - paragraph [ref=e403]:
+          - strong [ref=e404]: 3.2.3 长程Agent评测与短程Agent评测的差异
+        - paragraph [ref=e405]: 可以把两者的差异总结如下：
+        - figure [ref=e406]:
+          - img "图片" [ref=e408]
+        - paragraph [ref=e409]: 最本质的变化是：
+        - blockquote [ref=e410]:
+          - paragraph [ref=e411]: ChatAgent 评测关心“说得好不好”，长程 Agent 评测关心“事情做成没有，以及是怎么做成的”。
+        - paragraph [ref=e412]:
+          - strong [ref=e413]: 3.2.4 人评主导走向机评主导
+        - paragraph [ref=e414]:
+          - generic [ref=e415]:
+            - text: ChatAgent 时代常见流程是：
+            - code [ref=e416]: 核心评测员对齐 -> 外包对齐 -> 机评对齐
+        - paragraph [ref=e417]:
+          - generic [ref=e418]:
+            - text: 而在长程 Agent 场景下，这条链路有机会被明显缩短，甚至可以跳过外包对齐，直接进入：
+            - code [ref=e419]: 核心评测员对齐 -> 机评对齐 -> 规模化扩展
+        - paragraph [ref=e420]: 原因主要有三点：
+        - list [ref=e421]:
+          - listitem [ref=e422]:
+            - generic [ref=e423]: 长程 Agent 的执行轨迹更丰富，信息密度高使人成为卡点
+          - listitem [ref=e424]:
+            - generic [ref=e425]: Skill 生产门槛低，数量增长极快，人工大规模标注不可持续
+          - listitem [ref=e426]:
+            - generic [ref=e427]: 基座模型能力的持续突破
+        - paragraph [ref=e428]: 这并不意味着人工不重要，而是意味着：
+        - list [ref=e429]:
+          - listitem [ref=e430]:
+            - generic [ref=e431]: 人工更应该做高价值标准设计和 Rubric 对齐
+          - listitem [ref=e432]:
+            - generic [ref=e433]: AI 更适合承担规模化运行、初筛和回归验证
+          - listitem [ref=e434]:
+            - generic [ref=e435]: 平台更应该承担沉淀、回放、告警和归因职责
+        - paragraph [ref=e436]: 换句话说，AI 评测真正要放大的，不是“机器打分”本身，而是核心评测员的判断标准。
+        - paragraph [ref=e437]:
+          - strong [ref=e438]: 3.2.5 长程Agent评测基建至少应该具备哪些能力
+        - paragraph [ref=e439]: 如果未来要支撑公司内大规模 Agent 和 Skill 生态，评测基础设施至少应包含以下能力：
+        - list [ref=e440]:
+          - listitem [ref=e441]:
+            - generic [ref=e443]:
+              - strong [ref=e444]: 全链路回放
+              - text: ：复现一次任务从输入到结果的全过程
+          - listitem [ref=e445]:
+            - generic [ref=e447]:
+              - strong [ref=e448]: Case 管理
+              - text: ：统一维护任务样本、上下文、约束和 Rubric
+          - listitem [ref=e449]:
+            - generic [ref=e451]:
+              - strong [ref=e452]: 执行沙箱
+              - text: ：按只读、可写、高风险等类型分层隔离执行
+          - listitem [ref=e453]:
+            - generic [ref=e455]:
+              - strong [ref=e456]: AI 评测引
+              - text: 擎：支持 Rubric 驱动的人机对齐和自动判分，且足够简单易用，方便广大skill生产者接入
+          - listitem [ref=e457]:
+            - generic [ref=e459]:
+              - strong [ref=e460]: 报告与归因
+              - text: ：不仅给分，还能指出问题发生在规划、工具、环境还是 Skill
+          - listitem [ref=e461]:
+            - generic [ref=e463]:
+              - strong [ref=e464]: 回归机制
+              - text: ：版本升级后自动触发历史 Case 回归
+          - listitem [ref=e465]:
+            - generic [ref=e467]:
+              - strong [ref=e468]: 准入准出门禁
+              - text: ：把评测结果嵌入开发、发布和运营流程
+        - paragraph [ref=e469]: 如果缺少这些能力，评测就容易停留在“单次分析”和“项目制支持”层面，无法真正成为生产系统的一部分。
+        - heading "四、总结：Agent评测正在从打分动作走向基础设施能力" [level=2] [ref=e470]
+        - paragraph [ref=e473]: 综合来看，随着大模型能力的增强以及Agent Harness的持续演进，Agent 评测的演进可以概括为两句话：
+        - paragraph [ref=e474]:
+          - strong [ref=e475]: 第一，评测对象变了
+        - paragraph [ref=e476]: 过去评测的是“回答”，现在评测的是“任务系统”。
+        - paragraph [ref=e477]: 因此我们关心的不再只是输出内容本身，而是完整执行链路中的能力、稳定性、效率与风险。
+        - paragraph [ref=e478]:
+          - strong [ref=e479]: 第二，评测方法变了
+        - paragraph [ref=e480]:
+          - generic [ref=e481]:
+            - text: 过去主流是
+            - code [ref=e482]: Query -> Answer
+            - text: 的文本质量评测，现在逐步转向
+            - code [ref=e483]: Prompt -> Expected Behavior
+            - text: 的行为评测。
+        - paragraph [ref=e484]: 标准答案不再总是唯一，过程质量、任务完成度和轨迹质量成为新的核心对象。
+        - paragraph [ref=e485]:
+          - generic [ref=e486]:
+            - text: 因此，未来真正重要的，不只是能不能做几次评测，而是能不能建设出一套：
+            - strong [ref=e487]: 看得见问题
+            - text: 、
+            - strong [ref=e488]: 说得清标准
+            - text: 、
+            - strong [ref=e489]: 跑得动规模
+            - text: 、
+            - strong [ref=e490]: 接得上流程
+            - text: 、
+            - strong [ref=e491]: 带得动迭代
+            - text: 的 Agent 评测体系。
+        - paragraph [ref=e492]:
+          - strong
+        - separator [ref=e493]
+        - paragraph [ref=e494]:
+          - strong [ref=e495]:
+            - generic [ref=e496]: 附：长程Agent评测开源领域的行业调研
+        - list [ref=e497]:
+          - listitem [ref=e498]:
+            - generic [ref=e500]:
+              - strong [ref=e501]: 任务（Task，也称 Problem 或 Test Case）
+              - text: ：具有明确输入和成功标准的单个测试。每次尝试任务的行动称为试验（Trial）。由于模型输出在不同运行之间会有变化，我们运行多次试验以产生更一致的结果。
+          - listitem [ref=e502]:
+            - generic [ref=e504]:
+              - strong [ref=e505]: 评分器（Grader）
+              - text: 是评估Agent性能某些方面的逻辑。一个任务可以有多个评分器，每个评分器包含多个断言（有时称为检查 Checks）。
+          - listitem [ref=e506]:
+            - generic [ref=e508]:
+              - strong [ref=e509]: 记录（Transcript，也称 Trace 或 Trajectory）
+              - text: ：试验的完整记录，包括输出、工具调用、推理、中间结果和任何其他交互。
+          - listitem [ref=e510]:
+            - generic [ref=e512]:
+              - strong [ref=e513]: 结果（Outcome）
+              - text: ：试验结束时环境的最终状态。航班预订Agent可能在记录末尾说"您的航班已预订"，但结果是环境中 SQL 数据库中是否存在预订记录。
+          - listitem [ref=e514]:
+            - generic [ref=e516]:
+              - strong [ref=e517]: 评估框架（Evaluation Harness）
+              - text: ：端到端运行评估的基础设施。它提供指令和工具、并发运行任务、记录所有步骤、评分输出并汇总结果。
+          - listitem [ref=e518]:
+            - generic [ref=e520]:
+              - strong [ref=e521]: Agent框架（Agent Harness，或 Scaffold）
+              - generic [ref=e522]:
+                - text: ：使模型能够作为Agent运行的系统：处理输入、编排工具调用并返回结果。当我们评估"一个Agent"时，我们是在评估框架和模型协同工作。例如，
+                - link "Claude Code" [ref=e523]:
+                  - /url: https://claude.com/product/claude-code
+                - text: 是一个灵活的Agent框架，我们通过
+                - link "Agent SDK" [ref=e524]:
+                  - /url: https://code.claude.com/docs/en/agent-sdk/overview
+                - text: 使用其核心原语构建了我们的
+                - link "长时间运行Agent框架" [ref=e525]:
+                  - /url: https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents
+                - text: 。
+          - listitem [ref=e526]:
+            - generic [ref=e529]:
+              - strong [ref=e530]: 评估套件（Evaluation Suite）
+              - text: ：旨在测量特定能力或行为的任务集合。套件中的任务通常共享一个广泛的目标。例如，客户支持评估套件可能测试退款、取消和升级。
+        - figure [ref=e531]:
+          - img "图片" [ref=e533]
+        - paragraph [ref=e534]: 2026年2月，龙虾在全球爆火时候，社区涌现出面向龙虾评测的开源软件：
+        - table [ref=e536]:
+          - rowgroup [ref=e537]:
+            - row [ref=e538]:
+              - columnheader "软件名称" [ref=e539]
+              - columnheader "简介" [ref=e541]
+              - columnheader "GitStar" [ref=e543]
+              - columnheader "task定义" [ref=e545]
+          - rowgroup [ref=e547]:
+            - row [ref=e548]:
+              - cell [ref=e549]:
+                - link "pinchbench" [ref=e552]:
+                  - /url: https://github.com/pinchbench/skill
+              - cell "2026年2月开源，是一套专门用于评估OpenClaw的性能基准测试系统。与传统的合成测试（Synthetic Tests）不同，PinchBench 强调“真实场景下的任务模拟”。它通过给 AI 代理布置实际工作中会遇到的复杂任务，来衡量模型在处理多步工作、实际开发与办公环境下的真实表现。" [ref=e553]
+              - cell "1200+" [ref=e555]
+              - cell "md文件" [ref=e557]
+            - row [ref=e559]:
+              - cell [ref=e560]:
+                - link "claw eval" [ref=e563]:
+                  - /url: https://github.com/claw-eval/claw-eval
+              - cell [ref=e564]:
+                - generic [ref=e566]:
+                  - link "北大发布的龙虾能力评测" [ref=e567]:
+                    - /url: https://claw-eval.github.io/#/architecture
+                  - link "task列表" [ref=e568]:
+                    - /url: https://claw-eval.github.io/#/tasks
+                  - img "图片" [ref=e569]
+              - cell "500" [ref=e570]
+              - cell [ref=e572]:
+                - link "yaml文件" [ref=e575]:
+                  - /url: https://github.com/claw-eval/claw-eval/blob/main/tasks/C12zh_ecommerce_operations/task.yaml
+            - row [ref=e576]:
+              - cell [ref=e577]:
+                - link "WildClawBench" [ref=e580]:
+                  - /url: https://github.com/InternLM/WildClawBench
+              - cell [ref=e581]:
+                - generic [ref=e583]:
+                  - link "WildClawBench：野生环境 AI Agent 能力评测 10 大模型谁的\"龙虾\"最强？" [ref=e584]:
+                    - /url: https://www.ai-insight.org/reports/wildclaw-bench-2026
+                  - text: 核心理念是"在野生环境中测试 Agent"——不是给模型一个精心设计的沙盒，而是把它扔进真实用户每天使用 OpenClaw Agent 的场景中，看它能不能活下来。
+              - cell "500" [ref=e585]
+              - cell "Skill" [ref=e587]
+        - img "图片" [ref=e591]
+        - paragraph [ref=e592]: 欢迎大家积极留言，分享自己在评测过程中踩过的坑，也欢迎大家对文中评测核心方法论发表自己的看法或者见解。
+        - paragraph [ref=e596]:
+          - generic [ref=e597]: "---------- END ----------"
+        - generic [ref=e599]:
+          - paragraph [ref=e600]:
+            - generic [ref=e601]: 推荐阅读
+          - paragraph [ref=e604]:
+            - generic [ref=e606]:
+              - text: "|"
+              - link "用Agent评测思路管理AI Coding —— 31万行代码AI重构的实践" [ref=e607]:
+                - /url: https://mp.weixin.qq.com/s?__biz=MjM5NjQ5MTI5OA==&mid=2651782575&idx=1&sn=c4c3e41bf57fe08b573ccf76d83cd270&scene=21#wechat_redirect
+          - paragraph [ref=e608]:
+            - generic [ref=e610]:
+              - text: "|"
+              - link "美团正式发布 CatPaw：全场景 AI Agent，从个人提效到企业智能化" [ref=e611]:
+                - /url: https://mp.weixin.qq.com/s?__biz=MjM5NjQ5MTI5OA==&mid=2651783056&idx=1&sn=c5c7f73638bc777077e1b88b6f6acebd&scene=21#wechat_redirect
+          - paragraph [ref=e612]:
+            - generic [ref=e614]:
+              - text: "|"
+              - link "正式开源！美团 LongCat-2.0 同步开放国产卡推理代码" [ref=e615]:
+                - /url: https://mp.weixin.qq.com/s?__biz=MjM5NjQ5MTI5OA==&mid=2651783022&idx=1&sn=9c28dd11a4d95d5eebbb097e0a1aace0&scene=21#wechat_redirect
+        - paragraph [ref=e616]:
+          - img "图片" [ref=e618]
+        - img "图片" [ref=e620]
+        - link "美团技术团队 ， 这里是美团、大众点评、美团无人机、美团无人车等技术团队对外技术交流的窗口，我们会定期分享在AI领域的探索与实践、研发技能和技术招聘信息，希望跟大家一起交流学习，拥抱未来。 563篇原创内容 公众号" [ref=e627]:
+          - option [ref=e628]:
+            - generic [ref=e633]:
+              - strong [ref=e635]: 美团技术团队
+              - generic [ref=e637]: 这里是美团、大众点评、美团无人机、美团无人车等技术团队对外技术交流的窗口，我们会定期分享在AI领域的探索与实践、研发技能和技术招聘信息，希望跟大家一起交流学习，拥抱未来。
+              - generic [ref=e638]: 563篇原创内容
+            - generic [aria-hidden] [ref=e641]: 公众号
+        - generic [ref=e642]: ❤️❤️❤️ 如果这篇文章对你有帮助，欢迎大家帮忙点赞、评论，分享给更多的小伙伴。⬇️
+    - generic [ref=e647]:
+      - button "大模型 · 目录" [ref=e648]
+      - generic [ref=e653]:
+        - button "上一篇 美团海报生成 AIGC 技术创新与实践" [ref=e654]:
+          - generic [ref=e655]:
+            - generic [ref=e656]: 上一篇
+            - generic [ref=e657]: 美团海报生成 AIGC 技术创新与实践
+        - 'button "下一篇 GeoRA: 为RLVR设计的LoRA——ACL 2026杰出论文解析" [ref=e659]':
+          - generic [ref=e660]:
+            - generic [ref=e661]: 下一篇
+            - generic [ref=e662]: "GeoRA: 为RLVR设计的LoRA——ACL 2026杰出论文解析"
+  - generic [ref=e674]:
+    - link "美团技术团队" [ref=e684]
+    - generic [ref=e688]:
+      - button "赞" [ref=e690]:
+        - generic [aria-hidden] [ref=e691]: 赞
+      - button "分享" [ref=e693]:
+        - generic [aria-hidden] [ref=e694]: 分享
+      - button "在看" [ref=e696]:
+        - generic [aria-hidden] [ref=e697]: 推荐
+      - button "留言 写留言" [ref=e699]:
+        - generic [ref=e700]: 写留言
